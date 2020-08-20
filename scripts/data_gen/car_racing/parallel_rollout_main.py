@@ -24,7 +24,7 @@ flags.mark_flag_as_required('out_dir')
 
 def pickle_rollout(rollout):
   # TODO(mmatena): Find better way to write to disc. Perhaps write as a tf record?
-  filepath = tempfile.mkstemp(dir=FLAGS.out_dir, suffix=".pickle")
+  filepath = tempfile.mkstemp(dir=str(FLAGS.out_dir), suffix=".pickle")
   with open(filepath, "wb") as f:
     pickle.dump([rollout], f)
 
@@ -36,10 +36,10 @@ def main(_):
 
   gym_rollouts.parallel_rollouts("CarRacing-v0",
                                  policy=policy,
-                                 max_steps=FLAGS.max_steps,
-                                 num_rollouts=FLAGS.num_rollouts,
+                                 max_steps=int(FLAGS.max_steps),
+                                 num_rollouts=int(FLAGS.num_rollouts),
                                  process_rollout_fn=pickle_rollout,
-                                 parallelism=FLAGS.parallelism)
+                                 parallelism=int(FLAGS.parallelism))
 
 
 if __name__ == '__main__':

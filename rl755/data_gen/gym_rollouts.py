@@ -52,9 +52,9 @@ def single_rollout(env, policy, max_steps):
     action = policy.sample_action(obs=obs, step=step)
     _, reward, done, _ = env.step(action)
 
-    run.obs_l.append(obs)
-    run.action_l.append(action)
-    run.reward_l.append(reward)
+    rollout.obs_l.append(obs)
+    rollout.action_l.append(action)
+    rollout.reward_l.append(reward)
 
     if done:
       rollout.done = True

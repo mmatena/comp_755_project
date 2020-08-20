@@ -20,7 +20,7 @@ NUM_CORES=8
 MEMORY=16g
 #############################################################
 
-# Parallelism 1: 
+# Parallelism 1: 336.11165618896484
 # Parallelism 2: 258.24171566963196 seconds
 # Parallelism 5: 111.2401180267334 seconds
 
@@ -37,19 +37,12 @@ run_python() {
     --out_dir=$DATA_DIR
 }
 
-
-   
-   
+    # --partition=gpu \
+    # --gres=gpu:1 \
+    # --qos=gpu_access \
 launch() {
   # Not too sure why I have to do it like this, but just running the command
   # causes it fail to launch.
-  # CMD=$(echo sbatch \
-  #   --ntasks=1 \
-  #   -c ${NUM_CORES} \
-  #   --time=5:00:00 \
-  #   --mem=${MEMORY} \
-  #   --partition=general \
-  #   --wrap="\"$(run_python)\"")
   CMD=$(echo sbatch \
     --ntasks=1 \
     -c ${NUM_CORES} \
@@ -57,13 +50,11 @@ launch() {
     --output="$DATA_DIR/logs.out" \
     --time=5:00:00 \
     --mem=${MEMORY} \
-    --partition=gpu \
-    --gres=gpu:1 \
-    --qos=gpu_access \
+    --partition=general \
     --wrap="\"$(run_python)\"")
-  echo $CMD
   eval $CMD
 }
 
 
+# Run the command to actually launch the job.
 launch

@@ -46,6 +46,7 @@ launch() {
     --mem=${MEMORY} \
     --partition=general \
     --wrap="\"$(run_python)\"")
+  echo $CMD
   eval $CMD
 }
 

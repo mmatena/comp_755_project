@@ -50,7 +50,6 @@ launch() {
     --output="$DATA_DIR/logs-%j.out" \
     --time=2:30:00 \
     --mem=${MEMORY} \
-    --partition=general \
     --wrap="\"$(run_python)\"")
   # CMD=$(echo sbatch \
   #   --ntasks=${NUM_CORES} \

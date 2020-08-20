@@ -42,7 +42,7 @@ launch() {
     --output="$DATA_DIR/logs.out" \
     --ntasks=1 \
     -c ${NUM_CORES} \
-    --time=5- \
+    --time=5:00:00 \
     --mem=${MEMORY} \
     --partition=general \
     --wrap="\"$(run_python)\"")

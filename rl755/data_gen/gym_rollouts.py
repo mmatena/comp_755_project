@@ -71,12 +71,12 @@ def serial_rollouts(env_name, policy, max_steps, num_rollouts, process_rollout_f
 
 
 def parallel_rollouts(env_name, policy, max_steps, num_rollouts, process_rollout_fn, parallelism=1):
-  serial_rollouts = ray.remote(serial_rollouts)
-  do_rollouts = lambda num_serial: serial_rollouts.remote(env_name=env_name,
-                                                          policy=policy,
-                                                          max_steps=max_steps,
-                                                          num_rollouts=num_serial,
-                                                          process_rollout_fn=process_rollout_fn)
+  fn = ray.remote(serial_rollouts)
+  do_rollouts = lambda num_serial: fn.remote(env_name=env_name,
+                                             policy=policy,
+                                             max_steps=max_steps,
+                                             num_rollouts=num_serial,
+                                             process_rollout_fn=process_rollout_fn)
 
   # TODO(mmatena): Better handling of the surplus. Spread evenly across the rest of the nodes instead.
   full_num_serial, surplus_num_serial = divmod(num_rollouts, parallelism)

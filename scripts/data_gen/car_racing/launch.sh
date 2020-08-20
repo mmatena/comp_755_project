@@ -19,12 +19,12 @@ DATA_DIR=/pine/scr/m/m/mmatena/1000_rollouts_test
 # NUM_CORES=12
 # MEMORY=10g
 
-NUM_ROLLOUTS=1000
-PARALLELISM=20
+NUM_ROLLOUTS=250
+PARALLELISM=5
 MAX_STEPS=2000
 
-NUM_CORES=22
-MEMORY=16g
+NUM_CORES=5
+MEMORY=4g
 #############################################################
 
 
@@ -44,24 +44,24 @@ run_python() {
 launch() {
   # Not too sure why I have to do it like this, but just running the command
   # causes it fail to launch.
-  # CMD=$(echo sbatch \
-  #   --ntasks=${NUM_CORES} \
-  #   --error="$DATA_DIR/logs-%j.err" \
-  #   --output="$DATA_DIR/logs-%j.out" \
-  #   --time=2:30:00 \
-  #   --mem=${MEMORY} \
-  #   --partition=general \
-  #   --wrap="\"$(run_python)\"")
   CMD=$(echo sbatch \
     --ntasks=${NUM_CORES} \
     --error="$DATA_DIR/logs-%j.err" \
     --output="$DATA_DIR/logs-%j.out" \
-    --time=4:00:00 \
+    --time=2:30:00 \
     --mem=${MEMORY} \
-    --partition=volta-gpu \
-    --gres=gpu:1 \
-    --qos=gpu_access \
+    --partition=general \
     --wrap="\"$(run_python)\"")
+  # CMD=$(echo sbatch \
+  #   --ntasks=${NUM_CORES} \
+  #   --error="$DATA_DIR/logs-%j.err" \
+  #   --output="$DATA_DIR/logs-%j.out" \
+  #   --time=4:00:00 \
+  #   --mem=${MEMORY} \
+  #   --partition=gpu \
+  #   --gres=gpu:1 \
+  #   --qos=gpu_access \
+  #   --wrap="\"$(run_python)\"")
   eval $CMD
 }
 

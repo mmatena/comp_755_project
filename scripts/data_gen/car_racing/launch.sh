@@ -12,12 +12,19 @@ PROJECT_DIR=~/projects/comp_755_project
 # Probably already needs to exist.
 DATA_DIR=/pine/scr/m/m/mmatena/1000_rollouts_test
 
-NUM_ROLLOUTS=500
-PARALLELISM=10
+# NUM_ROLLOUTS=500
+# PARALLELISM=10
+# MAX_STEPS=2000
+
+# NUM_CORES=12
+# MEMORY=10g
+
+NUM_ROLLOUTS=250
+PARALLELISM=5
 MAX_STEPS=2000
 
-NUM_CORES=12
-MEMORY=10g
+NUM_CORES=5
+MEMORY=4g
 #############################################################
 
 
@@ -41,7 +48,7 @@ launch() {
     --ntasks=${NUM_CORES} \
     --error="$DATA_DIR/logs-%j.err" \
     --output="$DATA_DIR/logs-%j.out" \
-    --time=4:00:00 \
+    --time=2:30:00 \
     --mem=${MEMORY} \
     --partition=general \
     --wrap="\"$(run_python)\"")

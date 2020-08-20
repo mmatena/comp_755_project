@@ -16,8 +16,8 @@ NUM_ROLLOUTS=1000
 PARALLELISM=20
 MAX_STEPS=2000
 
-NUM_CORES=24
-MEMORY=128g
+NUM_CORES=22
+MEMORY=50g
 #############################################################
 
 
@@ -42,7 +42,7 @@ launch() {
     -c ${NUM_CORES} \
     --error="$DATA_DIR/logs.err" \
     --output="$DATA_DIR/logs.out" \
-    --time=5:00:00 \
+    --time=5- \
     --mem=${MEMORY} \
     --partition=general \
     --wrap="\"$(run_python)\"")

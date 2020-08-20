@@ -9,6 +9,7 @@
 PROJECT_DIR=~/projects/comp_755_project
 
 # Where all of the rollouts and logs will be written to.
+# Probably already needs to exist.
 DATA_DIR=/tmp/test_rollouts
 
 NUM_ROLLOUTS=10
@@ -37,8 +38,8 @@ launch() {
   # Not too sure why I have to do it like this, but just running the command
   # causes it fail to launch.
   CMD=$(echo sbatch \
-    --error="$DATA_DIR/%j-logs.err" \
-    --output="$DATA_DIR/%j-logs.out" \
+    --error="$DATA_DIR/logs.err" \
+    --output="$DATA_DIR/logs.out" \
     --ntasks=1 \
     -c ${NUM_CORES} \
     --time=5- \

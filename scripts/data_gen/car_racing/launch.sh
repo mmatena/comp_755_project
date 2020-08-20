@@ -12,12 +12,12 @@ PROJECT_DIR=~/projects/comp_755_project
 # Probably already needs to exist.
 DATA_DIR=/pine/scr/m/m/mmatena/1000_rollouts_test
 
-NUM_ROLLOUTS=1000
-PARALLELISM=20
+NUM_ROLLOUTS=500
+PARALLELISM=10
 MAX_STEPS=2000
 
-NUM_CORES=22
-MEMORY=50g
+NUM_CORES=12
+MEMORY=10g
 #############################################################
 
 
@@ -42,11 +42,9 @@ launch() {
     -c ${NUM_CORES} \
     --error="$DATA_DIR/logs.err" \
     --output="$DATA_DIR/logs.out" \
-    --time=5- \
+    --time=4:00:00 \
     --mem=${MEMORY} \
-    --partition=volta-gpu \
-    --gres=gpu:1 \
-    --qos=gpu_access \
+    --partition=general \
     --wrap="\"$(run_python)\"")
   eval $CMD
 }

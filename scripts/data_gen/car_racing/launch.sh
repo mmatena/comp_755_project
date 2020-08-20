@@ -13,15 +13,16 @@ PROJECT_DIR=~/projects/comp_755_project
 DATA_DIR=/pine/scr/m/m/mmatena/test_rollouts
 
 NUM_ROLLOUTS=10
-PARALLELISM=5
+PARALLELISM=1
 MAX_STEPS=2000
 
 NUM_CORES=8
 MEMORY=16g
 #############################################################
 
+# Parallelism 1: 
 # Parallelism 2: 258.24171566963196 seconds
-# Parallelism 5: 
+# Parallelism 5: 111.2401180267334 seconds
 
 
 module add python/3.6.6

@@ -1,6 +1,6 @@
 """Script for generating many rollouts of a given policy."""
+import gym
 from noise import pnoise1
-from gym import envs
 import ray
 
 from rl755.common.structs import Rollout

@@ -10,7 +10,7 @@ PROJECT_DIR=~/projects/comp_755_project
 
 # Where all of the rollouts and logs will be written to.
 # Probably already needs to exist.
-DATA_DIR=/tmp/test_rollouts
+DATA_DIR=/pine/scr/m/m/mmatena/test_rollouts
 
 NUM_ROLLOUTS=10
 PARALLELISM=2
@@ -34,8 +34,7 @@ run_python() {
 }
 
 
-    # --error="$DATA_DIR/logs.err" \
-    # --output="$DATA_DIR/logs.out" \
+   
    
 launch() {
   # Not too sure why I have to do it like this, but just running the command
@@ -50,6 +49,8 @@ launch() {
   CMD=$(echo sbatch \
     --ntasks=1 \
     -c ${NUM_CORES} \
+    --error="$DATA_DIR/logs.err" \
+    --output="$DATA_DIR/logs.out" \
     --time=5:00:00 \
     --mem=${MEMORY} \
     --partition=gpu \

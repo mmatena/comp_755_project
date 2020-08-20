@@ -52,8 +52,6 @@ launch() {
     --time=4:00:00 \
     --mem=${MEMORY} \
     --partition=gpu \
-    --gres=gpu:1 \
-    --qos=gpu_access \
     --wrap="\"$(run_python)\"")
   eval $CMD
 }

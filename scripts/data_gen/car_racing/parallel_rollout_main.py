@@ -31,12 +31,12 @@ def pickle_rollout(rollout):
 def main(_):
   policy = gym_rollouts.HastingsRandomPolicy(time_scale=200, magnitude_scale=1.7)
 
-  parallel_rollouts("CarRacing-v0",
-                    policy=policy,
-                    max_steps=FLAGS.max_steps,
-                    num_rollouts=FLAGS.num_rollouts,
-                    process_rollout_fn=pickle_rollout,
-                    parallelism=FLAGS.parallelism)
+  gym_rollouts.parallel_rollouts("CarRacing-v0",
+                                 policy=policy,
+                                 max_steps=FLAGS.max_steps,
+                                 num_rollouts=FLAGS.num_rollouts,
+                                 process_rollout_fn=pickle_rollout,
+                                 parallelism=FLAGS.parallelism)
 
 
 if __name__ == '__main__':

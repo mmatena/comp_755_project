@@ -44,7 +44,9 @@ launch() {
     --output="$DATA_DIR/logs.out" \
     --time=5- \
     --mem=${MEMORY} \
-    --partition=general \
+    --partition=volta-gpu \
+    --gres=gpu:0 \
+    --qos=gpu_access \
     --wrap="\"$(run_python)\"")
   eval $CMD
 }

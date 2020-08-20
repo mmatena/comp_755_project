@@ -4,4 +4,7 @@
 
 ```bash
 pip install noise
+pip install Box2D
+pip install ray
+pip install absl-py
 ```

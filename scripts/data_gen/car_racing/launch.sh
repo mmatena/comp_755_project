@@ -34,8 +34,7 @@ run_python() {
 }
 
 
-    # --error="$DATA_DIR/logs.err" \
-    # --output="$DATA_DIR/logs.out" \
+   
 launch() {
   # Not too sure why I have to do it like this, but just running the command
   # causes it fail to launch.
@@ -48,6 +47,8 @@ launch() {
   #   --wrap="\"$(run_python)\"")
   CMD=$(echo sbatch \
     --ntasks=1 \
+    --error="$DATA_DIR/logs.err" \
+    --output="$DATA_DIR/logs.out" \
     -c ${NUM_CORES} \
     --time=5:00:00 \
     --mem=${MEMORY} \

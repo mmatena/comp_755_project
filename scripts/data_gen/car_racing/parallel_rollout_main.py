@@ -6,7 +6,7 @@ import tempfile
 from absl import app
 from absl import flags
 import ray
-
+from pyvirtualdisplay import Display
 from rl755.data_gen import gym_rollouts
 
 FLAGS = flags.FLAGS
@@ -31,6 +31,11 @@ def pickle_rollout(rollout, out_dir):
 
 
 def main(_):
+  # It looks like OpenAI gym requires some sort of display, so we
+  # have to fake one.
+  display = Display(visible=0, size=(400, 300))
+  display.start()
+
   ray.init()
 
   policy = gym_rollouts.HastingsRandomPolicy(time_scale=200, magnitude_scale=1.7)

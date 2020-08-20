@@ -40,8 +40,8 @@ launch() {
   CMD=$(echo sbatch \
     --ntasks=1 \
     -c ${NUM_CORES} \
-    --error="$DATA_DIR/logs.err" \
-    --output="$DATA_DIR/logs.out" \
+    --error="$DATA_DIR/logs-%j.err" \
+    --output="$DATA_DIR/logs-%j.out" \
     --time=4:00:00 \
     --mem=${MEMORY} \
     --partition=general \

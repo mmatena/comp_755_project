@@ -38,8 +38,7 @@ launch() {
   # Not too sure why I have to do it like this, but just running the command
   # causes it fail to launch.
   CMD=$(echo sbatch \
-    --ntasks=1 \
-    -c ${NUM_CORES} \
+    --ntasks=${NUM_CORES} \
     --error="$DATA_DIR/logs-%j.err" \
     --output="$DATA_DIR/logs-%j.out" \
     --time=4:00:00 \

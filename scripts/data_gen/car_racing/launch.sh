@@ -19,12 +19,12 @@ DATA_DIR=/pine/scr/m/m/mmatena/1000_rollouts_test
 # NUM_CORES=12
 # MEMORY=10g
 
-NUM_ROLLOUTS=250
-PARALLELISM=5
+NUM_ROLLOUTS=2000
+PARALLELISM=10
 MAX_STEPS=2000
 
-NUM_CORES=5
-MEMORY=4g
+NUM_CORES=12
+MEMORY=8g
 #############################################################
 
 
@@ -48,7 +48,7 @@ launch() {
     --ntasks=${NUM_CORES} \
     --error="$DATA_DIR/logs-%j.err" \
     --output="$DATA_DIR/logs-%j.out" \
-    --time=2:30:00 \
+    --time=8:30:00 \
     --mem=${MEMORY} \
     --partition=general \
     --wrap="\"$(run_python)\"")

@@ -47,7 +47,6 @@ def main(_):
 
   start = time.time()
 
-
   gym_rollouts.parallel_rollouts("CarRacing-v0",
                                  policy=policy,
                                  max_steps=FLAGS.max_steps,
@@ -57,6 +56,7 @@ def main(_):
 
   end = time.time()
   print("Took", end - start, "seconds to run.")
-  
+
+
 if __name__ == '__main__':
   app.run(main)

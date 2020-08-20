@@ -1,7 +1,9 @@
 """Main file for running parallel rollouts of CarRacing-v0."""
 import functools
+import os
 import pickle
 import tempfile
+import time
 
 from absl import app
 from absl import flags
@@ -27,9 +29,10 @@ flags.mark_flag_as_required('out_dir')
 
 def pickle_rollout(rollout, out_dir):
   # TODO(mmatena): Find better way to write to disc. Perhaps write as a tf record?
-  filepath = tempfile.mkstemp(dir=out_dir, suffix=".pickle")
-  with open(filepath, "wb") as f:
+  fd, path = tempfile.mkstemp(dir=out_dir, suffix=".pickle")
+  with open(path, 'wb') as f:
     pickle.dump([rollout], f)
+  os.close(fd)
 
 
 def main(_):
@@ -42,6 +45,9 @@ def main(_):
 
   policy = gym_rollouts.HastingsRandomPolicy(time_scale=200, magnitude_scale=1.7)
 
+  start = time.time()
+
+
   gym_rollouts.parallel_rollouts("CarRacing-v0",
                                  policy=policy,
                                  max_steps=FLAGS.max_steps,
@@ -49,6 +55,8 @@ def main(_):
                                  process_rollout_fn=functools.partial(pickle_rollout, out_dir=FLAGS.out_dir),
                                  parallelism=FLAGS.parallelism)
 
-
+  end = time.time()
+  print("Took", end - start, "seconds to run.")
+  
 if __name__ == '__main__':
   app.run(main)

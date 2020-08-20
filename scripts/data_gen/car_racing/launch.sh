@@ -26,7 +26,7 @@ module add python/3.6.6
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 
 run_python() {
-  echo python "${PROJECT_DIR}/scripts/data_gen/car_racing/parallel_rollout_main.py" \
+  echo python $PROJECT_DIR/scripts/data_gen/car_racing/parallel_rollout_main.py \
     --num_rollouts=$NUM_ROLLOUTS \
     --parallelism=$PARALLELISM \
     --max_steps=$MAX_STEPS \

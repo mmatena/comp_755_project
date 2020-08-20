@@ -85,4 +85,3 @@ def parallel_rollouts(env_name, policy, max_steps, num_rollouts, process_rollout
   futures += [do_rollouts(full_num_serial + surplus_num_serial)]
 
   return ray.get(futures)
-

@@ -4,6 +4,7 @@ import tempfile
 
 from absl import app
 from absl import flags
+import ray
 
 from rl755.data_gen import gym_rollouts
 
@@ -29,6 +30,8 @@ def pickle_rollout(rollout):
 
 
 def main(_):
+  ray.init()
+
   policy = gym_rollouts.HastingsRandomPolicy(time_scale=200, magnitude_scale=1.7)
 
   gym_rollouts.parallel_rollouts("CarRacing-v0",

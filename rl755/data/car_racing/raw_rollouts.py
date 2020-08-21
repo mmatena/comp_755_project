@@ -50,9 +50,9 @@ def random_rollout_slices(slice_size, shuffle_files=True):
     rollout_length = tf.shape(x['observations'])[0]
     slice_start = tf.random.uniform([], 0, rollout_length - slice_size, dtype=tf.int32)
     x = {k: v[slice_start:slice_start + slice_size] for k, v in x.items()}
-    # Explicitly set the shape because I think it makes stuff nicer later on.
-    x = {k: tf.reshape(x, tf.concat([[slice_size], tf.shape(v)[1:]], axis=0))
-         for k, v in x.items()}
+    # # Explicitly set the shape because I think it makes stuff nicer later on.
+    # x = {k: tf.reshape(x, tf.concat([[slice_size], tf.shape(v)[1:]], axis=0))
+    #      for k, v in x.items()}
     return x
 
   ds = get_raw_rollouts_ds(shuffle_files=shuffle_files)

@@ -14,8 +14,8 @@ def get_raw_rollouts_ds(shuffle_files=True):
   def parse_fn(x):
     features = {
         'observations': tf.io.VarLenFeature(tf.string),
-        'actions': tf.io.VarLenFeature(tf.float),
-        'rewards': tf.io.VarLenFeature(tf.float),
+        'actions': tf.io.VarLenFeature(tf.float32),
+        'rewards': tf.io.VarLenFeature(tf.float32),
     }
     return tf.io.parse_single_example(x, features)
 

@@ -59,13 +59,13 @@ def random_rollout_slices(slice_size, shuffle_files=True):
   return ds.map(slice_example, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
 
-def random_rollout_observations(shuffle_files=True):
-  # TODO(mmatena): Add docs.
-
+def random_rollout_observations(obs_per_rollout=8, shuffle_files=True):
+  # TODO(mmatena): Add docs. Mention that obs_per_rollout is because ...
   def random_obs(x):
     rollout_length = tf.shape(x['observations'])[0]
-    index = tf.random.uniform([], 0, rollout_length, dtype=tf.int32)
+    index = tf.random.uniform([obs_per_rollout], 0, rollout_length, dtype=tf.int32)
     return {"observation": x['observations'][index]}
 
   ds = get_raw_rollouts_ds(shuffle_files=shuffle_files)
-  return ds.map(random_obs, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+  ds = ds.map(random_obs, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+  return ds.flat_map(tf.data.Dataset.from_tensor_slices)

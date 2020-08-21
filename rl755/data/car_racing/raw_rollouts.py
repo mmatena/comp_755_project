@@ -17,7 +17,9 @@ def get_raw_rollouts_ds(shuffle_files=True):
         'actions': tf.io.VarLenFeature(tf.float32),
         'rewards': tf.io.VarLenFeature(tf.float32),
     }
-    return tf.io.parse_single_example(x, features)
+    x = tf.io.parse_single_example(x, features)
+    x = {k: tf.sparse.to_dense(v) for k, v in x.items()}
+    return x
 
   ds = tf.data.TFRecordDataset(files)
   return ds.map(parse_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)

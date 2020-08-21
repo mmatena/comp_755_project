@@ -1,5 +1,5 @@
 """Datasets that come from raw rollouts."""
-
+import functools
 import tensorflow as tf
 
 _TFRECORDS_PATTERN = "/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/" \
@@ -22,8 +22,10 @@ def get_raw_rollouts_ds(shuffle_files=True):
     x = {k: tf.sparse.to_dense(v) for k, v in x.items()}
 
     observations = tf.squeeze(x['observations'])
+    observations = tf.map_fn(functools.partial(tf.io.parse_tensor, out_type=tf.uint8),
+                             observations)
     # observations = tf.unstack(observations)
-    observations = [tf.io.parse_tensor(obs, out_type=tf.uint8) for obs in observations]
+    # observations = [tf.io.parse_tensor(obs, out_type=tf.uint8) for obs in observations]
     x['observations'] = tf.stack(observations)
 
     return x

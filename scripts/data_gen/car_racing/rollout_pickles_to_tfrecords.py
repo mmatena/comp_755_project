@@ -15,10 +15,10 @@ from rl755.common.misc import divide_chunks, evenly_partition
 
 FLAGS = flags.FLAGS
 
-# TODO(mmatena): Compute this based on desired shard size. For 2000 cartpole rounds
-#                it seems like 8 is a good number. We want shards to be around 100-200 MB.
 flags.DEFINE_integer('parallelism', None, 'Number of processes to use for the conversion.',
                      lower_bound=1)
+# TODO(mmatena): Compute this based on desired shard size. For 2000 cartpole rounds
+#                it seems like 6 is a good number. We want shards to be around 100-200 MB.
 flags.DEFINE_integer('pickles_per_tfrecord_file', None,
                      'Number of pickled files to put in each tfrecord file.',
                      lower_bound=1)

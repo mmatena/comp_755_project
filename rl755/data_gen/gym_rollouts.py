@@ -4,11 +4,12 @@ from noise import pnoise1
 import numpy as np
 import ray
 
+from rl755.common.misc import evenly_partition
 from rl755.common.structs import Rollout
 
 
 class Policy(object):
-  """Base class for policies"""
+  """Abstract base class for policies"""
 
   def initialize(self, env, max_steps, **kwargs):
     raise NotImplementedError()
@@ -78,10 +79,5 @@ def parallel_rollouts(env_name, policy, max_steps, num_rollouts, process_rollout
                                              max_steps=max_steps,
                                              num_rollouts=num_serial,
                                              process_rollout_fn=process_rollout_fn)
-
-  # TODO(mmatena): Better handling of the surplus. Spread evenly across the rest of the nodes instead.
-  full_num_serial, surplus_num_serial = divmod(num_rollouts, parallelism)
-  futures = [do_rollouts(full_num_serial) for _ in range(parallelism-1)]
-  futures += [do_rollouts(full_num_serial + surplus_num_serial)]
-
+  futures = [do_rollouts(num) for num in evenly_partition(num_rollouts, parallelism)]
   return ray.get(futures)

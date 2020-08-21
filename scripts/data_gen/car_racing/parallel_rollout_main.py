@@ -10,7 +10,6 @@ from absl import flags
 import ray
 from pyvirtualdisplay import Display
 
-
 from rl755.data_gen import gym_rollouts
 
 FLAGS = flags.FLAGS

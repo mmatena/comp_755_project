@@ -31,6 +31,8 @@ def _to_float_feature_list(array, process_item_fn):
 
 def to_tf_record(rollout):
   """Converts a rollout to the equivalent tf record."""
+  assert isinstance(rollout, Rollout)
+
   obs_features = []
   for obs in rollout.obs_l:
     obs_str = tf.io.serialize_tensor(obs).numpy()

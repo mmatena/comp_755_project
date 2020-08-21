@@ -12,7 +12,7 @@ def get_raw_rollouts_ds(shuffle_files=True):
   Each example is a dict with items:
     'observations': tf.uint8, (rollout_len, 96, 96, 3)
     'actions': tf.float32, (rollout_len, 4)
-    'rewards': tf.float32, (rollout_len, 1)
+    'rewards': tf.float32, (rollout_len)
 
   Getting the i-th item in each of the tensors will provide values for the
   observation on the i-th step, the action taken at the i-th step, and the
@@ -23,7 +23,6 @@ def get_raw_rollouts_ds(shuffle_files=True):
   if shuffle_files:
     files = tf.random.shuffle(files)
 
-  @tf.function
   def parse_fn(x):
     features = {
         'observations': tf.io.VarLenFeature(tf.string),
@@ -32,9 +31,29 @@ def get_raw_rollouts_ds(shuffle_files=True):
     }
     _, x = tf.io.parse_single_sequence_example(x, sequence_features=features)
     x = {k: tf.sparse.to_dense(v) for k, v in x.items()}
+    x['rewards'] = tf.squeeze(x['rewards'])
     x['observations'] = tf.map_fn(functools.partial(tf.io.parse_tensor, out_type=tf.uint8),
                                   tf.squeeze(x['observations']), dtype=tf.uint8)
     return x
 
   ds = tf.data.TFRecordDataset(files)
   return ds.map(parse_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+
+
+def random_rollout_slices(slice_size, shuffle_files=True):
+  # TODO(mmatena): Add docs.
+  # TODO(mmatena): Handle slice_sizes biggers than the rollout length.
+
+  def slice_example(x):
+    # Note that we assume that 'observations', 'rewards', and 'actions' are
+    # all the same length.
+    rollout_length = tf.shape(x['observations'])[0]
+    slice_start = tf.random.uniform(0, rollout_length - slice_size, dtype=tf.int32)
+    x = {k: v[slice_start:slice_start + slice_size] for k, v in x.items()}
+    # Explicitly set the shape because I think it makes stuff nicer later on.
+    x = {k: tf.reshape(x, tf.concat([[slice_size], tf.shape(v)[1:]], axis=0))
+         for k, v in x.items()}
+    return x
+
+  ds = get_raw_rollouts_ds(shuffle_files=shuffle_files)
+  return ds.map(slice_example, num_parallel_calls=tf.data.experimental.AUTOTUNE)

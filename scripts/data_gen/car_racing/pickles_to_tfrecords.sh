@@ -29,6 +29,9 @@
 
 
 PROJECT_DIR=~/projects/comp_755_project
+
+export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
+
 python $PROJECT_DIR/scripts/data_gen/car_racing/rollout_pickles_to_tfrecords.py \
   --parallelism=1 \
   --pickles_per_tfrecord_file=8 \

@@ -11,6 +11,7 @@ def get_raw_rollouts_ds(shuffle_files=True):
   if shuffle_files:
     files = tf.random.shuffle(files)
 
+  @tf.function
   def parse_fn(x):
     features = {
         'observations': tf.io.VarLenFeature(tf.string),

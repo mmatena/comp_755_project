@@ -23,7 +23,7 @@ def get_raw_rollouts_ds(shuffle_files=True):
 
     observations = tf.squeeze(x['observations'])
     observations = tf.map_fn(functools.partial(tf.io.parse_tensor, out_type=tf.uint8),
-                             observations)
+                             observations, fn_output_signature=tf.uint8)
     # observations = tf.unstack(observations)
     # observations = [tf.io.parse_tensor(obs, out_type=tf.uint8) for obs in observations]
     x['observations'] = tf.stack(observations)

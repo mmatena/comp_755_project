@@ -30,7 +30,7 @@ flags.mark_flag_as_required('parallelism')
 flags.mark_flag_as_required('pickles_per_tfrecord_file')
 flags.mark_flag_as_required('pickle_dir')
 flags.mark_flag_as_required('out_dir')
-flags.mark_flag_as_required('out_prefix')
+flags.mark_flag_as_required('out_name')
 
 
 @ray.remote

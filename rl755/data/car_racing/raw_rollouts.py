@@ -19,7 +19,7 @@ def get_raw_rollouts_ds(shuffle_files=True):
     }
     _, x = tf.io.parse_single_sequence_example(x, sequence_features=features)
     x = {k: tf.sparse.to_dense(v) for k, v in x.items()}
-    x['observations'] = tf.io.parse_tensor(x['observations'])
+    x['observations'] = tf.io.parse_tensor(x['observations'], out_type=tf.uint8)
     return x
 
   ds = tf.data.TFRecordDataset(files)

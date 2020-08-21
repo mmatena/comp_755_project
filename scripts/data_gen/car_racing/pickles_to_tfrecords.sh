@@ -27,7 +27,7 @@ PICKLES_PER_TF_RECORD_FILE=6
 PARALLELISM=10
 
 NUM_CORES=12
-MEMORY=10g
+MEMORY=32g
 #############################################################
 
 

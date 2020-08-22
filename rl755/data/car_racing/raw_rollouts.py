@@ -72,8 +72,8 @@ def random_rollout_observations(obs_per_rollout=8, shuffle_files=True):
 
 def standard_dataset_prep(ds, batch_size, repeat=True, shuffle_buffer_size=1000):
   # TODO(mmatena): Add docs.
-  ds = ds.shuffle(buffer_size=shuffle_buffer_size, drop_remainder=True)
+  ds = ds.shuffle(buffer_size=shuffle_buffer_size)
   if repeat:
     ds = ds.repeat()
-  ds = ds.batch(batch_size)
+  ds = ds.batch(batch_size, drop_remainder=True)
   return ds

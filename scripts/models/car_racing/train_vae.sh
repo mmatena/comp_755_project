@@ -10,7 +10,7 @@ PROJECT_DIR=~/projects/comp_755_project
 
 MODEL_DIR=/pine/scr/m/m/mmatena/test_vae_train
 
-TRAIN_STEPS=2000
+TRAIN_STEPS=100000
 
 NUM_CORES=12
 # Needs high memory due as full rollouts are large.

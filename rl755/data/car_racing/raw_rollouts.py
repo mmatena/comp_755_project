@@ -65,9 +65,14 @@ def random_rollout_observations(obs_per_rollout=8, shuffle_files=True):
     index = tf.random.uniform([obs_per_rollout], 0, rollout_length, dtype=tf.int32)
     return {"observation": tf.gather(x['observations'], index, axis=0)}
 
+  def set_shape(x):
+    return {"observation": tf.reshape(x['observations'], (96, 96, 3))}
+
   ds = get_raw_rollouts_ds(shuffle_files=shuffle_files)
   ds = ds.map(random_obs, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-  return ds.flat_map(tf.data.Dataset.from_tensor_slices)
+  ds = ds.flat_map(tf.data.Dataset.from_tensor_slices)
+  ds = ds.map(set_shape, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+  return ds
 
 
 def standard_dataset_prep(ds, batch_size, repeat=True, shuffle_buffer_size=1000):

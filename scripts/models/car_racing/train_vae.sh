@@ -51,7 +51,6 @@ launch() {
     --gres=gpu:1 \
     --qos=gpu_access \
     --wrap="\"$(run_singularity)\"")
-  echo $CMD
   eval $CMD
 }
 

@@ -66,7 +66,7 @@ def random_rollout_observations(obs_per_rollout=8, shuffle_files=True):
     return {"observation": tf.gather(x['observations'], index, axis=0)}
 
   def set_shape(x):
-    return {"observation": tf.reshape(x['observations'], (96, 96, 3))}
+    return {"observation": tf.reshape(x['observation'], (96, 96, 3))}
 
   ds = get_raw_rollouts_ds(shuffle_files=shuffle_files)
   ds = ds.map(random_obs, num_parallel_calls=tf.data.experimental.AUTOTUNE)

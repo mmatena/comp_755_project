@@ -19,6 +19,8 @@ TIME="8:30:00"
 
 
 unset OMP_NUM_THREADS
+SIMG_PATH=/nas/longleaf/apps/tensorflow_py3/2.1.0/simg
+SIMG_NAME=tensorflow2.1.0-py3-cuda10.1-ubuntu18.04.simg
 
 module add python/3.6.6
 module add tensorflow_py3/2.1.0
@@ -58,3 +60,4 @@ launch() {
 [ -d $MODEL_DIR ] || mkdir $MODEL_DIR
 # Run the command to actually launch the job.
 launch
+

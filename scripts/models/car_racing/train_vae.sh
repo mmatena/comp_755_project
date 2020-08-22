@@ -46,5 +46,7 @@ launch() {
 }
 
 
+# Make the model directory if it does not exist.
+[ -d $MODEL_DIR ] || mkdir $MODEL_DIR
 # Run the command to actually launch the job.
 launch

@@ -69,7 +69,7 @@ class Vae(tf.keras.Model):
     # reduce_sum to use here.
     loss_recon = tf.reduce_sum(tf.square(x - reconstruction))
     loss_recon /= tf.cast(tf.shape(x)[0], tf.float32)
-    loss_kl = tfd.kl_divergence(posterior, self.prior)
+    loss_kl = tf.reduce_mean(tfd.kl_divergence(posterior, self.prior))
     return loss_recon, loss_kl
 
   def train_step(self, data):

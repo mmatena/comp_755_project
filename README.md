@@ -9,4 +9,7 @@ pip install ray
 pip install absl-py
 pip install pyvirtualdisplay
 pip install PyOpenGL PyOpenGL_accelerate
+
+pip install tensorflow-probability==0.9.0
+pip install cloudpickle==1.3.0
 ```

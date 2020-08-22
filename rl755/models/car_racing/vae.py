@@ -61,7 +61,7 @@ class Vae(tf.keras.Model):
 
   def get_losses(self, x):
     posterior = self.encode(x)
-    reconstruction = posterior.sample()
+    reconstruction = self.decode(posterior.sample())
 
     # TODO(mmatena): Figure out the right combination of reduce_mean and
     # reduce_sum to use here.

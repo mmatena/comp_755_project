@@ -34,6 +34,8 @@ def get_raw_rollouts_ds(shuffle_files=True):
     x['rewards'] = tf.squeeze(x['rewards'])
     x['observations'] = tf.map_fn(functools.partial(tf.io.parse_tensor, out_type=tf.uint8),
                                   tf.squeeze(x['observations']), dtype=tf.uint8)
+    # Convert to floats in the range [0, 1]
+    x['observations'] = tf.cast(x['observations'], tf.float32) / 255.0
     return x
 
   ds = tf.data.TFRecordDataset(files)
@@ -50,9 +52,6 @@ def random_rollout_slices(slice_size, shuffle_files=True):
     rollout_length = tf.shape(x['observations'])[0]
     slice_start = tf.random.uniform([], 0, rollout_length - slice_size, dtype=tf.int32)
     x = {k: v[slice_start:slice_start + slice_size] for k, v in x.items()}
-    # # Explicitly set the shape because I think it makes stuff nicer later on.
-    # x = {k: tf.reshape(x, tf.concat([[slice_size], tf.shape(v)[1:]], axis=0))
-    #      for k, v in x.items()}
     return x
 
   ds = get_raw_rollouts_ds(shuffle_files=shuffle_files)
@@ -69,3 +68,12 @@ def random_rollout_observations(obs_per_rollout=8, shuffle_files=True):
   ds = get_raw_rollouts_ds(shuffle_files=shuffle_files)
   ds = ds.map(random_obs, num_parallel_calls=tf.data.experimental.AUTOTUNE)
   return ds.flat_map(tf.data.Dataset.from_tensor_slices)
+
+
+def standard_dataset_prep(ds, batch_size, repeat=True, shuffle_buffer_size=1000):
+  # TODO(mmatena): Add docs.
+  ds = ds.shuffle(buffer_size=shuffle_buffer_size, drop_remainder=True)
+  if repeat:
+    ds = ds.repeat()
+  ds = ds.batch(batch_size)
+  return ds

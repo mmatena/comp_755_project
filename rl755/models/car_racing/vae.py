@@ -48,7 +48,7 @@ class Vae(tf.keras.Model):
     self.decoder = _get_decoder(latent_dim)
     self.prior = tfd.MultivariateNormalDiag(tf.zeros(latent_dim),
                                             tf.ones(latent_dim))
-    self.step = tf.Variable(start_step, dtype=tf.int32)
+    self.step = tf.Variable(start_step, dtype=tf.int64)
 
   def x_from_data(self, data):
     return data['observation']

@@ -39,14 +39,16 @@ def _get_decoder(latent_dim):
 
 
 class Vae(tf.keras.Model):
-  def __init__(self, latent_dim=32, beta=1.0, name="vae", **kwargs):
+  def __init__(self, latent_dim=32, beta=1.0, log_losses=False, start_step=0, name="vae", **kwargs):
     super().__init__(name=name, **kwargs)
     self.latent_dim = latent_dim
     self.beta = beta
+    self.log_losses = log_losses
     self.encoder = _get_encoder(latent_dim)
     self.decoder = _get_decoder(latent_dim)
     self.prior = tfd.MultivariateNormalDiag(tf.zeros(latent_dim),
                                             tf.ones(latent_dim))
+    self.step = tf.Variable(start_step, dtype=tf.int32)
 
   def x_from_data(self, data):
     return data['observation']
@@ -71,6 +73,8 @@ class Vae(tf.keras.Model):
     return loss_recon, loss_kl
 
   def train_step(self, data):
+    self.step.assign_add(1)
+
     x = self.x_from_data(data)
     with tf.GradientTape() as tape:
       loss_recon, loss_kl = self.get_losses(x)
@@ -79,4 +83,9 @@ class Vae(tf.keras.Model):
 
     gradients = tape.gradient(loss, self.trainable_variables)
     self.optimizer.apply_gradients(zip(gradients, self.trainable_variables))
+
+    if self.log_losses:
+      tf.summary.scalar('loss', data=loss, step=self.step)
+      tf.summary.scalar('l2_loss', data=loss_recon, step=self.step)
+      tf.summary.scalar('kl_loss', data=loss_kl, step=self.step) 
     return {"loss": loss, "l2": loss_recon, "kl": loss_kl}

@@ -33,6 +33,10 @@ flags.mark_flag_as_required('train_steps')
 def main(_):
   model_dir = FLAGS.model_dir
 
+  # TODO(mmatena): Check into best practices about this.
+  file_writer = tf.summary.create_file_writer(model_dir)
+  file_writer.set_as_default()
+
   ds = raw_rollouts.random_rollout_observations(obs_per_rollout=100, shuffle_files=True)
   ds = raw_rollouts.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
 
@@ -42,7 +46,7 @@ def main(_):
       save_best_only=False)
   tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=model_dir)
 
-  vae = Vae(latent_dim=FLAGS.latent_size, beta=FLAGS.beta)
+  vae = Vae(latent_dim=FLAGS.latent_size, beta=FLAGS.beta, log_losses=True)
   vae.compile(optimizer="adam")
 
   vae.fit(ds, epochs=1, steps_per_epoch=FLAGS.train_steps,

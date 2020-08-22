@@ -18,7 +18,10 @@ TIME="8:30:00"
 #############################################################
 
 
+unset OMP_NUM_THREADS
+
 module add python/3.6.6
+module add tensorflow_py3/2.1.0
 
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 
@@ -28,6 +31,10 @@ run_python() {
     --train_steps=$TRAIN_STEPS
 }
 
+
+run_singularity() {
+  echo singularity exec --nv -B /pine -B /proj $SIMG_PATH/$SIMG_NAME bash -c "\\\"$(run_python)\\\""
+}
 
 launch() {
   # Not too sure why I have to do it like this, but just running the command
@@ -41,7 +48,7 @@ launch() {
     --partition=gpu \
     --gres=gpu:1 \
     --qos=gpu_access \
-    --wrap="\"$(run_python)\"")
+    --wrap="\"$(run_singularity)\"")
   eval $CMD
 }
 

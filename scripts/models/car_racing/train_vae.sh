@@ -13,7 +13,8 @@ MODEL_DIR=/pine/scr/m/m/mmatena/test_vae_train
 TRAIN_STEPS=2000
 
 NUM_CORES=12
-MEMORY=8g
+# Needs high memory due as full rollouts are large.
+MEMORY=32g
 TIME="8:30:00"
 #############################################################
 

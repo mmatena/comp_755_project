@@ -68,7 +68,7 @@ def random_rollout_slices(slice_size, shuffle_files=True):
   return ds.map(slice_example, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
 
-def random_rollout_observations(obs_per_rollout=8, shuffle_files=True):
+def random_rollout_observations(obs_per_rollout=100, shuffle_files=True):
   # TODO(mmatena): Add docs. Mention that obs_per_rollout is because ...
   def random_obs(x):
     rollout_length = tf.shape(x['observations'])[0]

@@ -33,7 +33,7 @@ flags.mark_flag_as_required('train_steps')
 def main(_):
   model_dir = FLAGS.model_dir
 
-  ds = raw_rollouts.random_rollout_observations(obs_per_rollout=8, shuffle_files=True)
+  ds = raw_rollouts.random_rollout_observations(obs_per_rollout=100, shuffle_files=True)
   ds = raw_rollouts.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
 
   model_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(

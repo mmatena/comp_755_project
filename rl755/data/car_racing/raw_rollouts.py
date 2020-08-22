@@ -44,12 +44,12 @@ def get_raw_rollouts_ds(shuffle_files=True, process_observations=True):
       x['observations'] = _process_observations(x['observations'])
     return x
 
-  ds = tf.data.TFRecordDataset(files)
-  # files = tf.data.Dataset.from_tensor_slices(files)
-  # ds = files.interleave(tf.data.TFRecordDataset,
-  #                       num_parallel_calls=tf.data.experimental.AUTOTUNE,
-  #                       deterministic=False)
-  # ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
+  # ds = tf.data.TFRecordDataset(files)
+  files = tf.data.Dataset.from_tensor_slices(files)
+  ds = files.interleave(tf.data.TFRecordDataset,
+                        num_parallel_calls=tf.data.experimental.AUTOTUNE,
+                        deterministic=False)
+  ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
   return ds.map(parse_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
 

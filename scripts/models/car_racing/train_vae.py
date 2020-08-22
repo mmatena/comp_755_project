@@ -45,7 +45,7 @@ def main(_):
   vae = Vae(latent_dim=FLAGS.latent_size, beta=FLAGS.beta)
   vae.compile(optimizer="adam")
 
-  vae.fit(ds, epochs=1, steps_per_epoch=FLAGS.train_steps,  verbose=2,
+  vae.fit(ds, epochs=1, steps_per_epoch=FLAGS.train_steps,
           callbacks=[model_checkpoint_cb, tensorboard_cb])
 
 

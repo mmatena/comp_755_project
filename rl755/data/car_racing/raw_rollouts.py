@@ -38,7 +38,10 @@ def get_raw_rollouts_ds(shuffle_files=True):
     x['observations'] = tf.cast(x['observations'], tf.float32) / 255.0
     return x
 
-  ds = tf.data.TFRecordDataset(files)
+  # ds = tf.data.TFRecordDataset(files)
+  files = tf.data.Dataset.from_tensor_slices(files)
+  ds = files.interleave(tf.data.TFRecordDataset, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+  ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
   return ds.map(parse_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
 

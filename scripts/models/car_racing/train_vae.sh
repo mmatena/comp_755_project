@@ -12,8 +12,8 @@ MODEL_DIR=/pine/scr/m/m/mmatena/test_vae_train
 
 TRAIN_STEPS=2000
 
-NUM_CORES=4
-MEMORY=4g
+NUM_CORES=12
+MEMORY=8g
 TIME="8:30:00"
 #############################################################
 

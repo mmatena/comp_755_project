@@ -14,7 +14,7 @@ def _process_observations(observations):
   return observations
 
 
-def get_raw_rollouts_ds(shuffle_files=True, process_observations=True):
+def get_raw_rollouts_ds(process_observations=True):
   """Returns a tf.data.Dataset where each item is a raw full rollout.
 
   Each example is a dict with items:
@@ -28,8 +28,6 @@ def get_raw_rollouts_ds(shuffle_files=True, process_observations=True):
   state.
   """
   files = tf.io.matching_files(_TFRECORDS_PATTERN)
-  if shuffle_files:
-    files = tf.random.shuffle(files)
 
   def parse_fn(x):
     features = {
@@ -53,7 +51,7 @@ def get_raw_rollouts_ds(shuffle_files=True, process_observations=True):
   return ds.map(parse_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
 
-def random_rollout_slices(slice_size, shuffle_files=True):
+def random_rollout_slices(slice_size):
   # TODO(mmatena): Add docs.
   # TODO(mmatena): Handle slice_sizes biggers than the rollout length.
 
@@ -66,11 +64,11 @@ def random_rollout_slices(slice_size, shuffle_files=True):
     x['observations'] = _process_observations(x['observations'])
     return x
 
-  ds = get_raw_rollouts_ds(shuffle_files=shuffle_files, process_observations=False)
+  ds = get_raw_rollouts_ds(process_observations=False)
   return ds.map(slice_example, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
 
-def random_rollout_observations(obs_per_rollout=100, shuffle_files=True):
+def random_rollout_observations(obs_per_rollout=100, ):
   # TODO(mmatena): Add docs. Mention that obs_per_rollout is because ...
   def random_obs(x):
     rollout_length = tf.shape(x['observations'])[0]
@@ -82,7 +80,7 @@ def random_rollout_observations(obs_per_rollout=100, shuffle_files=True):
   def set_shape(x):
     return {"observation": tf.reshape(x['observation'], (96, 96, 3))}
 
-  ds = get_raw_rollouts_ds(shuffle_files=shuffle_files, process_observations=False)
+  ds = get_raw_rollouts_ds(process_observations=False)
   ds = ds.map(random_obs, num_parallel_calls=tf.data.experimental.AUTOTUNE)
   ds = ds.flat_map(tf.data.Dataset.from_tensor_slices)
   ds = ds.map(set_shape, num_parallel_calls=tf.data.experimental.AUTOTUNE)

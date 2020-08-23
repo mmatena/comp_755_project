@@ -35,7 +35,7 @@ launch() {
     --output="/tmp/logs-%j.out" \
     --time=10:00 \
     --mem=2g \
-    --partition=gpu \
+    --partition=volta-gpu \
     --gres=gpu:1 \
     --qos=gpu_access \
     --wrap="\"$(run_singularity)\"")

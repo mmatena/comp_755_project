@@ -73,7 +73,7 @@ def load_model(model_name):
 
 # @tf.function
 def encode(model, x):
-  posterior = model.encode(x)
+  posterior = tf.function(model.encode)(x)
   return posterior.mean(), posterior.stddev()
 
 

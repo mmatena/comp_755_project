@@ -69,7 +69,8 @@ def get_dataset(outer_shard_index, num_outer_shards, sub_shard_index, num_sub_sh
 
 
 def load_model(model_name):
-  return getattr(saved_models, model_name)()
+  return None
+  # return getattr(saved_models, model_name)()
 
 
 @tf.function

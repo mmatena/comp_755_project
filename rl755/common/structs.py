@@ -55,5 +55,5 @@ def latent_image_rollout_to_tfrecord(obs_latents, actions, rewards, obs_std_devs
       "observations": _to_float_feature_list(obs_latents.numpy().tolist(), lambda o: o),
       "observation_std_devs": _to_float_feature_list(obs_std_devs.numpy().tolist(), lambda o: o),
       "actions": _to_float_feature_list(actions.numpy().tolist(), lambda a: a),
-      "rewards": _to_float_feature_list(rewards.numpy().tolist(), lambda r: r),
+      "rewards": _to_float_feature_list(rewards.numpy().tolist(), lambda r: [r]),
   }))

@@ -16,7 +16,7 @@ OUT_DIR=/pine/scr/m/m/mmatena/test_encoded_rollouts
 OUT_NAME=encoded_rollouts
 MODEL="raw_rollout_vae_32ld"
 
-NUM_GPUS=4
+NUM_GPUS=8
 NUM_CORES=12
 # Needs high memory due as full rollouts are large.
 MEMORY=20g
@@ -25,11 +25,9 @@ TIME="8:30:00"
 
 
 # volta-gpu:
-# 2 GPU for 8 input shards: 268 sec
-# 4 GPU for 8 input shards:
 
 # gpu:
-# 4 GPU for 8 input shards: 362.5 sec
+# 4 GPU for 8 input shards: 80s
 # 8 GPU for 8 input shards: 370 sec
 
 

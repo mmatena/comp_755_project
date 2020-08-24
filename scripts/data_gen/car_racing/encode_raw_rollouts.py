@@ -4,7 +4,7 @@ import time
 
 from absl import app
 from absl import flags
-# import ray
+import ray
 import tensorflow as tf
 
 from rl755.common import misc
@@ -78,12 +78,12 @@ def main(_):
   # TODO: REMOVE, THIS IS JUST FOR INITIAL TESTING!!!!!!!!!!!!!!!!!!!!!
   ds = ds.take(8)
 
-  start = time.time()
+  # start = time.time()
 
-  run(ds, FLAGS.num_shards)
+  # run(ds, FLAGS.num_shards)
 
-  end = time.time()
-  print("Took", end - start, "seconds to run.")
+  # end = time.time()
+  # print("Took", end - start, "seconds to run.")
 
 
 if __name__ == '__main__':

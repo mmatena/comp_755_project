@@ -63,9 +63,9 @@ def run_shard(model, ds, shard_index, num_shards, out_dir, out_name):
 
 def run(ds, num_shards):
   futures = [
-      run_shard(FLAGS.model, ds=ds,
-                shard_index=i, num_shards=num_shards,
-                out_dir=FLAGS.out_dir, out_name=FLAGS.out_name).remote()
+      run_shard.remote(FLAGS.model, ds=ds,
+                       shard_index=i, num_shards=num_shards,
+                       out_dir=FLAGS.out_dir, out_name=FLAGS.out_name)
       for i in range(num_shards)
   ]
   ray.get(futures)

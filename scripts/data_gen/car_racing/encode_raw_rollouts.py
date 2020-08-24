@@ -56,7 +56,7 @@ def run_shard(model, ds, mirrored_strategy, shard_index, num_shards):
               obs_latents=mean,
               actions=x['actions'],
               rewards=x['rewards'],
-              obs_std_devs=std_dev))
+              obs_std_devs=std_dev).SerializeToString())
 
 
 def run(ds, num_shards):

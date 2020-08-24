@@ -8,18 +8,22 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
+# 29  # Based on some rough calculations, this produces about 100MB per shard.
 NUM_SHARDS=1
 # OUT_DIR=/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/encoded_rollouts
 OUT_DIR=/pine/scr/m/m/mmatena/test_encoded_rollouts
 OUT_NAME=encoded_rollouts
 MODEL="raw_rollout_vae_32ld"
 
-NUM_GPUS=1
+NUM_GPUS=4
 NUM_CORES=12
 # Needs high memory due as full rollouts are large.
 MEMORY=32g
 TIME="8:30:00"
 #############################################################
+
+
+# 1 GPU for 8: 86.05 sec
 
 
 

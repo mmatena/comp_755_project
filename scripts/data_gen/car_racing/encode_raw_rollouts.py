@@ -1,5 +1,6 @@
 """Train a VAE on random images collected from the rollouts."""
 import os
+import time
 
 from absl import app
 from absl import flags
@@ -45,6 +46,7 @@ def run_shard(model, ds, mirrored_strategy, shard_index, num_shards):
   with tf.io.TFRecordWriter(filepath) as file_writer:
     for x in ds:
       # TODO(mmatena): This is tailored to VAEs. Handle non-VAE encoders.
+      print(x['observations'])
       observations = model.encode(x['observations'])
       observations_mean = observations.mean()
       observations_std_dev = observations.stddev()
@@ -76,7 +78,12 @@ def main(_):
   # TODO: REMOVE, THIS IS JUST FOR INITIAL TESTING!!!!!!!!!!!!!!!!!!!!!
   ds = ds.take(128)
 
+  start = time.time()
+
   run(ds, FLAGS.num_shards)
+
+  end = time.time()
+  print("Took", end - start, "seconds to run.")
 
 
 if __name__ == '__main__':

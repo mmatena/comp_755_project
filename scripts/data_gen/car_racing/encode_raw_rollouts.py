@@ -46,8 +46,8 @@ def run_shard(model, ds, mirrored_strategy, shard_index, num_shards):
   with tf.io.TFRecordWriter(filepath) as file_writer:
     for x in ds:
       # TODO(mmatena): This is tailored to VAEs. Handle non-VAE encoders.
-      print(x['observations'])
-      observations = model.encode(x['observations'])
+      raw_observations = tf.reshape(x['observation'], (FLAGS.batch_size, -1, 96, 96, 3))
+      observations = model.encode(raw_observations)
       observations_mean = observations.mean()
       observations_std_dev = observations.stddev()
 

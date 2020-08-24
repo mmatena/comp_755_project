@@ -12,11 +12,11 @@ PROJECT_DIR=~/projects/comp_755_project
 NUM_OUTER_SHARDS=1
 NUM_SUBSHARDS=8
 # OUT_DIR=/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/encoded_rollouts
-OUT_DIR=/pine/scr/m/m/mmatena/test_encoded_rollouts
+OUT_DIR=/pine/scr/m/m/mmatena/test_encoded_rollouts2
 OUT_NAME=encoded_rollouts
 MODEL="raw_rollout_vae_32ld"
 
-NUM_GPUS=1
+NUM_GPUS=8
 NUM_CORES=12
 # Needs high memory due as full rollouts are large.
 MEMORY=20g
@@ -27,8 +27,12 @@ TIME="8:30:00"
 # volta-gpu:
 
 # gpu:
+# 1 GPU for 8 input shards: 80s
 # 4 GPU for 8 input shards: 80s
 # 8 GPU for 8 input shards: 83s sec
+
+# 1 GPU for 64 input shards: 
+# 8 GPU for 64 input shards: 
 
 
 

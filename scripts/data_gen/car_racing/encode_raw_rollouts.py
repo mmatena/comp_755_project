@@ -40,7 +40,7 @@ flags.mark_flag_as_required('out_name')
 
 
 def get_dataset_files():
-  files = tf.io.matching_files(raw_rollouts.TFRECORDS_PATTERN).numpy().aslist()
+  files = tf.io.matching_files(raw_rollouts.TFRECORDS_PATTERN).numpy().tolist()
 
 
 

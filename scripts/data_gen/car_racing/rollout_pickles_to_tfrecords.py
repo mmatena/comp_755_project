@@ -11,7 +11,7 @@ import ray
 import tensorflow as tf
 
 from rl755.common import structs
-from rl755.common.misc import divide_chunks, evenly_partition
+from rl755.common.misc import divide_chunks, evenly_partition, sharded_filename
 
 FLAGS = flags.FLAGS
 
@@ -41,7 +41,7 @@ def convert_to_tf_records(filepaths, out_dir, pickles_per_tfrecord_file, uuid):
       for file in files:
         rollouts = pickle.load(open(file, "rb"))
         for rollout in rollouts:
-          record = structs.to_tf_record(rollout)
+          record = structs.raw_rollout_to_tfrecord(rollout)
           writer.write(record.SerializeToString())
     os.close(fd)
 
@@ -53,8 +53,8 @@ def read_pickle_filenames(pickle_dir):
 def rename_tfrecords(out_dir, out_name, uuid):
   records = glob.glob(os.path.join(out_dir, f"*-{uuid}.tfrecord"))
   for i, file in enumerate(records):
-    # TODO(mmatena): Support cases with 10**6 or more shards.
-    new_name = os.path.join(out_dir, f'{out_name}.tfrecord-{i:05d}-of-{len(records):05d}')
+    base_name = sharded_filename(f'{out_name}.tfrecord', shard_index=i, num_shards=len(records))
+    new_name = os.path.join(out_dir, base_name)
     os.rename(file, new_name)
 
 

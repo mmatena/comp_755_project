@@ -43,7 +43,7 @@ def main(_):
   model_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
       filepath=os.path.join(model_dir, "model.hdf5"),
       save_freq=1000,
-      save_weights_only=False,
+      save_weights_only=True,
       save_best_only=False)
   tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=model_dir)
 

@@ -35,3 +35,8 @@ def evenly_partition(lis, n):
   assert len(partitions) == n
 
   return partitions
+
+
+def sharded_filename(filename, shard_index, num_shards):
+  # TODO(mmatena): Support cases with 10**6 or more shards.
+  return f'{filename}-{shard_index:05d}-of-{num_shards:05d}'

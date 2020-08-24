@@ -29,10 +29,8 @@ def _to_float_feature_list(array, process_item_fn):
   return tf.train.FeatureList(feature=features)
 
 
-def to_tf_record(rollout):
+def raw_rollout_to_tfrecord(rollout):
   """Converts a rollout to the equivalent tf record."""
-  assert isinstance(rollout, Rollout)
-
   obs_features = []
   for obs in rollout.obs_l:
     obs_str = tf.io.serialize_tensor(obs).numpy()
@@ -44,4 +42,18 @@ def to_tf_record(rollout):
       "observations": obs_features,
       "actions": _to_float_feature_list(rollout.action_l, lambda a: a),
       "rewards": _to_float_feature_list(rollout.reward_l, lambda r: [r]),
+  }))
+
+
+def latent_image_rollout_to_tfrecord(obs_latents, actions, rewards, obs_std_devs=None):
+  if obs_std_devs is None:
+    # TODO(mmatena): Figure out the best way to handle this. This can happen if we are
+    # using something like a deterministic encoder.
+    raise NotImplementedError("Figure out how to handle cases with no std dev on latents.")
+
+  return tf.train.SequenceExample(feature_lists=tf.train.FeatureLists(feature_list={
+      "observations": _to_float_feature_list(obs_latents, lambda o: o),
+      "observation_std_devs": _to_float_feature_list(obs_std_devs, lambda o: o),
+      "actions": _to_float_feature_list(actions, lambda a: a),
+      "rewards": _to_float_feature_list(rewards, lambda r: [r]),
   }))

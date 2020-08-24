@@ -2,8 +2,8 @@
 import functools
 import tensorflow as tf
 
-_TFRECORDS_PATTERN = "/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/" \
-                     "raw_rollouts/raw_rollouts.tfrecord*"
+TFRECORDS_PATTERN = "/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/" \
+                    "raw_rollouts/raw_rollouts.tfrecord*"
 
 
 def _process_observations(observations):
@@ -12,6 +12,20 @@ def _process_observations(observations):
   # Convert to floats in the range [0, 1]
   observations = tf.cast(observations, tf.float32) / 255.0
   return observations
+
+
+def parse_fn(x, process_observations):
+    features = {
+        'observations': tf.io.VarLenFeature(tf.string),
+        'actions': tf.io.VarLenFeature(tf.float32),
+        'rewards': tf.io.VarLenFeature(tf.float32),
+    }
+    _, x = tf.io.parse_single_sequence_example(x, sequence_features=features)
+    x = {k: tf.sparse.to_dense(v) for k, v in x.items()}
+    x['rewards'] = tf.squeeze(x['rewards'])
+    if process_observations:
+      x['observations'] = _process_observations(x['observations'])
+    return x
 
 
 def get_raw_rollouts_ds(process_observations=True):
@@ -27,28 +41,15 @@ def get_raw_rollouts_ds(process_observations=True):
   reward corresponding to the transition from the i-th state to the (i+1)-th
   state.
   """
-  files = tf.io.matching_files(_TFRECORDS_PATTERN)
+  files = tf.io.matching_files(TFRECORDS_PATTERN)
 
-  def parse_fn(x):
-    features = {
-        'observations': tf.io.VarLenFeature(tf.string),
-        'actions': tf.io.VarLenFeature(tf.float32),
-        'rewards': tf.io.VarLenFeature(tf.float32),
-    }
-    _, x = tf.io.parse_single_sequence_example(x, sequence_features=features)
-    x = {k: tf.sparse.to_dense(v) for k, v in x.items()}
-    x['rewards'] = tf.squeeze(x['rewards'])
-    if process_observations:
-      x['observations'] = _process_observations(x['observations'])
-    return x
-
-  # ds = tf.data.TFRecordDataset(files)
   files = tf.data.Dataset.from_tensor_slices(files)
   ds = files.interleave(tf.data.TFRecordDataset,
                         num_parallel_calls=tf.data.experimental.AUTOTUNE,
                         deterministic=False)
   ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
-  return ds.map(parse_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+  return ds.map(functools.partial(parse_fn, process_observations=process_observations),
+                num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
 
 def random_rollout_slices(slice_size):

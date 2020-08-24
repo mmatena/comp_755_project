@@ -8,8 +8,9 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-# 29  # Based on some rough calculations, this produces about 100MB per shard.
-NUM_SHARDS=1
+# 30 total shards  # Based on some rough calculations, this produces about 100MB per shard.
+NUM_OUTER_SHARDS=1
+NUM_SUBSHARDS=1
 # OUT_DIR=/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/encoded_rollouts
 OUT_DIR=/pine/scr/m/m/mmatena/test_encoded_rollouts
 OUT_NAME=encoded_rollouts
@@ -38,7 +39,9 @@ export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 
 run_python() {
   echo python $PROJECT_DIR/scripts/data_gen/car_racing/encode_raw_rollouts.py \
-    --num_shards=$NUM_SHARDS \
+    --num_outer_shards=$NUM_OUTER_SHARDS \
+    --outer_shard_index=0 \
+    --num_sub_shards=$NUM_SUBSHARDS \
     --out_dir=$OUT_DIR \
     --out_name=$OUT_NAME \
     --model=$MODEL

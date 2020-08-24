@@ -73,7 +73,7 @@ def load_model(model_name):
 
 # @tf.function
 def encode(model, x):
-  posterior = tf.function(model.encode)(x)
+  posterior = model.encode(x)
   return posterior.mean(), posterior.stddev()
 
 
@@ -85,6 +85,7 @@ def run_shard(model_name, out_dir, out_name,
                    num_outer_shards=num_outer_shards,
                    sub_shard_index=sub_shard_index,
                    num_sub_shards=num_sub_shards)
+  enc = tf.function(encode)
 
   num_total_shards = num_outer_shards * num_sub_shards
   total_shard_index = num_sub_shards * outer_shard_index + sub_shard_index
@@ -97,7 +98,7 @@ def run_shard(model_name, out_dir, out_name,
     for x in ds:
       # TODO(mmatena): This is tailored to VAEs. Handle non-VAE encoders.
       raw_observations = tf.reshape(x['observations'], (-1, 96, 96, 3))
-      mean, std_dev = encode(model, raw_observations)
+      mean, std_dev = enc(model, raw_observations)
       file_writer.write(
           structs.latent_image_rollout_to_tfrecord(
               obs_latents=mean,

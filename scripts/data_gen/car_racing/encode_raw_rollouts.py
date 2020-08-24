@@ -45,7 +45,7 @@ def get_dataset_files():
 
 
   # TODO: REMOVE, THIS IS JUST FOR INITIAL TESTING!!!!!!!!!!!!!!!!!!!!!
-  files = files[:8]
+  files = files[:64]
 
 
   # Ensure a consistent order so that each file is processed exactly once.

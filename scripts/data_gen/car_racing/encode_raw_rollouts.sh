@@ -19,7 +19,7 @@ MODEL="raw_rollout_vae_32ld"
 NUM_GPUS=4
 NUM_CORES=12
 # Needs high memory due as full rollouts are large.
-MEMORY=80g
+MEMORY=60g
 TIME="8:30:00"
 #############################################################
 

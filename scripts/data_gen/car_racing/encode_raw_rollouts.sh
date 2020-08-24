@@ -16,7 +16,7 @@ OUT_DIR=/pine/scr/m/m/mmatena/test_encoded_rollouts
 OUT_NAME=encoded_rollouts
 MODEL="raw_rollout_vae_32ld"
 
-NUM_GPUS=8
+NUM_GPUS=1
 NUM_CORES=12
 # Needs high memory due as full rollouts are large.
 MEMORY=20g
@@ -46,7 +46,6 @@ run_python() {
     --num_outer_shards=$NUM_OUTER_SHARDS \
     --outer_shard_index=0 \
     --num_sub_shards=$NUM_SUBSHARDS \
-    --num_gpu=$NUM_GPUS \
     --out_dir=$OUT_DIR \
     --out_name=$OUT_NAME \
     --model=$MODEL

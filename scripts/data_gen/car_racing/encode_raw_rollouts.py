@@ -62,7 +62,7 @@ def run_shard(model, ds, mirrored_strategy, shard_index, num_shards):
 def run(ds, num_shards):
   mirrored_strategy = tf.distribute.MirroredStrategy()
   with mirrored_strategy.scope():
-    model = load_model(FLAGS.model_name)
+    model = load_model(FLAGS.model)
     for i in range(num_shards):
       run_shard(model, ds=ds,
                 mirrored_strategy=mirrored_strategy,

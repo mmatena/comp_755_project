@@ -52,8 +52,8 @@ def latent_image_rollout_to_tfrecord(obs_latents, actions, rewards, obs_std_devs
     raise NotImplementedError("Figure out how to handle cases with no std dev on latents.")
 
   return tf.train.SequenceExample(feature_lists=tf.train.FeatureLists(feature_list={
-      "observations": _to_float_feature_list(obs_latents, lambda o: o),
-      "observation_std_devs": _to_float_feature_list(obs_std_devs, lambda o: o),
-      "actions": _to_float_feature_list(actions, lambda a: a),
-      "rewards": _to_float_feature_list(rewards, lambda r: [r]),
+      "observations": _to_float_feature_list(obs_latents.numpy(), lambda o: o),
+      "observation_std_devs": _to_float_feature_list(obs_std_devs.numpy(), lambda o: o),
+      "actions": _to_float_feature_list(actions.numpy(), lambda a: a),
+      "rewards": _to_float_feature_list(rewards.numpy(), lambda r: r),
   }))

@@ -4,6 +4,7 @@ import time
 
 from absl import app
 from absl import flags
+import ray
 import tensorflow as tf
 
 from rl755.common import misc
@@ -38,20 +39,20 @@ def encode(model, x):
   return posterior.mean(), posterior.stddev()
 
 
-def run_shard(model, ds, mirrored_strategy, shard_index, num_shards):
+@ray.remote
+def run_shard(model, ds, shard_index, num_shards, out_dir, out_name):
+  model = load_model(model)
   ds = ds.shard(num_shards=num_shards, index=shard_index)
-  ds = mirrored_strategy.experimental_distribute_dataset(ds)
 
-  filepath = os.path.join(FLAGS.out_dir,
-                          misc.sharded_filename(FLAGS.out_name,
+  filepath = os.path.join(out_dir,
+                          misc.sharded_filename(out_name,
                                                 shard_index=shard_index,
                                                 num_shards=num_shards))
   with tf.io.TFRecordWriter(filepath) as file_writer:
     for x in ds:
       # TODO(mmatena): This is tailored to VAEs. Handle non-VAE encoders.
-      # raw_observations = tf.reshape(x['observations'], (-1, 96, 96, 3))
-      # mean, std_dev = encode(model, raw_observations)
-      mean, std_dev = encode(model, x['observations'])
+      raw_observations = tf.reshape(x['observations'], (-1, 96, 96, 3))
+      mean, std_dev = encode(model, raw_observations)
       file_writer.write(
           structs.latent_image_rollout_to_tfrecord(
               obs_latents=mean,
@@ -61,17 +62,17 @@ def run_shard(model, ds, mirrored_strategy, shard_index, num_shards):
 
 
 def run(ds, num_shards):
-  mirrored_strategy = tf.distribute.MirroredStrategy()
-  with mirrored_strategy.scope():
-    model = load_model(FLAGS.model)
-    for i in range(num_shards):
-      run_shard(model, ds=ds,
-                mirrored_strategy=mirrored_strategy,
-                shard_index=i, num_shards=num_shards)
+  futures = [
+      run_shard(FLAGS.model, ds=ds,
+                shard_index=i, num_shards=num_shards,
+                out_dir=FLAGS.out_dir, out_name=FLAGS.out_name)
+      for i in range(num_shards)
+  ]
+  ray.get(futures)
 
 
 def main(_):
-  ds = raw_rollouts.get_raw_rollouts_ds(process_observations=True)
+  ds = raw_rollouts.get_raw_rollouts_ds(process_observations=True, shuffle_files=False)
 
   # TODO: REMOVE, THIS IS JUST FOR INITIAL TESTING!!!!!!!!!!!!!!!!!!!!!
   ds = ds.take(8)

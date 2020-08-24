@@ -31,8 +31,6 @@ launch() {
   # causes it fail to launch.
   CMD=$(echo sbatch \
     --ntasks=1 \
-    --error="/tmp/logs-%j.err" \
-    --output="/tmp/logs-%j.out" \
     --time=10:00 \
     --mem=2g \
     --partition=volta-gpu \

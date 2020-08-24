@@ -39,7 +39,7 @@ def encode(model, x):
   return posterior.mean(), posterior.stddev()
 
 
-# @ray.remote
+@ray.remote
 def run_shard(model, ds, shard_index, num_shards, out_dir, out_name):
   model = load_model(model)
   ds = ds.shard(num_shards=num_shards, index=shard_index)
@@ -68,22 +68,22 @@ def run(ds, num_shards):
                 out_dir=FLAGS.out_dir, out_name=FLAGS.out_name)
       for i in range(num_shards)
   ]
-  # ray.get(futures)
+  ray.get(futures)
 
 
 def main(_):
-  # ray.init()
+  ray.init()
   ds = raw_rollouts.get_raw_rollouts_ds(process_observations=True)
 
   # TODO: REMOVE, THIS IS JUST FOR INITIAL TESTING!!!!!!!!!!!!!!!!!!!!!
   ds = ds.take(8)
 
-  # start = time.time()
+  start = time.time()
 
-  # run(ds, FLAGS.num_shards)
+  run(ds, FLAGS.num_shards)
 
-  # end = time.time()
-  # print("Took", end - start, "seconds to run.")
+  end = time.time()
+  print("Took", end - start, "seconds to run.")
 
 
 if __name__ == '__main__':

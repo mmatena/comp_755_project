@@ -34,7 +34,7 @@ SIMG_NAME=tensorflow2.1.0-py3-cuda10.1-ubuntu18.04.simg
 module add python/3.6.6
 module add tensorflow_py3/2.1.0
 
-export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR:/nas/longleaf/apps/python/3.6.6/lib/python3.6/site-packages
+export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 
 run_python() {
   echo python $PROJECT_DIR/scripts/data_gen/car_racing/encode_raw_rollouts.py \

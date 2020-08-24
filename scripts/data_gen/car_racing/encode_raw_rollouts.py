@@ -32,6 +32,11 @@ def load_model(model_name):
   return getattr(saved_models, model_name)()
 
 
+@tf.function
+def encode(model, x):
+  return model.encode(x)
+
+
 def run_shard(model, ds, mirrored_strategy, shard_index, num_shards):
   ds = ds.shard(num_shards=num_shards, index=shard_index)
   ds = mirrored_strategy.experimental_distribute_dataset(ds)
@@ -44,7 +49,7 @@ def run_shard(model, ds, mirrored_strategy, shard_index, num_shards):
     for x in ds:
       # TODO(mmatena): This is tailored to VAEs. Handle non-VAE encoders.
       raw_observations = tf.reshape(x['observations'], (-1, 96, 96, 3))
-      observations = model.encode(raw_observations)
+      observations = encode(model, raw_observations)
       file_writer.write(
           structs.latent_image_rollout_to_tfrecord(
               obs_latents=observations.mean(),
@@ -53,7 +58,6 @@ def run_shard(model, ds, mirrored_strategy, shard_index, num_shards):
               obs_std_devs=observations.stddev()))
 
 
-@tf.function
 def run(ds, num_shards):
   mirrored_strategy = tf.distribute.MirroredStrategy()
   with mirrored_strategy.scope():

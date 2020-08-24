@@ -73,7 +73,7 @@ def run(ds, num_shards):
 
 def main(_):
   # ray.init()
-  ds = raw_rollouts.get_raw_rollouts_ds(process_observations=True, shuffle_files=False)
+  ds = raw_rollouts.get_raw_rollouts_ds(process_observations=True)
 
   # TODO: REMOVE, THIS IS JUST FOR INITIAL TESTING!!!!!!!!!!!!!!!!!!!!!
   ds = ds.take(8)

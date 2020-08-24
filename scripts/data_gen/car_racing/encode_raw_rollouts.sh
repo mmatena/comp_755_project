@@ -28,7 +28,7 @@ TIME="8:30:00"
 
 # gpu:
 # 4 GPU for 8 input shards: 80s
-# 8 GPU for 8 input shards: 370 sec
+# 8 GPU for 8 input shards: 83s sec
 
 
 

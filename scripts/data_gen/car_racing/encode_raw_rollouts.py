@@ -85,7 +85,8 @@ def encode(model, x):
 @ray.remote
 def run_shard(model_name, out_dir, out_name, num_gpu,
               outer_shard_index, num_outer_shards, sub_shard_index, num_sub_shards):
-  model = load_model(model_name)
+  with tf.device(f'/GPU:{sub_shard_index%num_gpu}'):
+    model = load_model(model_name)
   ds = get_dataset(outer_shard_index=outer_shard_index,
                    num_outer_shards=num_outer_shards,
                    sub_shard_index=sub_shard_index,

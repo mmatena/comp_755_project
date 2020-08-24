@@ -73,7 +73,7 @@ def main(_):
   ds = raw_rollouts.get_raw_rollouts_ds(process_observations=True)
 
   # TODO: REMOVE, THIS IS JUST FOR INITIAL TESTING!!!!!!!!!!!!!!!!!!!!!
-  ds = ds.take(128)
+  ds = ds.take(8)
 
   start = time.time()
 

@@ -26,6 +26,10 @@ flags.DEFINE_integer('num_sub_shards', None,
                      'A good goal is to strive for shards of size 100-200 MB.',
                      lower_bound=1)
 
+flags.DEFINE_integer('num_gpu', None,
+                     'Number of GPUs to use.',
+                     lower_bound=1)
+
 flags.DEFINE_string('out_dir', None, 'The directory to write the tfrecords to.')
 flags.DEFINE_string('out_name', None, 'Prefix to give the generated tfrecord files.')
 
@@ -35,6 +39,7 @@ flags.DEFINE_string('model', "raw_rollout_vae_32ld",
 flags.mark_flag_as_required('num_outer_shards')
 flags.mark_flag_as_required('outer_shard_index')
 flags.mark_flag_as_required('num_sub_shards')
+flags.mark_flag_as_required('num_gpu')
 flags.mark_flag_as_required('out_dir')
 flags.mark_flag_as_required('out_name')
 
@@ -78,9 +83,10 @@ def encode(model, x):
 
 
 @ray.remote
-def run_shard(model_name, out_dir, out_name,
+def run_shard(model_name, out_dir, out_name, num_gpu,
               outer_shard_index, num_outer_shards, sub_shard_index, num_sub_shards):
-  model = load_model(model_name)
+  with tf.device(f'/GPU:{sub_shard_index%num_gpu}'):
+    model = load_model(model_name)
   ds = get_dataset(outer_shard_index=outer_shard_index,
                    num_outer_shards=num_outer_shards,
                    sub_shard_index=sub_shard_index,
@@ -116,6 +122,7 @@ def main(_):
       run_shard.remote(model_name=FLAGS.model,
                        out_dir=FLAGS.out_dir,
                        out_name=FLAGS.out_name,
+                       num_gpu=FLAGS.num_gpu,
                        outer_shard_index=FLAGS.outer_shard_index,
                        num_outer_shards=FLAGS.num_outer_shards,
                        sub_shard_index=i,

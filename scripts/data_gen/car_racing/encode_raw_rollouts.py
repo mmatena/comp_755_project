@@ -58,8 +58,6 @@ def get_dataset(outer_shard_index, num_outer_shards, sub_shard_index, num_sub_sh
   files = misc.evenly_partition(files, num_outer_shards)[outer_shard_index]
   files = misc.evenly_partition(files, num_sub_shards)[sub_shard_index]
 
-  print("@@@", files)
-
   files = tf.data.Dataset.from_tensor_slices(files)
   ds = files.interleave(tf.data.TFRecordDataset,
                         num_parallel_calls=tf.data.experimental.AUTOTUNE,
@@ -81,7 +79,8 @@ def encode(model, x):
 @ray.remote
 def run_shard(model_name, out_dir, out_name,
               outer_shard_index, num_outer_shards, sub_shard_index, num_sub_shards):
-  model = load_model(model_name)
+  with tf.device(f"/GPU:{sub_shard_index%4}"):
+    model = load_model(model_name)
   ds = get_dataset(outer_shard_index=outer_shard_index,
                    num_outer_shards=num_outer_shards,
                    sub_shard_index=sub_shard_index,

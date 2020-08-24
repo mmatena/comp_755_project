@@ -22,9 +22,6 @@ flags.DEFINE_string('out_name', None, 'Prefix to give the generated tfrecord fil
 
 flags.DEFINE_string('model', "raw_rollout_vae_32ld",
                     'Name of model in `saved_models` to use.')
-flags.DEFINE_integer('batch_size', 8,
-                     'The number of rollouts in each batch.',
-                     lower_bound=1)
 
 flags.mark_flag_as_required('num_shards')
 flags.mark_flag_as_required('out_dir')
@@ -46,18 +43,14 @@ def run_shard(model, ds, mirrored_strategy, shard_index, num_shards):
   with tf.io.TFRecordWriter(filepath) as file_writer:
     for x in ds:
       # TODO(mmatena): This is tailored to VAEs. Handle non-VAE encoders.
-      raw_observations = tf.reshape(x['observations'], (FLAGS.batch_size, -1, 96, 96, 3))
+      raw_observations = tf.reshape(x['observations'], (-1, 96, 96, 3))
       observations = model.encode(raw_observations)
-      observations_mean = observations.mean()
-      observations_std_dev = observations.stddev()
-
-      for k in range(FLAGS.batch_size):
-        file_writer.write(
-            structs.latent_image_rollout_to_tfrecord(
-                obs_latents=observations_mean[k],
-                actions=x['actions'][k],
-                rewards=x['rewards'][k],
-                obs_std_devs=observations_std_dev[k]))
+      file_writer.write(
+          structs.latent_image_rollout_to_tfrecord(
+              obs_latents=observations.mean(),
+              actions=x['actions'],
+              rewards=x['rewards'],
+              obs_std_devs=observations.stddev()))
 
 
 @tf.function
@@ -73,7 +66,6 @@ def run(ds, num_shards):
 
 def main(_):
   ds = raw_rollouts.get_raw_rollouts_ds(process_observations=True)
-  ds = ds.batch(FLAGS.batch_size)
 
   # TODO: REMOVE, THIS IS JUST FOR INITIAL TESTING!!!!!!!!!!!!!!!!!!!!!
   ds = ds.take(128)

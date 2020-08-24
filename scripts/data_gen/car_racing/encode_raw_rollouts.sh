@@ -13,7 +13,6 @@ NUM_SHARDS=1
 OUT_DIR=/pine/scr/m/m/mmatena/test_encoded_rollouts
 OUT_NAME=encoded_rollouts
 MODEL="raw_rollout_vae_32ld"
-BATCH_SIZE=2
 
 NUM_GPUS=1
 NUM_CORES=12
@@ -38,8 +37,7 @@ run_python() {
     --num_shards=$NUM_SHARDS \
     --out_dir=$OUT_DIR \
     --out_name=$OUT_NAME \
-    --model=$MODEL \
-    --batch_size=$BATCH_SIZE
+    --model=$MODEL
 }
 
 

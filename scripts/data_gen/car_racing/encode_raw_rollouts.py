@@ -40,8 +40,7 @@ flags.mark_flag_as_required('out_name')
 
 
 def get_dataset_files():
-  # files = tf.io.matching_files(raw_rollouts.TFRECORDS_PATTERN).numpy().aslist()
-  files = []
+  files = tf.io.matching_files(raw_rollouts.TFRECORDS_PATTERN).numpy().aslist()
 
 
 
@@ -55,26 +54,24 @@ def get_dataset_files():
 
 
 def get_dataset(outer_shard_index, num_outer_shards, sub_shard_index, num_sub_shards):
-  return None
-  # files = get_dataset_files()
-  # files = misc.evenly_partition(files, num_outer_shards)[outer_shard_index]
-  # files = misc.evenly_partition(files, num_sub_shards)[sub_shard_index]
+  files = get_dataset_files()
+  files = misc.evenly_partition(files, num_outer_shards)[outer_shard_index]
+  files = misc.evenly_partition(files, num_sub_shards)[sub_shard_index]
 
-  # files = tf.data.Dataset.from_tensor_slices(files)
-  # ds = files.interleave(tf.data.TFRecordDataset,
-  #                       num_parallel_calls=tf.data.experimental.AUTOTUNE,
-  #                       deterministic=False)
-  # ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
-  # return ds.map(functools.partial(raw_rollouts.parse_fn, process_observations=True),
-  #               num_parallel_calls=tf.data.experimental.AUTOTUNE)
+  files = tf.data.Dataset.from_tensor_slices(files)
+  ds = files.interleave(tf.data.TFRecordDataset,
+                        num_parallel_calls=tf.data.experimental.AUTOTUNE,
+                        deterministic=False)
+  ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
+  return ds.map(functools.partial(raw_rollouts.parse_fn, process_observations=True),
+                num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
 
 def load_model(model_name):
-  return None
-  # return getattr(saved_models, model_name)()
+  return getattr(saved_models, model_name)()
 
 
-@tf.function
+# @tf.function
 def encode(model, x):
   posterior = model.encode(x)
   return posterior.mean(), posterior.stddev()

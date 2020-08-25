@@ -18,7 +18,7 @@ flags.DEFINE_integer('num_samples', 1,
 def main(_):
   vae = saved_models.raw_rollout_vae_32ld()
   z = vae.sample_unconditionally(FLAGS.num_samples)
-  z = tf.cast(255.0 * z, tf.unit8)
+  z = tf.cast(255.0 * z, tf.uint8)
   serial = tf.io.serialize_tensor(z)
   print(serial.numpy())
 

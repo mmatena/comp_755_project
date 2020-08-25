@@ -16,8 +16,7 @@ flags.DEFINE_integer('num_samples', 1,
                      lower_bound=1)
 
 flags.DEFINE_bool('unconditional', True,
-                  'The number of times to sample from the VAE.',
-                  lower_bound=1)
+                  'Whether to condition on real images or not.')
 
 
 def float_to_uint(x):

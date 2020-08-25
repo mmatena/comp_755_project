@@ -29,7 +29,8 @@ def main(_):
     images = vae.sample_unconditionally(FLAGS.num_samples)
   else:
     inputs = [
-        x for x in itertools.islice(raw_rollouts.random_rollout_observations(), FLAGS.num_samples)]
+        x['observation']
+        for x in itertools.islice(raw_rollouts.random_rollout_observations(), FLAGS.num_samples)]
     inputs = tf.stack(inputs, axis=0)
     # TODO(mmatena): Compare .sample() vs .mean().
     z = vae.encode(inputs).mean()

@@ -82,7 +82,7 @@ launch() {
     --qos=gpu_access \
     --wrap="\"$(run_sh)\"")
   echo $CMD
-  eval $CMD
+  exec $CMD
 }
 
 

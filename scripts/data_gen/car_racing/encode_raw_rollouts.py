@@ -87,8 +87,8 @@ def encode_map_fn(x, model):
   mean, std_dev = encode(model, raw_observations)
   return {
       "obs_latents": mean,
-      "actions": tf.concat([x['actions'][0], x['actions'][1]], axis=0),
-      "rewards": tf.concat([x['rewards'][0], x['rewards'][1]], axis=0),
+      "actions": tf.reshape(x['actions'], (-1, 4)),
+      "rewards": tf.reshape(x['rewards'], (-1, 1)),
       "obs_std_devs": std_dev
   }
 

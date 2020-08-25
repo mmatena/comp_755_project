@@ -2,9 +2,6 @@
 
 Most of the encoding was done by the VAE at
 `rl755.models.car_racing.saved_models.raw_rollout_vae_32ld`.
-
-# TODO(mmatena): A lot of the code is very similar to the code in `raw_rollouts`.
-# Refactor to get rid of this code duplication.
 """
 import functools
 
@@ -65,31 +62,6 @@ def random_rollout_slices(slice_size):
                 num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
 
-def random_rollout_observations(obs_per_rollout=100):
-  # TODO(mmatena): Add docs. Mention that obs_per_rollout is because ...
-  # TODO(mmatena): Mention that the we are taking the mean of the posterior as the latent.
-  def random_obs(x):
-    rollout_length = tf.shape(x['observations'])[0]
-    index = tf.random.uniform([obs_per_rollout], 0, rollout_length, dtype=tf.int32)
-    observation = tf.gather(x['observations'], index, axis=0)
-    return {"observation": observation}
-
-  def set_shape(x):
-    return {"observation": tf.reshape(x['observation'], (96, 96, 3))}
-
-  ds = get_rollouts_ds()
-  ds = ds.map(random_obs, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-  ds = ds.flat_map(tf.data.Dataset.from_tensor_slices)
-  ds = ds.map(set_shape, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-
-
-
 for x in random_rollout_slices(slice_size=13):
-  print(x)
-  break
-
-print("\n\n\n\n\n")
-
-for x in random_rollout_observations():
   print(x)
   break

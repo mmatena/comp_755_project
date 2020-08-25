@@ -9,8 +9,8 @@
 PROJECT_DIR=~/projects/comp_755_project
 
 # 30 total shards  # Based on some rough calculations, this produces about 100MB per shard.
-NUM_OUTER_SHARDS=4
-NUM_SUBSHARDS=4
+NUM_OUTER_SHARDS=1
+NUM_SUBSHARDS=16
 BASE_OUTER_SHARD_INDEX=0
 # OUT_DIR=/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/encoded_rollouts
 OUT_DIR=/pine/scr/m/m/mmatena/test_encoded_rollouts2
@@ -64,8 +64,13 @@ run_python_single() {
 }
 
 run_python() {
+  # echo "echo ''"
+  #   for ((i=0;i<$NUM_GPUS;i++));
+  #     do echo " & $(run_python_single $i) ";
+  #   done
+  #   echo " && fg"
   echo "echo ''"
-    for ((i=0;i<$NUM_GPUS;i++));
+    for ((i=0;i<1;i++));
       do echo " & $(run_python_single $i) ";
     done
     echo " && fg"

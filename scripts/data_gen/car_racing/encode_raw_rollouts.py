@@ -58,7 +58,6 @@ def get_dataset(outer_shard_index, num_outer_shards, num_sub_shards):
   ds = files.interleave(tf.data.TFRecordDataset,
                         num_parallel_calls=tf.data.experimental.AUTOTUNE,
                         deterministic=False)
-  ds = ds.prefetch(1)
   ds = ds.map(functools.partial(raw_rollouts.parse_fn, process_observations=True),
               num_parallel_calls=tf.data.experimental.AUTOTUNE)
   return ds
@@ -88,6 +87,7 @@ def encode_map_fn(x, model):
 
 def run_shard(model, ds, out_dir, out_name,
               outer_shard_index, num_outer_shards, sub_shard_index, num_sub_shards):
+  ds = ds.prefetch(1)
   ds = ds.map(functools.partial(encode_map_fn, model=model),
               num_parallel_calls=tf.data.experimental.AUTOTUNE)
 

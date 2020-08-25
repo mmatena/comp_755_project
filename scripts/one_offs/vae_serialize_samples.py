@@ -36,7 +36,7 @@ def main(_):
     z = vae.encode(inputs).mean()
     images = vae.decode(z)
 
-    print(tf.io.serialize_tensor(inputs).numpy())
+    print(tf.io.serialize_tensor(float_to_uint(inputs)).numpy())
     for _ in range(10):
       print("_")
 

@@ -63,9 +63,9 @@ run_singularity() {
 }
 
 run_sh() {
-  echo  for ((GPU_INDEX=0;GPU_INDEX<=$NUM_GPUS;GPU_INDEX++)); \
-          do $(run_singularity); \
-        done
+  echo  "for ((GPU_INDEX=0;GPU_INDEX<=$NUM_GPUS;GPU_INDEX++)); \
+            do $(run_singularity); \
+          done"
 }
 
 launch() {

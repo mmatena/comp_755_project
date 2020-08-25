@@ -111,19 +111,19 @@ def main(_):
   with tf.device(f"/GPU:{FLAGS.gpu_index}"):
     model = load_model(FLAGS.model)
 
-  start = time.time()
+    start = time.time()
 
-  for i in range(FLAGS.num_sub_shards):
-    run_shard(model=model,
-              out_dir=FLAGS.out_dir,
-              out_name=FLAGS.out_name,
-              outer_shard_index=FLAGS.outer_shard_index,
-              num_outer_shards=FLAGS.num_outer_shards,
-              sub_shard_index=i,
-              num_sub_shards=FLAGS.num_sub_shards)
+    for i in range(FLAGS.num_sub_shards):
+      run_shard(model=model,
+                out_dir=FLAGS.out_dir,
+                out_name=FLAGS.out_name,
+                outer_shard_index=FLAGS.outer_shard_index,
+                num_outer_shards=FLAGS.num_outer_shards,
+                sub_shard_index=i,
+                num_sub_shards=FLAGS.num_sub_shards)
 
-  end = time.time()
-  print("Took", end - start, "seconds to run.")
+    end = time.time()
+    print("Took", end - start, "seconds to run.")
 
 
 if __name__ == '__main__':

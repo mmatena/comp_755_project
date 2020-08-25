@@ -81,6 +81,7 @@ launch() {
     --gres=gpu:${NUM_GPUS} \
     --qos=gpu_access \
     --wrap="\"$(run_sh)\"")
+  echo $CMD
   eval $CMD
 }
 

@@ -15,7 +15,7 @@ def slice_example(x, slice_size):
   # TODO(mmatena): Add docs.
   # TODO(mmatena): Handle slice_sizes biggers than the rollout length.
   # Note that we assume that all values have the same first dimension.
-  rollout_length = tf.shape(x.keys()[0])[0]
+  rollout_length = tf.shape(list(x.keys())[0])[0]
   slice_start = tf.random.uniform([], 0, rollout_length - slice_size, dtype=tf.int32)
   x = {k: v[slice_start:slice_start + slice_size] for k, v in x.items()}
   return x

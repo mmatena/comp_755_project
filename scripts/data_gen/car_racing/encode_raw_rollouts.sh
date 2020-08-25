@@ -10,14 +10,14 @@ PROJECT_DIR=~/projects/comp_755_project
 
 # 30 total shards  # Based on some rough calculations, this produces about 100MB per shard.
 NUM_OUTER_SHARDS=4
-NUM_SUBSHARDS=1
+NUM_SUBSHARDS=4
 BASE_OUTER_SHARD_INDEX=0
 # OUT_DIR=/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/encoded_rollouts
 OUT_DIR=/pine/scr/m/m/mmatena/test_encoded_rollouts2
 OUT_NAME=encoded_rollouts
 MODEL="raw_rollout_vae_32ld"
 
-NUM_GPUS=2
+NUM_GPUS=4
 NUM_CORES=12
 # Needs high memory due as full rollouts are large.
 MEMORY=30g

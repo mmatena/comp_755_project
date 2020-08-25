@@ -46,7 +46,7 @@ module add tensorflow_py3/2.1.0
 
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 
-run_python() {
+run_python_single() {
   echo "python $PROJECT_DIR/scripts/data_gen/car_racing/encode_raw_rollouts.py \
       --num_outer_shards=$NUM_OUTER_SHARDS \
       --outer_shard_index=\$(($BASE_OUTER_SHARD_INDEX + \$GPU_INDEX)) \
@@ -57,16 +57,16 @@ run_python() {
       --model=$MODEL"
 }
 
+run_python() {
+  echo  "for ((GPU_INDEX=0;GPU_INDEX<=$NUM_GPUS;GPU_INDEX++)); \
+            do $(run_python_single); \
+          done"
+}
 
 run_singularity() {
   echo singularity exec --nv -B /pine -B /proj $SIMG_PATH/$SIMG_NAME bash -c "\\\"$(run_python)\\\""
 }
 
-run_sh() {
-  echo  "for ((GPU_INDEX=0;GPU_INDEX<=$NUM_GPUS;GPU_INDEX++)); \
-            do $(run_singularity); \
-          done"
-}
 
 launch() {
   # Not too sure why I have to do it like this, but just running the command
@@ -80,11 +80,31 @@ launch() {
     --partition=volta-gpu \
     --gres=gpu:${NUM_GPUS} \
     --qos=gpu_access \
-    --wrap="\"$(run_sh)\"")
+    --wrap="\"$(run_singularity)\"")
   echo $CMD
-  exec $CMD
+  eval $CMD
 }
 
+
+# launch() {
+#   TMP_FILE=$(mktemp)
+#   echo $(run_sh) > $TMP_FILE
+
+#   # Not too sure why I have to do it like this, but just running the command
+#   # causes it fail to launch.
+#   CMD=$(echo sbatch \
+#     --ntasks=${NUM_CORES} \
+#     --error="$OUT_DIR/logs-%j.err" \
+#     --output="$OUT_DIR/logs-%j.out" \
+#     --time=${TIME} \
+#     --mem=${MEMORY} \
+#     --partition=volta-gpu \
+#     --gres=gpu:${NUM_GPUS} \
+#     --qos=gpu_access \
+#     $TMP_FILE)
+#   echo $CMD
+#   exec $CMD
+# }
 
 # Make the model directory if it does not exist.
 [ -d $OUT_DIR ] || mkdir $OUT_DIR

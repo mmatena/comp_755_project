@@ -106,7 +106,7 @@ def run_shard(model, ds, out_dir, out_name,
 def main(_):
   gpus = tf.config.experimental.list_physical_devices('GPU')
   tf.config.experimental.set_visible_devices(gpus[FLAGS.gpu_index], 'GPU')
-  tf.config.experimental.set_memory_growth(gpus[FLAGS.gpu_index][0], True)
+  tf.config.experimental.set_memory_growth(gpus[FLAGS.gpu_index], True)
 
   model = load_model(FLAGS.model)
 

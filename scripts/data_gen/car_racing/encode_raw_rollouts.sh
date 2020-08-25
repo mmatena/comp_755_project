@@ -27,7 +27,7 @@ TIME="8:30:00"
 
 # volta-gpu:
 # 2 GPU, post prefetch of 1: 500s
-# 2 GPU, post prefetch of 8:
+# 2 GPU, post prefetch of 8: 490s
 
 
 # gpu:

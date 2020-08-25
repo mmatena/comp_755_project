@@ -60,8 +60,9 @@ run_python_single() {
 
 run_python() {
     for ((i=0;i<=$NUM_GPUS;i++));
-      do echo $(run_python_single $i) "\\";
+      do echo $(run_python_single $i) "; \\";
     done
+    echo " "
 }
 
 run_singularity() {

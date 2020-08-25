@@ -61,6 +61,10 @@ class Vae(tf.keras.Model):
     logits = self.decoder(z)
     return logits
 
+  def sample_unconditionally(self, num_samples=1):
+    z = self.prior.sample(num_samples)
+    return self.decode(z)
+
   def get_losses(self, x):
     posterior = self.encode(x)
     reconstruction = self.decode(posterior.sample())

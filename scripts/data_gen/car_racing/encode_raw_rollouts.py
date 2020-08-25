@@ -95,9 +95,10 @@ def encode_map_fn(x, model):
 
 def run_shard(model, ds, out_dir, out_name,
               outer_shard_index, num_outer_shards, sub_shard_index, num_sub_shards):
+
+  ds = ds.batch(2)
   ds = ds.map(functools.partial(encode_map_fn, model=model),
               num_parallel_calls=tf.data.experimental.AUTOTUNE)
-  ds = ds.batch(2)
 
   num_total_shards = num_outer_shards * num_sub_shards
   total_shard_index = num_sub_shards * outer_shard_index + sub_shard_index

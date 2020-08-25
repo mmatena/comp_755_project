@@ -56,12 +56,12 @@ def get_rollouts_ds():
 
 
 def random_rollout_slices(slice_size):
-  # TODO(mmatena): Add docs.
+  """Returns a tf.data.Dataset where items are random windows of size `slice_size`.
+
+  See the documentation for `get_rollouts_ds()` for more information about what this
+  function returns. The items in the dataset will have the same structure except the
+  size of their first dimension will be `slice_size`.
+  """
   ds = get_rollouts_ds()
   return ds.map(functools.partial(processing.slice_example, slice_size=slice_size),
                 num_parallel_calls=tf.data.experimental.AUTOTUNE)
-
-
-for x in random_rollout_slices(slice_size=13):
-  print(x)
-  break

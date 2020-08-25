@@ -74,6 +74,7 @@ def load_model(model_name):
   return getattr(saved_models, model_name)()
 
 
+@tf.function
 def encode(model, x):
   posterior = model.encode(x)
   return posterior.mean(), posterior.stddev()
@@ -85,7 +86,6 @@ def run_shard(model, out_dir, out_name,
                    num_outer_shards=num_outer_shards,
                    sub_shard_index=sub_shard_index,
                    num_sub_shards=num_sub_shards)
-  enc = tf.function(encode)
 
   num_total_shards = num_outer_shards * num_sub_shards
   total_shard_index = num_sub_shards * outer_shard_index + sub_shard_index
@@ -98,7 +98,7 @@ def run_shard(model, out_dir, out_name,
     for x in ds:
       # TODO(mmatena): This is tailored to VAEs. Handle non-VAE encoders.
       raw_observations = tf.reshape(x['observations'], (-1, 96, 96, 3))
-      mean, std_dev = enc(model, raw_observations)
+      mean, std_dev = encode(model, raw_observations)
       file_writer.write(
           structs.latent_image_rollout_to_tfrecord(
               obs_latents=mean,
@@ -108,22 +108,24 @@ def run_shard(model, out_dir, out_name,
 
 
 def main(_):
-  with tf.device(f"/GPU:{FLAGS.gpu_index}"):
-    model = load_model(FLAGS.model)
+  gpus = tf.config.experimental.list_physical_devices('GPU')
+  tf.config.experimental.set_visible_devices(gpus[FLAGS.gpu_index], 'GPU')
 
-    start = time.time()
+  model = load_model(FLAGS.model)
 
-    for i in range(FLAGS.num_sub_shards):
-      run_shard(model=model,
-                out_dir=FLAGS.out_dir,
-                out_name=FLAGS.out_name,
-                outer_shard_index=FLAGS.outer_shard_index,
-                num_outer_shards=FLAGS.num_outer_shards,
-                sub_shard_index=i,
-                num_sub_shards=FLAGS.num_sub_shards)
+  start = time.time()
 
-    end = time.time()
-    print("Took", end - start, "seconds to run.")
+  for i in range(FLAGS.num_sub_shards):
+    run_shard(model=model,
+              out_dir=FLAGS.out_dir,
+              out_name=FLAGS.out_name,
+              outer_shard_index=FLAGS.outer_shard_index,
+              num_outer_shards=FLAGS.num_outer_shards,
+              sub_shard_index=i,
+              num_sub_shards=FLAGS.num_sub_shards)
+
+  end = time.time()
+  print("Took", end - start, "seconds to run.")
 
 
 if __name__ == '__main__':

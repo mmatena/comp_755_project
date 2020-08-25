@@ -44,13 +44,6 @@ flags.mark_flag_as_required('out_name')
 
 def get_dataset_files():
   files = tf.io.matching_files(raw_rollouts.TFRECORDS_PATTERN).numpy().tolist()
-
-
-
-  # TODO: REMOVE, THIS IS JUST FOR INITIAL TESTING!!!!!!!!!!!!!!!!!!!!!
-  files = files[:32]
-
-
   # Ensure a consistent order so that each file is processed exactly once.
   files.sort()
   return files
@@ -112,9 +105,9 @@ def run_shard(model, ds, out_dir, out_name,
 
 
 def main(_):
-  # gpus = tf.config.experimental.list_physical_devices('GPU')
-  # tf.config.experimental.set_visible_devices(gpus[FLAGS.gpu_index], 'GPU')
-  # tf.config.experimental.set_memory_growth(gpus[FLAGS.gpu_index], True)
+  gpus = tf.config.experimental.list_physical_devices('GPU')
+  tf.config.experimental.set_visible_devices(gpus[FLAGS.gpu_index], 'GPU')
+  tf.config.experimental.set_memory_growth(gpus[FLAGS.gpu_index], True)
 
   model = load_model(FLAGS.model)
 

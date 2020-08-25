@@ -9,11 +9,10 @@
 PROJECT_DIR=~/projects/comp_755_project
 
 # 30 total shards  # Based on some rough calculations, this produces about 100MB per shard.
-NUM_OUTER_SHARDS=1
-NUM_SUBSHARDS=16
+NUM_OUTER_SHARDS=16
+NUM_SUBSHARDS=19
 BASE_OUTER_SHARD_INDEX=0
-# OUT_DIR=/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/encoded_rollouts
-OUT_DIR=/pine/scr/m/m/mmatena/test_encoded_rollouts2
+OUT_DIR=/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/encoded_rollouts
 OUT_NAME=encoded_rollouts
 MODEL="raw_rollout_vae_32ld"
 
@@ -21,26 +20,8 @@ NUM_GPUS=4
 NUM_CORES=12
 # Needs high memory due as full rollouts are large.
 MEMORY=30g
-TIME="8:30:00"
+TIME="23:30:00"
 #############################################################
-
-
-# volta-gpu:
-# 2 GPU, post prefetch of 1: 500s
-# 2 GPU, post prefetch of 8: 490s
-# 2 GPU, pre prefetch of 8: 490s
-# 2 GPU, final prefetch of 8: 480s
-
-
-# gpu:
-# 1 GPU for 8 input shards: 80s
-# 4 GPU for 8 input shards: 80s
-# 8 GPU for 8 input shards: 83s sec
-
-# 1 GPU for 64 input shards: 
-# 8 GPU for 64 input shards: 
-
-
 
 unset OMP_NUM_THREADS
 SIMG_PATH=/nas/longleaf/apps/tensorflow_py3/2.1.0/simg
@@ -64,13 +45,8 @@ run_python_single() {
 }
 
 run_python() {
-  # echo "echo ''"
-  #   for ((i=0;i<$NUM_GPUS;i++));
-  #     do echo " & $(run_python_single $i) ";
-  #   done
-  #   echo " && fg"
   echo "echo ''"
-    for ((i=0;i<1;i++));
+    for ((i=0;i<$NUM_GPUS;i++));
       do echo " & $(run_python_single $i) ";
     done
     echo " && fg"
@@ -97,27 +73,6 @@ launch() {
   echo $CMD
   eval $CMD
 }
-
-
-# launch() {
-#   TMP_FILE=$(mktemp)
-#   echo $(run_sh) > $TMP_FILE
-
-#   # Not too sure why I have to do it like this, but just running the command
-#   # causes it fail to launch.
-#   CMD=$(echo sbatch \
-#     --ntasks=${NUM_CORES} \
-#     --error="$OUT_DIR/logs-%j.err" \
-#     --output="$OUT_DIR/logs-%j.out" \
-#     --time=${TIME} \
-#     --mem=${MEMORY} \
-#     --partition=volta-gpu \
-#     --gres=gpu:${NUM_GPUS} \
-#     --qos=gpu_access \
-#     $TMP_FILE)
-#   echo $CMD
-#   exec $CMD
-# }
 
 # Make the model directory if it does not exist.
 [ -d $OUT_DIR ] || mkdir $OUT_DIR

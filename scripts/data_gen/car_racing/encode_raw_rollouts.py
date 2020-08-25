@@ -65,7 +65,7 @@ def get_dataset(outer_shard_index, num_outer_shards, sub_shard_index, num_sub_sh
   ds = files.interleave(tf.data.TFRecordDataset,
                         num_parallel_calls=tf.data.experimental.AUTOTUNE,
                         deterministic=False)
-  ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
+  # ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
   return ds.map(functools.partial(raw_rollouts.parse_fn, process_observations=True),
                 num_parallel_calls=tf.data.experimental.AUTOTUNE)
 

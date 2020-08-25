@@ -2,6 +2,8 @@
 import functools
 import tensorflow as tf
 
+from rl755.data.car_racing import processing
+
 TFRECORDS_PATTERN = "/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/" \
                     "raw_rollouts/raw_rollouts.tfrecord*"
 
@@ -56,20 +58,18 @@ def random_rollout_slices(slice_size):
   # TODO(mmatena): Add docs.
   # TODO(mmatena): Handle slice_sizes biggers than the rollout length.
 
-  def slice_example(x):
+  def map_fn(x):
     # Note that we assume that 'observations', 'rewards', and 'actions' are
     # all the same length.
-    rollout_length = tf.shape(x['observations'])[0]
-    slice_start = tf.random.uniform([], 0, rollout_length - slice_size, dtype=tf.int32)
-    x = {k: v[slice_start:slice_start + slice_size] for k, v in x.items()}
+    x = processing.raw_rollout_vae_32ld(x, slice_size=slice_size)
     x['observations'] = _process_observations(x['observations'])
     return x
 
   ds = get_raw_rollouts_ds(process_observations=False)
-  return ds.map(slice_example, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+  return ds.map(map_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
 
-def random_rollout_observations(obs_per_rollout=100, ):
+def random_rollout_observations(obs_per_rollout=100):
   # TODO(mmatena): Add docs. Mention that obs_per_rollout is because ...
   def random_obs(x):
     rollout_length = tf.shape(x['observations'])[0]
@@ -85,13 +85,4 @@ def random_rollout_observations(obs_per_rollout=100, ):
   ds = ds.map(random_obs, num_parallel_calls=tf.data.experimental.AUTOTUNE)
   ds = ds.flat_map(tf.data.Dataset.from_tensor_slices)
   ds = ds.map(set_shape, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-  return ds
-
-
-def standard_dataset_prep(ds, batch_size, repeat=True, shuffle_buffer_size=1000):
-  # TODO(mmatena): Add docs.
-  ds = ds.shuffle(buffer_size=shuffle_buffer_size)
-  if repeat:
-    ds = ds.repeat()
-  ds = ds.batch(batch_size, drop_remainder=True)
   return ds

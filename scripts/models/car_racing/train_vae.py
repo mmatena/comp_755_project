@@ -5,6 +5,7 @@ from absl import app
 from absl import flags
 import tensorflow as tf
 
+from rl755.data.car_racing import processing
 from rl755.data.car_racing import raw_rollouts
 from rl755.models.car_racing.vae import Vae
 
@@ -38,7 +39,7 @@ def main(_):
   file_writer.set_as_default()
 
   ds = raw_rollouts.random_rollout_observations(obs_per_rollout=100)
-  ds = raw_rollouts.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
+  ds = processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
 
   model_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
       filepath=os.path.join(model_dir, "model.hdf5"),

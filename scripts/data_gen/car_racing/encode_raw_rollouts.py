@@ -87,8 +87,8 @@ def encode_map_fn(x, model):
   mean, std_dev = encode(model, raw_observations)
   return {
       "obs_latents": mean,
-      "actions": x['actions'],
-      "rewards": x['rewards'],
+      "actions": tf.concat([x['actions'][0], x['actions'][1]], axis=0),
+      "rewards": tf.concat([x['rewards'][0], x['rewards'][1]], axis=0),
       "obs_std_devs": std_dev
   }
 
@@ -97,6 +97,7 @@ def run_shard(model, ds, out_dir, out_name,
               outer_shard_index, num_outer_shards, sub_shard_index, num_sub_shards):
   ds = ds.map(functools.partial(encode_map_fn, model=model),
               num_parallel_calls=tf.data.experimental.AUTOTUNE)
+  ds = ds.batch(2)
 
   num_total_shards = num_outer_shards * num_sub_shards
   total_shard_index = num_sub_shards * outer_shard_index + sub_shard_index
@@ -109,29 +110,6 @@ def run_shard(model, ds, out_dir, out_name,
     for x in ds:
       file_writer.write(
           structs.latent_image_rollout_to_tfrecord(**x).SerializeToString())
-# def run_shard(model, ds, out_dir, out_name,
-#               outer_shard_index, num_outer_shards, sub_shard_index, num_sub_shards):
-#   ds = ds.prefetch(8)
-#   ds = ds.map(lambda x: )
-
-#   num_total_shards = num_outer_shards * num_sub_shards
-#   total_shard_index = num_sub_shards * outer_shard_index + sub_shard_index
-
-#   filepath = os.path.join(out_dir,
-#                           misc.sharded_filename(out_name,
-#                                                 shard_index=total_shard_index,
-#                                                 num_shards=num_total_shards))
-#   with tf.io.TFRecordWriter(filepath) as file_writer:
-#     for x in ds:
-#       # TODO(mmatena): This is tailored to VAEs. Handle non-VAE encoders.
-#       raw_observations = tf.reshape(x['observations'], (-1, 96, 96, 3))
-#       mean, std_dev = encode(model, raw_observations)
-#       file_writer.write(
-#           structs.latent_image_rollout_to_tfrecord(
-#               obs_latents=mean,
-#               actions=x['actions'],
-#               rewards=x['rewards'],
-#               obs_std_devs=std_dev).SerializeToString())
 
 
 def main(_):
@@ -149,7 +127,7 @@ def main(_):
 
   for i in range(FLAGS.num_sub_shards):
     run_shard(model=model,
-              ds=ds,#ds.shard(num_shards=FLAGS.num_sub_shards, index=i),
+              ds=ds.shard(num_shards=FLAGS.num_sub_shards, index=i),
               out_dir=FLAGS.out_dir,
               out_name=FLAGS.out_name,
               outer_shard_index=FLAGS.outer_shard_index,

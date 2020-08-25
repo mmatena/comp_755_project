@@ -10,7 +10,7 @@ PROJECT_DIR=~/projects/comp_755_project
 
 # 30 total shards  # Based on some rough calculations, this produces about 100MB per shard.
 NUM_OUTER_SHARDS=4
-NUM_SUBSHARDS=4
+NUM_SUBSHARDS=1
 BASE_OUTER_SHARD_INDEX=0
 # OUT_DIR=/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/encoded_rollouts
 OUT_DIR=/pine/scr/m/m/mmatena/test_encoded_rollouts2
@@ -29,7 +29,7 @@ TIME="8:30:00"
 # 2 GPU, post prefetch of 1: 500s
 # 2 GPU, post prefetch of 8: 490s
 # 2 GPU, pre prefetch of 8: 490s
-# 2 GPU, final prefetch of 8: 490s
+# 2 GPU, final prefetch of 8: 480s
 
 
 # gpu:

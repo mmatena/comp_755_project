@@ -82,9 +82,22 @@ def encode(model, x):
   return posterior.mean(), posterior.stddev()
 
 
+def encode_map_fn(model, x):
+  # TODO(mmatena): This is tailored to VAEs. Handle non-VAE encoders.
+  raw_observations = tf.reshape(x['observations'], (-1, 96, 96, 3))
+  mean, std_dev = encode(model, raw_observations)
+  return {
+      "obs_latents": mean,
+      "actions": x['actions'],
+      "rewards": x['rewards'],
+      "obs_std_devs": std_dev
+  }
+
+
 def run_shard(model, ds, out_dir, out_name,
               outer_shard_index, num_outer_shards, sub_shard_index, num_sub_shards):
-  ds = ds.prefetch(8)
+  ds = ds.map(functools.partial(encode_map_fn, model=model))
+  ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
 
   num_total_shards = num_outer_shards * num_sub_shards
   total_shard_index = num_sub_shards * outer_shard_index + sub_shard_index
@@ -95,15 +108,31 @@ def run_shard(model, ds, out_dir, out_name,
                                                 num_shards=num_total_shards))
   with tf.io.TFRecordWriter(filepath) as file_writer:
     for x in ds:
-      # TODO(mmatena): This is tailored to VAEs. Handle non-VAE encoders.
-      raw_observations = tf.reshape(x['observations'], (-1, 96, 96, 3))
-      mean, std_dev = encode(model, raw_observations)
       file_writer.write(
-          structs.latent_image_rollout_to_tfrecord(
-              obs_latents=mean,
-              actions=x['actions'],
-              rewards=x['rewards'],
-              obs_std_devs=std_dev).SerializeToString())
+          structs.latent_image_rollout_to_tfrecord(**x).SerializeToString())
+# def run_shard(model, ds, out_dir, out_name,
+#               outer_shard_index, num_outer_shards, sub_shard_index, num_sub_shards):
+#   ds = ds.prefetch(8)
+#   ds = ds.map(lambda x: )
+
+#   num_total_shards = num_outer_shards * num_sub_shards
+#   total_shard_index = num_sub_shards * outer_shard_index + sub_shard_index
+
+#   filepath = os.path.join(out_dir,
+#                           misc.sharded_filename(out_name,
+#                                                 shard_index=total_shard_index,
+#                                                 num_shards=num_total_shards))
+#   with tf.io.TFRecordWriter(filepath) as file_writer:
+#     for x in ds:
+#       # TODO(mmatena): This is tailored to VAEs. Handle non-VAE encoders.
+#       raw_observations = tf.reshape(x['observations'], (-1, 96, 96, 3))
+#       mean, std_dev = encode(model, raw_observations)
+#       file_writer.write(
+#           structs.latent_image_rollout_to_tfrecord(
+#               obs_latents=mean,
+#               actions=x['actions'],
+#               rewards=x['rewards'],
+#               obs_std_devs=std_dev).SerializeToString())
 
 
 def main(_):

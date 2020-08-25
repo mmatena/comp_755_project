@@ -2,7 +2,7 @@
 import tensorflow as tf
 
 TFRECORDS_PATTERN = "/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/" \
-                    "encoded_rollouts/encoded_rollouts.tfrecord*"
+                    "encoded_rollouts/encoded_rollouts*"
 
 
 def parse_fn(x):

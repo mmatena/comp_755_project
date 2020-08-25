@@ -82,7 +82,7 @@ def encode(model, x):
   return posterior.mean(), posterior.stddev()
 
 
-def encode_map_fn(model, x):
+def encode_map_fn(x, model):
   # TODO(mmatena): This is tailored to VAEs. Handle non-VAE encoders.
   raw_observations = tf.reshape(x['observations'], (-1, 96, 96, 3))
   mean, std_dev = encode(model, raw_observations)
@@ -96,7 +96,8 @@ def encode_map_fn(model, x):
 
 def run_shard(model, ds, out_dir, out_name,
               outer_shard_index, num_outer_shards, sub_shard_index, num_sub_shards):
-  ds = ds.map(functools.partial(encode_map_fn, model=model))
+  ds = ds.map(functools.partial(encode_map_fn, model=model),
+              num_parallel_calls=tf.data.experimental.AUTOTUNE)
   ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
 
   num_total_shards = num_outer_shards * num_sub_shards

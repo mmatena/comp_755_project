@@ -56,10 +56,10 @@ def get_dataset_files():
   return files
 
 
-def get_dataset(outer_shard_index, num_outer_shards, sub_shard_index, num_sub_shards):
+def get_dataset(outer_shard_index, num_outer_shards, num_sub_shards):
   files = get_dataset_files()
   files = misc.evenly_partition(files, num_outer_shards)[outer_shard_index]
-  files = misc.evenly_partition(files, num_sub_shards)[sub_shard_index]
+  # files = misc.evenly_partition(files, num_sub_shards)[sub_shard_index]
 
   files = tf.data.Dataset.from_tensor_slices(files)
   ds = files.interleave(tf.data.TFRecordDataset,
@@ -80,13 +80,8 @@ def encode(model, x):
   return posterior.mean(), posterior.stddev()
 
 
-def run_shard(model, out_dir, out_name,
+def run_shard(model, ds, out_dir, out_name,
               outer_shard_index, num_outer_shards, sub_shard_index, num_sub_shards):
-  ds = get_dataset(outer_shard_index=outer_shard_index,
-                   num_outer_shards=num_outer_shards,
-                   sub_shard_index=sub_shard_index,
-                   num_sub_shards=num_sub_shards)
-
   num_total_shards = num_outer_shards * num_sub_shards
   total_shard_index = num_sub_shards * outer_shard_index + sub_shard_index
 
@@ -113,10 +108,15 @@ def main(_):
 
   model = load_model(FLAGS.model)
 
+  ds = get_dataset(outer_shard_index=FLAGS.outer_shard_index,
+                   num_outer_shards=FLAGS.num_outer_shards,
+                   num_sub_shards=FLAGS.num_sub_shards)
+
   start = time.time()
 
   for i in range(FLAGS.num_sub_shards):
     run_shard(model=model,
+              ds=ds.shard(num_shards=FLAGS.num_sub_shards, index=i),
               out_dir=FLAGS.out_dir,
               out_name=FLAGS.out_name,
               outer_shard_index=FLAGS.outer_shard_index,

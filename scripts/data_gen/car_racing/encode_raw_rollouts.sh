@@ -80,7 +80,7 @@ launch() {
     --output="$OUT_DIR/logs-%j.out" \
     --time=${TIME} \
     --mem=${MEMORY} \
-    --partition=gpu \
+    --partition=volta-gpu \
     --gres=gpu:${NUM_GPUS} \
     --qos=gpu_access \
     --wrap="\"$(run_singularity)\"")

@@ -5,7 +5,6 @@ import time
 
 from absl import app
 from absl import flags
-import ray
 import tensorflow as tf
 
 from rl755.common import misc
@@ -25,6 +24,9 @@ flags.DEFINE_integer('num_sub_shards', None,
                      'The number of shards to generate for this part of the dataset. '
                      'A good goal is to strive for shards of size 100-200 MB.',
                      lower_bound=1)
+flags.DEFINE_integer('gpu_index', None,
+                     'The index of the GPU to use on multi-gpu systems.',
+                     lower_bound=0)
 
 flags.DEFINE_string('out_dir', None, 'The directory to write the tfrecords to.')
 flags.DEFINE_string('out_name', None, 'Prefix to give the generated tfrecord files.')
@@ -35,6 +37,7 @@ flags.DEFINE_string('model', "raw_rollout_vae_32ld",
 flags.mark_flag_as_required('num_outer_shards')
 flags.mark_flag_as_required('outer_shard_index')
 flags.mark_flag_as_required('num_sub_shards')
+flags.mark_flag_as_required('gpu_index')
 flags.mark_flag_as_required('out_dir')
 flags.mark_flag_as_required('out_name')
 
@@ -45,7 +48,7 @@ def get_dataset_files():
 
 
   # TODO: REMOVE, THIS IS JUST FOR INITIAL TESTING!!!!!!!!!!!!!!!!!!!!!
-  files = files[:64]
+  files = files[:32]
 
 
   # Ensure a consistent order so that each file is processed exactly once.
@@ -76,11 +79,8 @@ def encode(model, x):
   return posterior.mean(), posterior.stddev()
 
 
-@ray.remote
-def run_shard(model_name, out_dir, out_name,
+def run_shard(model, out_dir, out_name,
               outer_shard_index, num_outer_shards, sub_shard_index, num_sub_shards):
-  print("@@@",  tf.config.experimental.list_physical_devices('GPU'))
-  model = load_model(model_name)
   ds = get_dataset(outer_shard_index=outer_shard_index,
                    num_outer_shards=num_outer_shards,
                    sub_shard_index=sub_shard_index,
@@ -108,21 +108,19 @@ def run_shard(model_name, out_dir, out_name,
 
 
 def main(_):
-  ray.init()
+  with tf.device(f"/GPU:{FLAGS.gpu_index}"):
+    model = load_model(FLAGS.model)
 
   start = time.time()
 
-  futures = [
-      run_shard.remote(model_name=FLAGS.model,
-                       out_dir=FLAGS.out_dir,
-                       out_name=FLAGS.out_name,
-                       outer_shard_index=FLAGS.outer_shard_index,
-                       num_outer_shards=FLAGS.num_outer_shards,
-                       sub_shard_index=i,
-                       num_sub_shards=FLAGS.num_sub_shards)
-      for i in range(FLAGS.num_sub_shards)
-  ]
-  ray.get(futures)
+  for i in range(FLAGS.num_sub_shards):
+    run_shard(model=model,
+              out_dir=FLAGS.out_dir,
+              out_name=FLAGS.out_name,
+              outer_shard_index=FLAGS.outer_shard_index,
+              num_outer_shards=FLAGS.num_outer_shards,
+              sub_shard_index=i,
+              num_sub_shards=FLAGS.num_sub_shards)
 
   end = time.time()
   print("Took", end - start, "seconds to run.")

@@ -67,7 +67,7 @@ def get_dataset(outer_shard_index, num_outer_shards, num_sub_shards):
                         deterministic=False)
   ds = ds.map(functools.partial(raw_rollouts.parse_fn, process_observations=True),
               num_parallel_calls=tf.data.experimental.AUTOTUNE)
-  ds = ds.prefetch(1)
+  ds = ds.prefetch(8)
   return ds
 
 

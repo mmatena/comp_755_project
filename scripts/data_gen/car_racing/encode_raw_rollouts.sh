@@ -58,7 +58,7 @@ run_python_single() {
 }
 
 run_python() {
-  echo  "for ((GPU_INDEX=0;GPU_INDEX<=$NUM_GPUS;GPU_INDEX++)); \
+  echo  "for GPU_INDEX in {1..${NUM_GPUS}}; \
             do $(run_python_single); \
           done"
 }

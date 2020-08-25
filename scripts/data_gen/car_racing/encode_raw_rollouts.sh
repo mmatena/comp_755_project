@@ -60,7 +60,7 @@ run_python_single() {
 
 run_python() {
   echo "echo ''"
-    for ((i=0;i<=$NUM_GPUS;i++));
+    for ((i=0;i<$NUM_GPUS;i++));
       do echo " & $(run_python_single $i) ";
     done
     echo " && fg"

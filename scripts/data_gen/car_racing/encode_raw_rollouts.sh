@@ -47,20 +47,21 @@ module add tensorflow_py3/2.1.0
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 
 run_python_single() {
+  GPU_INDEX=$1
   echo "python $PROJECT_DIR/scripts/data_gen/car_racing/encode_raw_rollouts.py \
       --num_outer_shards=$NUM_OUTER_SHARDS \
-      --outer_shard_index=\$(($BASE_OUTER_SHARD_INDEX + GPU_INDEX)) \
+      --outer_shard_index=$(($BASE_OUTER_SHARD_INDEX + $GPU_INDEX)) \
       --num_sub_shards=$NUM_SUBSHARDS \
-      --gpu_index=\$GPU_INDEX \
+      --gpu_index=$GPU_INDEX \
       --out_dir=$OUT_DIR \
       --out_name=$OUT_NAME \
       --model=$MODEL"
 }
 
 run_python() {
-  echo  "for GPU_INDEX in {1..${NUM_GPUS}}; \
-            do $(run_python_single); \
-          done"
+    for ((i=0;i<=$NUM_GPUS;i++));
+      do echo $(run_python_single $i) "\\";
+    done
 }
 
 run_singularity() {

@@ -3,6 +3,8 @@
 ## (Some) dependencies
 
 ```bash
+pip install pre-commit
+
 pip install noise
 pip install Box2D
 pip install ray

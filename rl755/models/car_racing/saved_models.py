@@ -17,6 +17,9 @@ def raw_rollout_vae_32ld():
     """VAE trained on images from raw rollouts for 100k steps with
     a batch size of 256 for 100k steps and a latent dim of 32 and
     beta of 1.0. Used L2 reconstruction loss between pixels.
+
+    Returns:
+        A rl755.models.car_racing.vae.Vae instance.
     """
     weights_path = "/pine/scr/m/m/mmatena/test_vae_train/model.hdf5"
     vae = Vae(latent_dim=32, beta=1.0)

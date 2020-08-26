@@ -51,19 +51,20 @@ def _get_decoder(latent_dim):
 
 
 class Vae(tf.keras.Model):
-    def __init__(
-        self,
-        latent_dim=32,
-        beta=1.0,
-        log_losses=False,
-        start_step=0,
-        name="vae",
-        **kwargs
-    ):
+    """A variational auto-encoder."""
+
+    def __init__(self, latent_dim=32, beta=1.0, start_step=0, name="vae", **kwargs):
+        """Create a Vae.
+
+        Args:
+            latent_dim: a positive integer, the size of the latent dimension
+            beta: a float, the weight to give to the KL loss
+            start_step: an integer, used to initialize a tf.Variable that tracts the current step
+            name: string, used by tf.keras.Model superclass
+        """
         super().__init__(name=name, **kwargs)
         self.latent_dim = latent_dim
         self.beta = beta
-        self.log_losses = log_losses
         self.encoder = _get_encoder(latent_dim)
         self.decoder = _get_decoder(latent_dim)
         self.prior = tfd.MultivariateNormalDiag(
@@ -109,8 +110,7 @@ class Vae(tf.keras.Model):
         gradients = tape.gradient(loss, self.trainable_variables)
         self.optimizer.apply_gradients(zip(gradients, self.trainable_variables))
 
-        if self.log_losses:
-            tf.summary.scalar("loss", data=loss, step=self.step)
-            tf.summary.scalar("l2_loss", data=loss_recon, step=self.step)
-            tf.summary.scalar("kl_loss", data=loss_kl, step=self.step)
+        tf.summary.scalar("loss", data=loss, step=self.step)
+        tf.summary.scalar("l2_loss", data=loss_recon, step=self.step)
+        tf.summary.scalar("kl_loss", data=loss_kl, step=self.step)
         return {"loss": loss, "l2": loss_recon, "kl": loss_kl}

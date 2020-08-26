@@ -49,7 +49,7 @@ def main(_):
     )
     tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=model_dir)
 
-    vae = Vae(latent_dim=FLAGS.latent_size, beta=FLAGS.beta, log_losses=True)
+    vae = Vae(latent_dim=FLAGS.latent_size, beta=FLAGS.beta)
     vae.compile(optimizer="adam")
 
     vae.fit(

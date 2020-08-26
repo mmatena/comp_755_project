@@ -8,6 +8,8 @@ RolloutStep = namedtuple("RolloutStep", ["o", "a", "r", "step"])
 
 
 class Rollout:
+    """A generic class representing a rollout of some environment."""
+
     def __init__(self):
         # The observation at step i.
         self.obs_l = []
@@ -21,7 +23,18 @@ class Rollout:
 
 
 def _to_float_feature_list(array, process_item_fn):
-    """Converts a 1-d float array to a tf.train.FeatureList."""
+    """Converts an array of floats to a tf.train.FeatureList.
+
+    The `array` must be representable as a rank 2 tensor. Note that this trivially
+    includes rank 1 and rank 0 tensors.
+
+    Args:
+        array: an iterable object
+        process_item_fn: a function to be applied to each item in the array. Must return
+            a 1-dimensional list-like object of floats.
+    Returns:
+        A tf.train.FeatureList corresponding to `array`.
+    """
     features = []
     for a in array:
         feature = tf.train.Feature(
@@ -32,7 +45,13 @@ def _to_float_feature_list(array, process_item_fn):
 
 
 def raw_rollout_to_tfrecord(rollout):
-    """Converts a rollout to the equivalent tf record."""
+    """Converts a rollout to the equivalent tfrecord.
+
+    Args:
+        rollout: a rl755.common.structs.Rollout, the rollout to convert
+    Returns:
+        A tf.train.SequenceExample corresponding to `rollout`.
+    """
     obs_features = []
     for obs in rollout.obs_l:
         obs_str = tf.io.serialize_tensor(obs).numpy()
@@ -52,6 +71,16 @@ def raw_rollout_to_tfrecord(rollout):
 
 
 def latent_image_rollout_to_tfrecord(obs_latents, actions, rewards, obs_std_devs=None):
+    """Converts a rollout with the images encoded by e.g. a VAE to the equivalent tfrecord.
+
+    Args:
+        obs_latents: float32 tf.Tensor with shape [num_rollouts, latent_size]
+        actions: float32 tf.Tensor with shape [num_rollouts, 4]
+        rewards: float32 tf.Tensor with shape [num_rollouts]
+        obs_std_devs: None or float32 tf.Tensor with shape [num_rollouts, latent_size]
+    Returns:
+        A tf.train.SequenceExample corresponding to the inputs.
+    """
     if obs_std_devs is None:
         # TODO(mmatena): Figure out the best way to handle this. This can happen if we are
         # using something like a deterministic encoder.

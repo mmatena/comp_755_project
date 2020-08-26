@@ -17,6 +17,7 @@ TFRECORDS_PATTERN = (
 
 
 def parse_fn(x):
+    """Parses a single tfrecord."""
     features = {
         "observations": tf.io.VarLenFeature(tf.float32),
         "observation_std_devs": tf.io.VarLenFeature(tf.float32),
@@ -32,11 +33,11 @@ def parse_fn(x):
 def get_rollouts_ds():
     """Returns a tf.data.Dataset where each item is a encoded full rollout.
 
-    Each example is a dict with items:
-      'observations': tf.uint8, (rollout_len, 32)
-      'observations_std_dev': tf.uint8, (rollout_len, 32)
-      'actions': tf.float32, (rollout_len, 4)
-      'rewards': tf.float32, (rollout_len)
+    Each example is a dict with tf.Tensor items:
+      'observations': tf.float32, [rollout_len, 32]
+      'observations_std_dev': tf.float32, [rollout_len, 32]
+      'actions': tf.float32, [rollout_len, 4]
+      'rewards': tf.float32, [rollout_len]
 
     Since the examples were encoded with a VAE, the 'observations' key corresponds
     to the mean of the posterior and the 'observations_std_dev' coresponds to the
@@ -46,6 +47,9 @@ def get_rollouts_ds():
     observation on the i-th step, the action taken at the i-th step, and the
     reward corresponding to the transition from the i-th state to the (i+1)-th
     state.
+
+    Returns:
+        A tf.data.Dataset.
     """
     files = tf.io.matching_files(TFRECORDS_PATTERN)
 
@@ -65,6 +69,11 @@ def random_rollout_slices(slice_size):
     See the documentation for `get_rollouts_ds()` for more information about what this
     function returns. The items in the dataset will have the same structure except the
     size of their first dimension will be `slice_size`.
+
+    Args:
+        slice_size: a positive integer, the length of each slice
+    Returns:
+        A tf.data.Dataset.
     """
     ds = get_rollouts_ds()
     return ds.map(

@@ -2,7 +2,7 @@
 
 
 def divide_chunks(lis, n):
-    """Yield successive n-sized from list lis."""
+    """Yield successive n-sized from list `lis`."""
     for i in range(0, len(lis), n):
         yield lis[i : i + n]
 
@@ -12,6 +12,14 @@ def evenly_partition(lis, n):
 
     If lis is an integer, then we will assume it is the total number of items
     and return a list containing the sizes of the partitions.
+
+    Args:
+        lis: either the list to partition or an integer specificying a number to partition
+        n: a positive integer specifying the number of partitions
+    Returns:
+        A list containing the partitions, each of which will either be the list of items
+        in the partition or the size of the partition. That behavior depends on the type
+        of `lis`. The returned list will always have length `n`.
     """
     if isinstance(lis, int):
         # TODO(mmatena): This could be done in another functions without generating lists.

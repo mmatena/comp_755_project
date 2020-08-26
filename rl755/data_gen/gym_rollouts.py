@@ -12,9 +12,31 @@ class Policy(object):
     """Abstract base class for policies"""
 
     def initialize(self, env, max_steps, **kwargs):
+        """Initializes the policy upon starting a new episode.
+
+        Please add a (potentially) unused **kwargs to subclasses to prevent breakage
+        if we need to expose more information for some policies in the future.
+
+        Args:
+            env: the OpenAI Gym environment we will be running on
+            max_steps: a postive integer, the maximum number of steps the
+                rollout will go on for
+        """
         raise NotImplementedError()
 
     def sample_action(self, obs, step, **kwargs):
+        """Generate an action.
+
+        Please add a (potentially) unused **kwargs to subclasses to prevent breakage
+        if we need to expose more information for some policies in the future.
+
+        Args:
+            obs: the observation at the current time step, whose exact format depends
+                on the environment you are running on
+            step: non-negative integer, the 0-based index of the current time step
+        Returns:
+            A action compatible with the `env.step(action)` method.
+        """
         raise NotImplementedError()
 
 
@@ -46,6 +68,19 @@ class HastingsRandomPolicy(Policy):
 
 
 def single_rollout(env, policy, max_steps):
+    """Runs a single rollout.
+
+    The rollout will end when either the environment says we are done or we have
+    executed for `max_steps`.
+
+    Args:
+        env: an OpenAI Gym environment
+        policy: a subclass of rl755.data_gen.gym_rollouts.Policy
+        max_steps: a positive integer, the maximum number of steps the rollout
+            will go on for
+    Returns:
+        A rl755.common.structs.Rollout instance.
+    """
     env.reset()
     policy.initialize(env=env, max_steps=max_steps)
 
@@ -68,6 +103,7 @@ def single_rollout(env, policy, max_steps):
 
 
 def serial_rollouts(env_name, policy, max_steps, num_rollouts, process_rollout_fn):
+    """Runs `num_rollouts` and applies `process_rollout_fn` to each generated Rollout object."""
     env = gym.make(env_name)
     for _ in range(num_rollouts):
         rollout = single_rollout(env, policy=policy, max_steps=max_steps)
@@ -78,6 +114,7 @@ def serial_rollouts(env_name, policy, max_steps, num_rollouts, process_rollout_f
 def parallel_rollouts(
     env_name, policy, max_steps, num_rollouts, process_rollout_fn, parallelism=1
 ):
+    """Runs `num_rollouts` with up to `parallelism` rollouts occuring concurrently."""
     fn = ray.remote(serial_rollouts)
     do_rollouts = lambda num_serial: fn.remote(
         env_name=env_name,

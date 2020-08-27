@@ -6,7 +6,7 @@ unless explicitly stated otherwise.
 """
 from bert.attention import AttentionLayer
 from bert.transformer import TransformerEncoderLayer
-import mock
+from unittest import mock
 import tensorflow as tf
 
 

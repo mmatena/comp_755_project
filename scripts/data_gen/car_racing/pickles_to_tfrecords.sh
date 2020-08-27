@@ -12,10 +12,12 @@ PROJECT_DIR=~/projects/comp_755_project
 
 # Where the pickle files reside. All pickle files in this directory are
 # assumed to be lists of Rollout instances and will be put into tfrecords.
-PICKLE_DIR=/pine/scr/m/m/mmatena/1000_rollouts_test
+# PICKLE_DIR=/pine/scr/m/m/mmatena/1000_rollouts_test
+PICKLE_DIR=/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/raw_rollouts/validation
 
 # Where we will write the tfrecords and logs to.
-OUT_DIR=/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/raw_rollouts
+# OUT_DIR=/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/raw_rollouts
+OUT_DIR=/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/raw_rollouts/validation
 
 # Tfrecord files will be named like "$OUTNAME.tfrecord-*-of-*".
 OUT_NAME=raw_rollouts

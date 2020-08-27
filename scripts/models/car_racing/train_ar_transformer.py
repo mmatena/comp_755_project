@@ -57,6 +57,9 @@ def _to_inputs_and_targets(x):
         axis=-1,
     )
     targets = tf.concat([o[1:], r[:-1]], axis=-1)
+    # TODO(mmatena): Don't hardcode these shapes
+    inputs = tf.reshape(inputs, [FLAGS.sequence_length, 32 + 4 + 1])
+    targets = tf.reshape(targets, [FLAGS.sequence_length, 32 + 1])
     return inputs, targets
 
 

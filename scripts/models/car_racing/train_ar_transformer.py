@@ -53,7 +53,7 @@ def _to_inputs_and_targets(x):
     a = x["actions"]
     o = x["observations"]
     inputs = tf.concat(
-        [o[:-1], a[:-1], tf.concat([[0.0], r[:-2]], axis=0)],
+        [o[:-1], a[:-1], tf.concat([[[0.0]], r[:-2]], axis=0)],
         axis=-1,
     )
     targets = tf.concat([o[1:], r[:-1]], axis=-1)

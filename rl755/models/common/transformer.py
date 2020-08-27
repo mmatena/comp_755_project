@@ -11,11 +11,6 @@ import tensorflow as tf
 
 
 def _create_ar_mask(seq_len):
-    # The existing implementation seems to be tailored to using the mask only to handle the
-    # case where sequences require padding due to different lengths.
-    raise ValueError(
-        "Looking at the implementation in the library, this looks like it won't work."
-    )
     arange = tf.range(seq_len)
     # Looks like the mask shape corresponds to [batch, from_sequence, to_sequence].
     mask = tf.less(tf.expand_dims(arange, axis=0), tf.expand_dims(arange, axis=1))

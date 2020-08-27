@@ -37,6 +37,7 @@ flags.DEFINE_integer(
     lower_bound=0,
 )
 
+flags.DEFINE_string("split", None, "The dataset split to use.")
 flags.DEFINE_string("out_dir", None, "The directory to write the tfrecords to.")
 flags.DEFINE_string("out_name", None, "Prefix to give the generated tfrecord files.")
 
@@ -48,12 +49,17 @@ flags.mark_flag_as_required("num_outer_shards")
 flags.mark_flag_as_required("outer_shard_index")
 flags.mark_flag_as_required("num_sub_shards")
 flags.mark_flag_as_required("gpu_index")
+flags.mark_flag_as_required("split")
 flags.mark_flag_as_required("out_dir")
 flags.mark_flag_as_required("out_name")
 
 
 def get_dataset_files():
-    files = tf.io.matching_files(raw_rollouts.TFRECORDS_PATTERN).numpy().tolist()
+    files = (
+        tf.io.matching_files(raw_rollouts.TFRECORDS_PATTERN.format(split=FLAGS.split))
+        .numpy()
+        .tolist()
+    )
     # Ensure a consistent order so that each file is processed exactly once.
     files.sort()
     return files

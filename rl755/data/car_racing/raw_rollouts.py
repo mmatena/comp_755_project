@@ -6,7 +6,7 @@ from rl755.data.car_racing import processing
 
 TFRECORDS_PATTERN = (
     "/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/"
-    "raw_rollouts/raw_rollouts.tfrecord*"
+    "raw_rollouts/{split}/raw_rollouts.tfrecord*"
 )
 
 
@@ -46,7 +46,7 @@ def parse_fn(x, process_observations):
     return x
 
 
-def get_raw_rollouts_ds(process_observations=True):
+def get_raw_rollouts_ds(process_observations=True, split="train"):
     """Returns a tf.data.Dataset where each item is a raw full rollout.
 
     Each example is a dict with tf.Tensor items:
@@ -65,7 +65,7 @@ def get_raw_rollouts_ds(process_observations=True):
     Returns:
         A tf.data.Dataset.
     """
-    files = tf.io.matching_files(TFRECORDS_PATTERN)
+    files = tf.io.matching_files(TFRECORDS_PATTERN.format(split=split))
 
     files = tf.data.Dataset.from_tensor_slices(files)
     ds = files.interleave(

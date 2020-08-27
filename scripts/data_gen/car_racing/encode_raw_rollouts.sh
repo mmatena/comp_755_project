@@ -9,11 +9,16 @@
 PROJECT_DIR=~/projects/comp_755_project
 
 # 30 total shards  # Based on some rough calculations, this produces about 100MB per shard.
-NUM_OUTER_SHARDS=16
-NUM_SUBSHARDS=19
+NUM_OUTER_SHARDS=1
+NUM_SUBSHARDS=15
 BASE_OUTER_SHARD_INDEX=$1
 echo $BASE_OUTER_SHARD_INDEX
-OUT_DIR=/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/encoded_rollouts
+
+# SPLIT=train
+# OUT_DIR=/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/encoded_rollouts
+SPLIT=validation
+OUT_DIR=/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/encoded_rollouts/validation
+
 OUT_NAME=encoded_rollouts
 MODEL="raw_rollout_vae_32ld"
 
@@ -42,6 +47,7 @@ run_python_single() {
       --gpu_index=$GPU_INDEX \
       --out_dir=$OUT_DIR \
       --out_name=$OUT_NAME \
+      --split=$SPLIT \
       --model=$MODEL"
 }
 

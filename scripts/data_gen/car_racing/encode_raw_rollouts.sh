@@ -9,7 +9,7 @@
 PROJECT_DIR=~/projects/comp_755_project
 
 # 30 total shards  # Based on some rough calculations, this produces about 100MB per shard.
-NUM_OUTER_SHARDS=1
+NUM_OUTER_SHARDS=2
 NUM_SUBSHARDS=15
 BASE_OUTER_SHARD_INDEX=$1
 echo $BASE_OUTER_SHARD_INDEX

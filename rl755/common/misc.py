@@ -21,8 +21,6 @@ def evenly_partition(lis, n):
         in the partition or the size of the partition. That behavior depends on the type
         of `lis`. The returned list will always have length `n`.
     """
-    if n == 1:
-        return [lis]
     if isinstance(lis, int):
         # TODO(mmatena): This could be done in another functions without generating lists.
         return [len(p) for p in evenly_partition(range(lis), n)]

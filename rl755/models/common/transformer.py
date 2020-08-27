@@ -61,3 +61,19 @@ class AutoregressiveTransformer(tf.keras.Model):
         ):
             output = self.transformer(inputs, mask=mask, training=training)
         return output
+
+
+# Random testing code!
+model = AutoregressiveTransformer(
+    TransformerEncoderLayer.Params(
+        hidden_size=15,
+        num_heads=5,
+        num_layers=2,
+        intermediate_size=8,
+        hidden_dropout=0.1,
+    )
+)
+
+shape = [16, 8, 2]
+model.build(shape)
+out = model(tf.ones(shape))

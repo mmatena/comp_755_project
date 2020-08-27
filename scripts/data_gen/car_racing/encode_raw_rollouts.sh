@@ -22,10 +22,10 @@ OUT_DIR=/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/encoded_rollouts/
 OUT_NAME=encoded_rollouts
 MODEL="raw_rollout_vae_32ld"
 
-NUM_GPUS=4
-NUM_CORES=12
+NUM_GPUS=2
+NUM_CORES=6
 # Needs high memory due as full rollouts are large.
-MEMORY=30g
+MEMORY=15g
 TIME="23:30:00"
 #############################################################
 

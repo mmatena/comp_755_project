@@ -34,6 +34,11 @@ class AutoregressiveTransformer(tf.keras.Model):
         self.output_size = output_size
 
     def build(self, input_spec):
+        self.initial_layer = tf.keras.layers.TimeDistributed(
+            tf.keras.layers.Dense(
+                units=self.transformer_params.hidden_size, activation=None
+            )
+        )
         self.transformer = TransformerEncoderLayer.from_params(
             self.transformer_params, name="transformer"
         )
@@ -52,6 +57,8 @@ class AutoregressiveTransformer(tf.keras.Model):
             # Here we are assuming mask has shape [batch, seq_len] and is used for padding.
             mask = tf.cast(tf.expand_dims(mask, axis=1), tf.float32)
             mask *= ar_mask
+
+        inputs = self.initial_layer(inputs, training=training)
         # Have to do this hack as the mask in the original transformer just represents non-padded
         # regions of the input. We need a different shape of the input mask to make the transformer
         # autoregressive. The function `_our_create_attention_mask` justs passes through our mask
@@ -60,5 +67,5 @@ class AutoregressiveTransformer(tf.keras.Model):
             AttentionLayer, "create_attention_mask", _our_create_attention_mask
         ):
             output = self.transformer(inputs, mask=mask, training=training)
-        output = self.final_layer(output)
+        output = self.final_layer(output, training=training)
         return output

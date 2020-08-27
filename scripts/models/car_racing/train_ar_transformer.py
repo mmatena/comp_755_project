@@ -20,7 +20,7 @@ flags.DEFINE_integer(
 )
 
 flags.DEFINE_integer(
-    "batch_size", 256, "The number of sequences in each batch.", lower_bound=1
+    "batch_size", 8, "The number of sequences in each batch.", lower_bound=1
 )
 flags.DEFINE_integer(
     "sequence_length", 32, "Size of windows to train on.", lower_bound=1

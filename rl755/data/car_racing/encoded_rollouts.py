@@ -53,6 +53,9 @@ def get_rollouts_ds():
     """
     files = tf.io.matching_files(TFRECORDS_PATTERN)
 
+    ############### THIS IS FOR TESTING ONLY #########################
+    files = files[:4]
+
     files = tf.data.Dataset.from_tensor_slices(files)
     ds = files.interleave(
         tf.data.TFRecordDataset,

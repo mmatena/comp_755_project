@@ -106,7 +106,7 @@ def main(_):
     tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=model_dir)
 
     loss_fn = ignore_prefix_loss(
-        tf.keras.losses.MeanSquaredError(), prefix_size=FLAGS.ignore_prefix_loss
+        tf.keras.losses.MeanSquaredError(), prefix_size=FLAGS.ignore_loss_prefix_size
     )
 
     model.compile(loss=loss_fn, optimizer="adam")

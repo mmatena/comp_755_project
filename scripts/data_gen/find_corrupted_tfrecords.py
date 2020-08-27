@@ -12,10 +12,11 @@ flags.mark_flag_as_required("pattern")
 
 
 def main(_):
-    files = tf.io.matching_files(FLAGS.pattern).numpy().aslist()
+    files = tf.io.matching_files(FLAGS.pattern).numpy().tolist()
 
-    for file in files:
+    for i, file in enumerate(files):
         try:
+            print(i)
             ds = tf.data.TFRecordDataset(file)
             for _ in ds:
                 pass

@@ -35,8 +35,9 @@ def _our_create_attention_mask(from_shape, input_mask):
 
 
 class AutoregressiveTransformer(tf.keras.Model):
-    def __init__(self, transformer_params):
+    def __init__(self, transformer_params, **kwargs):
         # TODO(mmatena): Add docs
+        super().__init__(**kwargs)
         self.transformer_params = transformer_params
 
     def build(self, input_spec):

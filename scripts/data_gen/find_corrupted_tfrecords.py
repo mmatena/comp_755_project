@@ -16,7 +16,6 @@ def main(_):
 
     for i, file in enumerate(files):
         try:
-            print(i)
             ds = tf.data.TFRecordDataset(file)
             for _ in ds:
                 pass

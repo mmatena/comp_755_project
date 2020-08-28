@@ -33,21 +33,21 @@ class AutoregressiveTransformer(tf.keras.Model):
         self.transformer_params = transformer_params
         self.output_size = output_size
 
-    def build(self, input_spec):
+    def build(self, input_shape):
         hidden_size = self.transformer_params.hidden_size
         self.initial_layer = tf.keras.layers.TimeDistributed(
             tf.keras.layers.Dense(units=hidden_size, activation=None)
         )
-        self.initial_layer.build(input_spec)
+        self.initial_layer.build(input_shape=input_shape)
         self.transformer = TransformerEncoderLayer.from_params(
             self.transformer_params, name="transformer"
         )
-        transformer_input_spec = list(input_spec[:-1]) + [hidden_size]
-        self.transformer.build(transformer_input_spec)
+        transformer_input_shape = list(input_shape[:-1]) + [hidden_size]
+        self.transformer.build(input_shape=transformer_input_shape)
         self.final_layer = tf.keras.layers.TimeDistributed(
             tf.keras.layers.Dense(units=self.output_size, activation=None)
         )
-        self.final_layer.build(list(input_spec[:-1]) + [hidden_size])
+        self.final_layer.build(input_shape=list(input_shape[:-1]) + [hidden_size])
 
     def call(self, inputs, mask=None, training=None):
         # TODO(mmatena): Make sure this is right.

@@ -33,6 +33,8 @@ def raw_rollout_vae_32ld():
 def encoded_rollout_transformer():
     # TODO(mmatena): Add docs explaing all the parameters this was trained with.
     weights_path = "/pine/scr/m/m/mmatena/test_ar_transformer_train/model.hdf5"
+    seqlen = 32
+    input_size = 32 + 4 + 1  # latent_dim + action_dim + reward_dim
     output_size = 32 + 1  # latent_dim + reward_dim
     num_attention_heads = 12
     hidden_size = 768
@@ -46,5 +48,6 @@ def encoded_rollout_transformer():
         size_per_head=int(hidden_size / num_attention_heads),
     )
     model = AutoregressiveTransformer(transformer_params, output_size=output_size)
+    model.build([None, seqlen, input_size])
     model.load_weights(weights_path)
     return model

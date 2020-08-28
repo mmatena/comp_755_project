@@ -49,7 +49,6 @@ def encoded_rollout_transformer():
         size_per_head=int(hidden_size / num_attention_heads),
     )
     model = AutoregressiveTransformer(transformer_params, output_size=output_size)
-    # model.build([None, seqlen, input_size])
-    model(tf.keras.layers.InputSpec(dtype=tf.float32, shape=[None, seqlen, input_size]))
+    model.build([None, seqlen, input_size])
     model.load_weights(weights_path)
     return model

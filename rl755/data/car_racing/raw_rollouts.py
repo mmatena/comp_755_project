@@ -6,7 +6,7 @@ from rl755.data.car_racing import processing
 
 TFRECORDS_PATTERN = (
     "/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/"
-    "raw_rollouts/raw_rollouts.tfrecord*"
+    "raw_rollouts/{split}/raw_rollouts.tfrecord*"
 )
 
 
@@ -46,7 +46,7 @@ def parse_fn(x, process_observations):
     return x
 
 
-def get_raw_rollouts_ds(process_observations=True):
+def get_raw_rollouts_ds(process_observations=True, split="train"):
     """Returns a tf.data.Dataset where each item is a raw full rollout.
 
     Each example is a dict with tf.Tensor items:
@@ -61,11 +61,12 @@ def get_raw_rollouts_ds(process_observations=True):
 
     Args:
         process_observations: bool, whether to parse the "observations" value. See documentation
-        for `parse_fn` for more details.
+            for `parse_fn` for more details.
+        split: str, "train" or "validation"
     Returns:
         A tf.data.Dataset.
     """
-    files = tf.io.matching_files(TFRECORDS_PATTERN)
+    files = tf.io.matching_files(TFRECORDS_PATTERN.format(split=split))
 
     files = tf.data.Dataset.from_tensor_slices(files)
     ds = files.interleave(
@@ -80,7 +81,7 @@ def get_raw_rollouts_ds(process_observations=True):
     )
 
 
-def random_rollout_slices(slice_size):
+def random_rollout_slices(slice_size, split="train"):
     """Returns a tf.data.Dataset where items are random windows of size `slice_size`.
 
     See the documentation for `get_raw_rollouts_ds()` for more information about what this
@@ -89,6 +90,7 @@ def random_rollout_slices(slice_size):
 
     Args:
         slice_size: a positive integer, the length of each slice
+        split: str, "train" or "validation"
     Returns:
         A tf.data.Dataset.
     """
@@ -98,11 +100,11 @@ def random_rollout_slices(slice_size):
         x["observations"] = _process_observations(x["observations"])
         return x
 
-    ds = get_raw_rollouts_ds(process_observations=False)
+    ds = get_raw_rollouts_ds(process_observations=False, split=split)
     return ds.map(map_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
 
-def random_rollout_observations(obs_per_rollout=100):
+def random_rollout_observations(obs_per_rollout=100, split="train"):
     """Returns a tf.data.Dataset where each item is a single image.
 
     Each example is a dict with tf.Tensor items:
@@ -114,6 +116,7 @@ def random_rollout_observations(obs_per_rollout=100):
             and having many correlated examples in each minibatch. Extracting too few can
             lead to poor performance since each raw rollout is large and takes a while to read
             from disk.
+       split: str, "train" or "validation"
     Returns:
         A tf.data.Dataset.
     """
@@ -128,7 +131,7 @@ def random_rollout_observations(obs_per_rollout=100):
     def set_shape(x):
         return {"observation": tf.reshape(x["observation"], (96, 96, 3))}
 
-    ds = get_raw_rollouts_ds(process_observations=False)
+    ds = get_raw_rollouts_ds(process_observations=False, split=split)
     ds = ds.map(random_obs, num_parallel_calls=tf.data.experimental.AUTOTUNE)
     ds = ds.flat_map(tf.data.Dataset.from_tensor_slices)
     ds = ds.map(set_shape, num_parallel_calls=tf.data.experimental.AUTOTUNE)

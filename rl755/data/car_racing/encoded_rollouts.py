@@ -12,7 +12,7 @@ from rl755.data.car_racing import processing
 # mmatena: I forgot the tfrecord suffix when writing the files.
 TFRECORDS_PATTERN = (
     "/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/"
-    "encoded_rollouts/encoded_rollouts*"
+    "encoded_rollouts/{split}/encoded_rollouts*"
 )
 
 
@@ -30,7 +30,7 @@ def parse_fn(x):
     return x
 
 
-def get_rollouts_ds():
+def get_rollouts_ds(split="train"):
     """Returns a tf.data.Dataset where each item is a encoded full rollout.
 
     Each example is a dict with tf.Tensor items:
@@ -48,10 +48,12 @@ def get_rollouts_ds():
     reward corresponding to the transition from the i-th state to the (i+1)-th
     state.
 
+    Args:
+        split: str, "train" or "validation"
     Returns:
         A tf.data.Dataset.
     """
-    files = tf.io.matching_files(TFRECORDS_PATTERN)
+    files = tf.io.matching_files(TFRECORDS_PATTERN.format(split=split))
 
     files = tf.data.Dataset.from_tensor_slices(files)
     ds = files.interleave(
@@ -63,7 +65,7 @@ def get_rollouts_ds():
     return ds.map(parse_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
 
-def random_rollout_slices(slice_size):
+def random_rollout_slices(slice_size, split="train"):
     """Returns a tf.data.Dataset where items are random windows of size `slice_size`.
 
     See the documentation for `get_rollouts_ds()` for more information about what this
@@ -72,10 +74,11 @@ def random_rollout_slices(slice_size):
 
     Args:
         slice_size: a positive integer, the length of each slice
+        split: str, "train" or "validation"
     Returns:
         A tf.data.Dataset.
     """
-    ds = get_rollouts_ds()
+    ds = get_rollouts_ds(split=split)
     return ds.map(
         functools.partial(processing.slice_example, slice_size=slice_size),
         num_parallel_calls=tf.data.experimental.AUTOTUNE,

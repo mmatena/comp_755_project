@@ -10,7 +10,7 @@ PROJECT_DIR=~/projects/comp_755_project
 
 # Where all of the rollouts and logs will be written to.
 # Probably already needs to exist.
-DATA_DIR=/pine/scr/m/m/mmatena/1000_rollouts_test
+DATA_DIR=/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/raw_rollouts/validation
 
 # NUM_ROLLOUTS=500
 # PARALLELISM=10
@@ -19,12 +19,12 @@ DATA_DIR=/pine/scr/m/m/mmatena/1000_rollouts_test
 # NUM_CORES=12
 # MEMORY=10g
 
-NUM_ROLLOUTS=1500
+NUM_ROLLOUTS=250
 PARALLELISM=10
 MAX_STEPS=2000
 
 NUM_CORES=12
-MEMORY=8g
+MEMORY=20g
 #############################################################
 
 

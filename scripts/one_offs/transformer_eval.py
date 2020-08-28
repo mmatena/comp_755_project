@@ -14,6 +14,16 @@ flags.DEFINE_integer("batch_size", 128, "Batch size for eval.", lower_bound=1)
 flags.DEFINE_integer("sequence_length", 32, "Size of windows for eval.", lower_bound=1)
 
 
+def ignore_prefix_loss(loss_fn, prefix_size):
+    def fn(y_true, y_pred):
+        # We assume that the sequence dimension is the second dimension.
+        y_true = y_true[:, prefix_size:]
+        y_pred = y_pred[:, prefix_size:]
+        return loss_fn(y_true, y_pred)
+
+    return fn
+
+
 def _to_inputs_and_targets(x):
     # o[i], a[i], r[i-1] => o[i+1], r[i]
     # TODO(mmatena): Make sure this is correct!
@@ -46,7 +56,13 @@ def get_ds():
 
 def main(_):
     ds = get_ds()
+
+    loss_fn = ignore_prefix_loss(
+        tf.keras.losses.MeanSquaredError(), prefix_size=FLAGS.ignore_loss_prefix_size
+    )
+
     model = saved_models.encoded_rollout_transformer()
+    model.compile(optimizer="adam", loss=loss_fn)
     model.evaluate(ds)
 
 

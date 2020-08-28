@@ -57,9 +57,7 @@ def get_ds():
 def main(_):
     ds = get_ds()
 
-    loss_fn = ignore_prefix_loss(
-        tf.keras.losses.MeanSquaredError(), prefix_size=FLAGS.ignore_loss_prefix_size
-    )
+    loss_fn = ignore_prefix_loss(tf.keras.losses.MeanSquaredError(), prefix_size=4)
 
     model = saved_models.encoded_rollout_transformer()
     model.compile(optimizer="adam", loss=loss_fn)

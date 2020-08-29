@@ -1,6 +1,7 @@
 from absl import app
 from absl import flags
 import gym
+from pyvirtualdisplay import Display
 import tensorflow as tf
 
 from rl755.data.car_racing import encoded_rollouts
@@ -12,6 +13,11 @@ FLAGS = flags.FLAGS
 
 
 def main(_):
+    # It looks like OpenAI gym requires some sort of display, so we
+    # have to fake one.
+    display = Display(visible=0, size=(400, 300))
+    display.start()
+
     encoder = saved_models.raw_rollout_vae_32ld()
     encoder.compile()
     model = saved_models.encoded_rollout_transformer()

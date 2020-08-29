@@ -25,9 +25,7 @@ run_python() {
 }
 
 run_singularity() {
-  echo ls ~/centos/usr/bin/; \
-    export PATH="\\\"$HOME/centos/usr/sbin:$HOME/centos/usr/bin:$HOME/centos/bin:$PATH"\\\"; \
-    singularity exec --nv -B /pine -B /proj $SIMG_PATH/$SIMG_NAME bash -c "\\\"$(run_python)\\\""
+  echo singularity exec --nv -B /pine -B /proj $SIMG_PATH/$SIMG_NAME bash -c "\\\"$(run_python)\\\""
 }
 
 launch() {

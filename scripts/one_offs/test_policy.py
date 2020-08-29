@@ -1,3 +1,6 @@
+import os
+import sys
+
 from absl import app
 from absl import flags
 import gym
@@ -10,6 +13,14 @@ from rl755.models.car_racing import saved_models
 from rl755.models.car_racing import policies
 
 FLAGS = flags.FLAGS
+
+HOME = os.environ["PATH"]
+sys.path += [
+    os.path.join(HOME, "centos/usr/sbin"),
+    os.path.join(HOME, "centos/usr/bin"),
+    os.path.join(HOME, "centos/bin"),
+]
+# os.environ["PATH"] += os.pathsep + os.pathsep.join(["c:\\new\\path"])
 
 
 def main(_):

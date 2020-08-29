@@ -31,7 +31,7 @@ run_singularity() {
 launch() {
   # Not too sure why I have to do it like this, but just running the command
   # causes it fail to launch.
-  CMD=$(echo sbatch \
+  CMD=$(echo ls ~/centos/usr/bin/ && sbatch \
     --ntasks=1 \
     --time=0:30:00 \
     --mem=6g \
@@ -42,7 +42,6 @@ launch() {
   eval $CMD
 }
 
-ls ~/centos/usr/bin/
 
 # Run the command to actually launch the job.
 launch

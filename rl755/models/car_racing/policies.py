@@ -73,6 +73,7 @@ class RandomShootingPolicy(gym_rollouts.Policy):
         return self._ensure_sequence_length(inputs)
 
     def sample_action(self, obs, step, rollout, **kwargs):
+        print(f"Step {step}")
         actions = self.action_dist.sample(self.num_samples)
         # TODO(mmatena): Figure out the best way to deal with this unused action.
         actions = tf.concat([actions, tf.zeros([self.num_samples, 1])], axis=-1)

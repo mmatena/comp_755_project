@@ -16,9 +16,9 @@ module add tensorflow_py3/2.1.0
 
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 
-export PATH="$HOME/centos/usr/sbin:$HOME/centos/usr/bin:$HOME/centos/bin:$PATH"
-L='/lib:/lib64:/usr/lib:/usr/lib64'
-export LD_LIBRARY_PATH="$L:$HOME/centos/usr/lib:$HOME/centos/usr/lib64"
+# export PATH="$HOME/centos/usr/sbin:$HOME/centos/usr/bin:$HOME/centos/bin:$PATH"
+# L='/lib:/lib64:/usr/lib:/usr/lib64'
+# export LD_LIBRARY_PATH="$L:$HOME/centos/usr/lib:$HOME/centos/usr/lib64"
 
 run_python() {
   echo python $PROJECT_DIR/scripts/one_offs/test_policy.py
@@ -41,6 +41,8 @@ launch() {
     --wrap="\"$(run_singularity)\"")
   eval $CMD
 }
+
+ls ~/centos/usr/bin/
 
 # Run the command to actually launch the job.
 launch

@@ -8,6 +8,11 @@ from rl755.models.common import transformer as common_transformer
 class AutoregressiveFwdOr(common_transformer.AutoregressiveTransformer):
     pass
 
+    # def predict_next(self, rollout, action):
+    #     # TODO(mmatena): Return maybe change the inputs here.
+    #     # TODO(mmatena): Return next state, next reward
+    #     pass
+
 
 def ignore_prefix_loss(loss_fn, prefix_size):
     """Ignore the losses on the first few tokens.

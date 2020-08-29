@@ -31,7 +31,7 @@ launch() {
     --ntasks=1 \
     --time=0:30:00 \
     --mem=6g \
-    --partition=volta-gpu \
+    --partition=gpu \
     --gres=gpu:1 \
     --qos=gpu_access \
     --wrap="\"$(run_singularity)\"")

@@ -117,8 +117,7 @@ def get_keys(model):
 
 
 def get_keys_and_values(inputs, targets, key_model):
-    # keys = key_model(inputs, training=False)[:, -1]
-    keys = key_model.get_something(inputs, training=False)[:, -1]
+    keys = key_model(inputs, training=False)[:, -1]
     values = targets[:, -1]
     return keys, values
 
@@ -157,18 +156,17 @@ def main(_):
     ds = get_dataset()
 
     model = get_model()
-    # input_ = tf.keras.Input(shape=[SEQUENCE_LENGTH, 32 + 4 + 1])
-    # model(input_)
-    # # layer = model.transformer.encoder_layers[-1].self_attention_layer
+    input_ = tf.keras.Input(shape=[SEQUENCE_LENGTH, 32 + 4 + 1])
+    model(input_)
+    layer = model.transformer.encoder_layers[-1].self_attention_layer
     # key_model = tf.keras.Model(inputs=input_, outputs=model.output)
-    # # key_model = tf.keras.Model(inputs=input_, outputs=layer.output)
+    key_model = tf.keras.Model(inputs=input_, outputs=layer.output)
 
     start = time.time()
 
     for i in range(FLAGS.num_sub_shards):
         run_shard(
-            # key_model=key_model,
-            key_model=model,
+            key_model=key_model,
             ds=ds.shard(num_shards=FLAGS.num_sub_shards, index=i),
             sub_shard_index=i,
         )

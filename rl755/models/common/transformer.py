@@ -43,11 +43,14 @@ def _get_our_layer_call(array):
 
 
 class AutoregressiveTransformer(tf.keras.Model):
-    def __init__(self, transformer_params, output_size, **kwargs):
+    def __init__(
+        self, transformer_params, output_size, return_layer_outputs=False, **kwargs
+    ):
         # TODO(mmatena): Add docs
         super().__init__(**kwargs)
         self.transformer_params = transformer_params
         self.output_size = output_size
+        self.return_layer_outputs = return_layer_outputs
 
     def build(self, input_shape):
         hidden_size = self.transformer_params.hidden_size
@@ -66,22 +69,15 @@ class AutoregressiveTransformer(tf.keras.Model):
         self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
         super().build(input_shape)
 
-    def get_output_of_layer(self, layers_with_output, layer_):
-        # TODO(mmatena): move somewhere else.
-        for layer, output in layers_with_output:
-            if layer is layer_:
-                return output
-        raise ValueError("Layer not found.")
-
     def call(self, inputs, mask=None, training=None):
+        call_inner = lambda: self._call_inner(inputs, mask=mask, training=training)
+        if not self.return_layer_outputs:
+            return call_inner()
         layers_with_output = []
         override = _get_our_layer_call(layers_with_output)
         with mock.patch.object(tf.keras.layers.Layer, "__call__", override):
-            # TODO(mmatena): Make this only happen if flag in model is set.
-            return (
-                self._call_inner(inputs, mask=mask, training=training),
-                layers_with_output,
-            )
+            call_inner()
+            return layers_with_output
 
     def _call_inner(self, inputs, mask=None, training=None):
         # TODO(mmatena): Make sure this is right.

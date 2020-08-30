@@ -106,35 +106,30 @@ def get_dataset():
     return ds
 
 
-def get_keys(model):
-    # return model.transformer.encoder_layers[-1].self_attention_layer.output
-    x = model.transformer
-    x = x.encoder_layers[-1]
-    x = x.self_attention_layer
-    x = x.output
-    print("$$$", x.shape)
-    return x
+def get_output_of_layer(layers_with_output, layer_):
+    for layer, output in layers_with_output:
+        if layer is layer_:
+            return output
+    raise ValueError("Layer not found.")
 
 
-def get_keys_and_values(inputs, targets, key_model):
-    _, layers_with_output = key_model(inputs, training=False)
-    keys = key_model.get_output_of_layer(
+def get_keys_and_values(inputs, targets, model):
+    layers_with_output = model(inputs, training=False)
+    keys = get_output_of_layer(
         layers_with_output,
-        key_model.transformer.encoder_layers[-1].self_attention_layer,
+        # Use the output of the last self attention after the layer norm as the key.
+        model.transformer.encoder_layers[-1].self_attention_layer,
     )
     keys = keys[:, -1]
     values = targets[:, -1]
     return keys, values
-    # keys = key_model(inputs, training=False)[:, -1]
-    # values = targets[:, -1]
-    # return keys, values
 
 
-def run_shard(key_model, ds, sub_shard_index):
+def run_shard(model, ds, sub_shard_index):
 
     ds = ds.prefetch(4)
     ds = ds.map(
-        functools.partial(get_keys_and_values, key_model=key_model),
+        functools.partial(get_keys_and_values, model=model),
         num_parallel_calls=tf.data.experimental.AUTOTUNE,
     )
     num_total_shards = FLAGS.num_outer_shards * FLAGS.num_sub_shards
@@ -165,20 +160,13 @@ def main(_):
     ds = get_dataset()
 
     model = get_model()
-    # input_ = tf.keras.Input(shape=[SEQUENCE_LENGTH, 32 + 4 + 1])
-    # model(input_)
-    # layer = model.transformer.encoder_layers[-1].self_attention_layer
-    # # key_model = tf.keras.Model(inputs=input_, outputs=model.output)
-    # key_model = tf.keras.Model(inputs=input_, outputs=layer.output)
-
-    # print("@", [v.name for v in model.variables])
-    key_model = model
+    model.return_layer_outputs = True
 
     start = time.time()
 
     for i in range(FLAGS.num_sub_shards):
         run_shard(
-            key_model=key_model,
+            model=model,
             ds=ds.shard(num_shards=FLAGS.num_sub_shards, index=i),
             sub_shard_index=i,
         )

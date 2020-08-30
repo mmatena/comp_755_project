@@ -116,22 +116,8 @@ def get_keys(model):
     return x
 
 
-@tf.function
-def compute_keys(model, inputs):
-    model(inputs, training=False)
-    return model.transformer.encoder_layers[-1].self_attention_layer.get_output_at(0)[
-        :, -1
-    ]
-
-
 def get_keys_and_values(inputs, targets, key_model):
-    print("@@@", inputs)
-    # keys = key_model(inputs, training=False)[:, -1]
-
-    key_model(inputs, training=False)
-    # keys = get_keys(key_model)[:, -1]
-    keys = compute_keys(key_model, inputs)
-
+    keys = key_model(inputs, training=False)[:, -1]
     values = targets[:, -1]
     return keys, values
 
@@ -170,21 +156,18 @@ def main(_):
     ds = get_dataset()
 
     model = get_model()
-    # input_ = tf.keras.Input(shape=[SEQUENCE_LENGTH, 32 + 4 + 1])
-    # model(input_)
-    # layer = model.transformer.encoder_layers[-1].self_attention_layer
-    # print("@@@@@", layer.input)
-    # print("@@@@@", layer.output)
-    # # key_model = tf.keras.Model(inputs=input_, outputs=get_keys(model))
-    # # key_model = tf.keras.Model(inputs=input_, outputs=layer.output)
-    # key_model = tf.keras.Model(inputs=model.input, outputs=layer.get_output_at(0))
+    input_ = tf.keras.Input(shape=[SEQUENCE_LENGTH, 32 + 4 + 1])
+    model(input_)
+    layer = model.transformer.encoder_layers[-1].self_attention_layer
+    # key_model = tf.keras.Model(inputs=input_, outputs=get_keys(model))
+    # key_model = tf.keras.Model(inputs=input_, outputs=layer.output)
+    key_model = tf.keras.Model(inputs=input_, outputs=layer.output)
 
     start = time.time()
 
     for i in range(FLAGS.num_sub_shards):
         run_shard(
-            # key_model=key_model,
-            key_model=model,
+            key_model=key_model,
             ds=ds.shard(num_shards=FLAGS.num_sub_shards, index=i),
             sub_shard_index=i,
         )

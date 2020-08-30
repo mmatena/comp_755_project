@@ -24,34 +24,13 @@ run_python() {
   echo python $PROJECT_DIR/scripts/one_offs/test_policy.py
 }
 
-# run_singularity() {
-#   echo singularity exec --nv -B /pine -B /proj  -B /nas $SIMG_PATH/$SIMG_NAME bash -c "\\\"$(run_python)\\\""
-# }
-
-# launch() {
-#   # Not too sure why I have to do it like this, but just running the command
-#   # causes it fail to launch.
-#   CMD=$(echo sbatch \
-#     --ntasks=1 \
-#     --time=0:30:00 \
-#     --mem=6g \
-#     --partition=gpu \
-#     --gres=gpu:1 \
-#     --qos=gpu_access \
-#     --wrap="\"$(run_singularity)\"")
-#   eval $CMD
-# }
-
+run_singularity() {
+  echo singularity exec --nv -B /pine -B /proj $SIMG_PATH/$SIMG_NAME bash -c "\\\"$(run_python)\\\""
+}
 
 launch() {
   # Not too sure why I have to do it like this, but just running the command
   # causes it fail to launch.
-  # CMD=$(echo sbatch \
-  #   --ntasks=1 \
-  #   --time=8:30:00 \
-  #   --mem=6g \
-  #   --partition=general \
-  #   --wrap="\"$(run_python)\"")
   CMD=$(echo sbatch \
     --ntasks=1 \
     --time=0:30:00 \
@@ -59,7 +38,7 @@ launch() {
     --partition=gpu \
     --gres=gpu:1 \
     --qos=gpu_access \
-    --wrap="\"$(run_python)\"")
+    --wrap="\"$(run_singularity)\"")
   eval $CMD
 }
 

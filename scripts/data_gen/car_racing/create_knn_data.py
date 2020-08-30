@@ -62,9 +62,7 @@ SEQUENCE_LENGTH = 32
 
 
 def get_model():
-    model = saved_models.encoded_rollout_transformer()
-    model.compile()
-    return model
+    return saved_models.encoded_rollout_transformer()
 
 
 def get_dataset_files():
@@ -160,8 +158,8 @@ def main(_):
     model = get_model()
     input_ = tf.keras.Input(shape=[SEQUENCE_LENGTH, 32 + 4 + 1])
     model(input_)
-    key_model = tf.keras.Model(inputs=input_, outputs=get_keys(model))
-    key_model.build([None, SEQUENCE_LENGTH, 32 + 4 + 1])
+    outputs = tf.keras.layers.TimeDistributed(get_keys(model))
+    key_model = tf.keras.Model(inputs=input_, outputs=outputs)
 
     start = time.time()
 

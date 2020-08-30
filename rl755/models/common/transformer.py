@@ -66,10 +66,10 @@ class AutoregressiveTransformer(tf.keras.Model):
         self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
         super().build(input_shape)
 
-    def get_output_of_layer(self, layers_with_output, layer):
+    def get_output_of_layer(self, layers_with_output, layer_):
         # TODO(mmatena): move somewhere else.
         for layer, output in layers_with_output:
-            if layer is layer:
+            if layer is layer_:
                 return output
         raise ValueError("Layer not found.")
 

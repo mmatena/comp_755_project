@@ -114,10 +114,12 @@ def get_keys(model):
 
 
 def get_keys_and_values(inputs, targets, model):
-    model(inputs, training=False)
+    inputs_ph = tf.keras.Inputs(shape=inputs.shape)
+    # model(inputs, training=False)
     keys = get_keys(model)[:, -1]
+    key_model = tf.keras.Model(inputs=inputs_ph, outputs=keys)
     values = targets[:, -1]
-    return keys, values
+    return key_model(inputs, training=False), values
 
 
 def run_shard(model, ds, sub_shard_index):

@@ -165,7 +165,7 @@ def main(_):
     print("@@@@@", layer.output)
     # key_model = tf.keras.Model(inputs=input_, outputs=get_keys(model))
     # key_model = tf.keras.Model(inputs=input_, outputs=layer.output)
-    key_model = tf.keras.Model(inputs=[model.input], outputs=[layer.output])
+    key_model = tf.keras.Model(inputs=model.input, outputs=layer.get_output_at(0))
 
     start = time.time()
 

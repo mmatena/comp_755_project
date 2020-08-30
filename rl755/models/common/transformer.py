@@ -50,6 +50,7 @@ class AutoregressiveTransformer(tf.keras.Model):
         self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
         super().build(input_shape)
 
+    @tf.function
     def get_something(self, inputs, mask=None, training=None):
         seqlen = tf.shape(inputs)[1]
         ar_mask = _create_ar_mask(seqlen)

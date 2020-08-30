@@ -109,17 +109,19 @@ def get_dataset():
 
 
 def get_keys(model):
-    model.transformer.encoder_layers[-1].self_attention_layer.output
-    raise ValueError("This is justa placeholder for now.")
+    # return model.transformer.encoder_layers[-1].self_attention_layer.output
+    x = model.transformer
+    x = x.encoder_layers[-1]
+    x = x.self_attention_layer
+    x = x.output
+    return x
 
 
 def get_keys_and_values(inputs, targets, model):
-    inputs_ph = tf.keras.Inputs(shape=inputs.shape)
-    # model(inputs, training=False)
+    model(inputs, training=False)
     keys = get_keys(model)[:, -1]
-    key_model = tf.keras.Model(inputs=inputs_ph, outputs=keys)
     values = targets[:, -1]
-    return key_model(inputs, training=False), values
+    return keys, values
 
 
 def run_shard(model, ds, sub_shard_index):

@@ -121,8 +121,8 @@ def get_keys_and_values(inputs, targets, model):
     # input_ = tf.keras.Input(shape=inputs.shape[1:])
     # model(input_)
     # key_model = tf.keras.Model(inputs=model.inputs, outputs=get_keys(model))
-    # keys = key_model(model, training=False)[:, -1]
-    keys = model(model, training=False)[:, -1]
+    # keys = key_model(inputs, training=False)[:, -1]
+    keys = model(inputs, training=False)[:, -1]
     values = targets[:, -1]
     return keys, values
 

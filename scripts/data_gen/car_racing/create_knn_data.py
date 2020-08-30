@@ -158,7 +158,7 @@ def main(_):
     ds = get_dataset()
 
     model = get_model()
-    input_ = tf.keras.Input(shape=[SEQUENCE_LENGTH, 32 + 4 + 1])
+    input_ = tf.keras.Input(shape=[None, SEQUENCE_LENGTH, 32 + 4 + 1])
     model(input_)
     key_model = tf.keras.Model(inputs=input_, outputs=get_keys(model))
 

@@ -73,11 +73,11 @@ class AutoregressiveTransformer(tf.keras.Model):
                 return output
         raise ValueError("Layer not found.")
 
-    def call(self, *args, **kwargs):
+    def call(self, inputs, mask=None, training=None):
         self.layers_with_output = []
         override = _get_our_layer_call(self.layers_with_output)
         with mock.patch.object(tf.keras.layers.Layer, "__call__", override):
-            return self._call_inner(*args, **kwargs)
+            return self._call_inner(inputs, mask=mask, training=training)
 
     def _call_inner(self, inputs, mask=None, training=None):
         # TODO(mmatena): Make sure this is right.

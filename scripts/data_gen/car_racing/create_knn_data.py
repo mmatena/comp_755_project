@@ -162,7 +162,7 @@ def main(_):
     # # key_model = tf.keras.Model(inputs=input_, outputs=model.output)
     # key_model = tf.keras.Model(inputs=input_, outputs=layer.output)
 
-    print(model.variables)
+    print([v.name for v in model.variables])
     key_model = model
 
     start = time.time()

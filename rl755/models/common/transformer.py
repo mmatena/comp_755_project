@@ -36,8 +36,7 @@ _original_layer_call = tf.keras.layers.Layer.__call__
 def _get_our_layer_call(array):
     def fn(self, *args, **kwargs):
         output = _original_layer_call(self, *args, **kwargs)
-        # array.append(LayerWithOutput(layer=self, output=output))
-        print(output)
+        array.append(LayerWithOutput(layer=self, output=output))
         return output
 
     return fn

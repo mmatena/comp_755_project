@@ -151,11 +151,7 @@ def main(_):
     tf.config.experimental.set_visible_devices(gpus[FLAGS.gpu_index], "GPU")
     tf.config.experimental.set_memory_growth(gpus[FLAGS.gpu_index], True)
 
-    ds = get_dataset(
-        outer_shard_index=FLAGS.outer_shard_index,
-        num_outer_shards=FLAGS.num_outer_shards,
-        num_sub_shards=FLAGS.num_sub_shards,
-    )
+    ds = get_dataset()
 
     model = get_model()
 

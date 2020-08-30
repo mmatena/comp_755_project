@@ -63,7 +63,7 @@ SEQUENCE_LENGTH = 32
 
 def get_model():
     model = saved_models.encoded_rollout_transformer()
-    model.compile()
+    # model.compile()
     return model
 
 

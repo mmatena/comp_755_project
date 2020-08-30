@@ -161,7 +161,8 @@ def main(_):
     model(input_)
     layer = model.transformer.encoder_layers[-1].self_attention_layer
     # key_model = tf.keras.Model(inputs=input_, outputs=get_keys(model))
-    key_model = tf.keras.Model(inputs=input_, outputs=layer.output)
+    # key_model = tf.keras.Model(inputs=input_, outputs=layer.output)
+    key_model = tf.keras.Model(inputs=model.input, outputs=layer.output)
 
     start = time.time()
 

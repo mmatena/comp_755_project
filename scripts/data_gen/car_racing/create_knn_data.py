@@ -113,10 +113,10 @@ def get_keys(model):
     raise ValueError("This is justa placeholder for now.")
 
 
-def get_keys_and_values(x, model):
-    outputs = model(x["inputs"], training=False)
+def get_keys_and_values(inputs, targets, model):
+    model(inputs, training=False)
     keys = get_keys(model)[:, -1]
-    values = outputs[:, -1]
+    values = targets[:, -1]
     return keys, values
 
 

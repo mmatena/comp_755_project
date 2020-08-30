@@ -112,6 +112,7 @@ def get_keys(model):
     x = x.encoder_layers[-1]
     x = x.self_attention_layer
     x = x.output
+    print("$$$", x.shape)
     return x
 
 
@@ -158,8 +159,7 @@ def main(_):
     model = get_model()
     input_ = tf.keras.Input(shape=[SEQUENCE_LENGTH, 32 + 4 + 1])
     model(input_)
-    outputs = tf.keras.layers.TimeDistributed(get_keys(model))
-    key_model = tf.keras.Model(inputs=input_, outputs=outputs)
+    key_model = tf.keras.Model(inputs=input_, outputs=get_keys(model))
 
     start = time.time()
 

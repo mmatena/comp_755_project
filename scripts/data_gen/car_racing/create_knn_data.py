@@ -117,9 +117,10 @@ def get_keys(model):
 
 
 def get_keys_and_values(inputs, targets, key_model):
-    key_model(inputs, training=False)
+    _, layers_with_output = key_model(inputs, training=False)
     keys = key_model.get_output_of_layer(
-        key_model.transformer.encoder_layers[-1].self_attention_layer
+        layers_with_output,
+        key_model.transformer.encoder_layers[-1].self_attention_layer,
     )
     keys = keys[:, -1]
     values = targets[:, -1]
@@ -171,8 +172,6 @@ def main(_):
 
     # print("@", [v.name for v in model.variables])
     key_model = model
-    if True:
-        raise ValueError("asdf")
 
     start = time.time()
 

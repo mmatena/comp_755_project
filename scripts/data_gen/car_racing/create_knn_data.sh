@@ -8,7 +8,7 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-NUM_OUTER_SHARDS=16
+NUM_OUTER_SHARDS=4
 NUM_SUBSHARDS=4
 BASE_OUTER_SHARD_INDEX=$1
 

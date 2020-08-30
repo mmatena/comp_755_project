@@ -63,7 +63,6 @@ SEQUENCE_LENGTH = 32
 
 def get_model():
     model = saved_models.encoded_rollout_transformer()
-    model.build(input_shape=[FLAGS.batch_size, SEQUENCE_LENGTH, 32 + 4 + 1])
     model.compile()
     return model
 
@@ -119,8 +118,8 @@ def get_keys(model):
 
 
 def get_keys_and_values(inputs, targets, model):
-    model(inputs, training=False)
-    keys = get_keys(model)[:, -1]
+    key_model = tf.keras.Model(inputs=model.inputs, outputs=get_keys(model))
+    keys = key_model(model, training=False)[:, -1]
     values = targets[:, -1]
     return keys, values
 

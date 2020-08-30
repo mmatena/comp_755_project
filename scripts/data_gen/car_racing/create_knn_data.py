@@ -88,7 +88,6 @@ def get_dataset():
     ds = files.interleave(
         tf.data.TFRecordDataset,
         num_parallel_calls=tf.data.experimental.AUTOTUNE,
-        deterministic=False,
     )
     ds = ds.map(
         encoded_rollouts.parse_fn,

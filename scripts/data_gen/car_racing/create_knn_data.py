@@ -158,10 +158,11 @@ def main(_):
     model = get_model()
     input_ = tf.keras.Input(shape=[SEQUENCE_LENGTH, 32 + 4 + 1])
     model(input_)
-    layer = model.transformer.encoder_layers[-1].self_attention_layer
-    # key_model = tf.keras.Model(inputs=input_, outputs=get_keys(model))
+    # layer = model.transformer.encoder_layers[-1].self_attention_layer
+    key_model = tf.keras.Model(
+        inputs=input_, outputs=model.transformer.encoder_layers[-1].output
+    )
     # key_model = tf.keras.Model(inputs=input_, outputs=layer.output)
-    key_model = tf.keras.Model(inputs=input_, outputs=layer.output)
 
     start = time.time()
 

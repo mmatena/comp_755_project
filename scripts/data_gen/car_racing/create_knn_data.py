@@ -161,7 +161,7 @@ def main(_):
     input_ = tf.keras.Input(shape=[SEQUENCE_LENGTH, 32 + 4 + 1])
     model(input_)
     key_model = tf.keras.Model(inputs=input_, outputs=get_keys(model))
-    key_model.compile()
+    key_model.build([None, SEQUENCE_LENGTH, 32 + 4 + 1])
 
     start = time.time()
 

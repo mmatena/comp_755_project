@@ -63,7 +63,7 @@ SEQUENCE_LENGTH = 32
 
 def get_model():
     model = saved_models.encoded_rollout_transformer()
-    model.build(input_shape=[FLAGS.batch_size, SEQUENCE_LENGTH, 32])
+    model.build(input_shape=[FLAGS.batch_size, SEQUENCE_LENGTH, 32 + 4 + 1])
     model.compile()
     return model
 

@@ -116,17 +116,21 @@ def get_keys(model):
     return x
 
 
+@tf.function
+def compute_keys(model, inputs):
+    model(inputs, training=False)
+    return model.transformer.encoder_layers[-1].self_attention_layer.get_output_at(0)[
+        :, -1
+    ]
+
+
 def get_keys_and_values(inputs, targets, key_model):
     print("@@@", inputs)
     # keys = key_model(inputs, training=False)[:, -1]
 
-    output = key_model(inputs, training=False)
+    key_model(inputs, training=False)
     # keys = get_keys(key_model)[:, -1]
-    keys = key_model.transformer.encoder_layers[-1].self_attention_layer.get_output_at(
-        0
-    )[:, -1]
-
-    keys += output[:, -1]
+    keys = compute_keys(key_model, inputs)
 
     values = targets[:, -1]
     return keys, values

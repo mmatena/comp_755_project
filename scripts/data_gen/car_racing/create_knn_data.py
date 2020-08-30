@@ -160,6 +160,8 @@ def main(_):
     input_ = tf.keras.Input(shape=[SEQUENCE_LENGTH, 32 + 4 + 1])
     model(input_)
     layer = model.transformer.encoder_layers[-1].self_attention_layer
+    print("@@@@@", layer.input)
+    print("@@@@@", layer.output)
     # key_model = tf.keras.Model(inputs=input_, outputs=get_keys(model))
     # key_model = tf.keras.Model(inputs=input_, outputs=layer.output)
     key_model = tf.keras.Model(inputs=model.input, outputs=layer.output)

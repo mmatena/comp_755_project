@@ -117,9 +117,16 @@ def get_keys(model):
 
 
 def get_keys_and_values(inputs, targets, key_model):
-    keys = key_model(inputs, training=False)[:, -1]
+    key_model(inputs, training=False)
+    keys = key_model.get_output_of_layer(
+        key_model.transformer.encoder_layers[-1].self_attention_layer
+    )
+    keys = keys[:, -1]
     values = targets[:, -1]
     return keys, values
+    # keys = key_model(inputs, training=False)[:, -1]
+    # values = targets[:, -1]
+    # return keys, values
 
 
 def run_shard(key_model, ds, sub_shard_index):
@@ -162,7 +169,7 @@ def main(_):
     # # key_model = tf.keras.Model(inputs=input_, outputs=model.output)
     # key_model = tf.keras.Model(inputs=input_, outputs=layer.output)
 
-    print("@", [v.name for v in model.variables])
+    # print("@", [v.name for v in model.variables])
     key_model = model
     if True:
         raise ValueError("asdf")

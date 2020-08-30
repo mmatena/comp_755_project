@@ -4,10 +4,14 @@ Note that we will be training on sequences of continuous inputs instead of
 discrete tokens, so we'll assume that we aren't using embeddings layers
 unless explicitly stated otherwise.
 """
+import collections
+
 from bert.attention import AttentionLayer
 from bert.transformer import TransformerEncoderLayer
 from unittest import mock
 import tensorflow as tf
+
+LayerWithOutput = collections.namedtuple("LayerWithOutput", ["layer", "output"])
 
 
 def _create_ar_mask(seq_len):
@@ -26,12 +30,25 @@ def _our_create_attention_mask(from_shape, input_mask):
     return input_mask
 
 
+_original_layer_call = tf.keras.layers.Layer.__call__
+
+
+def _get_our_layer_call(array):
+    def fn(self, *args, **kwargs):
+        output = _original_layer_call(self, *args, **kwargs)
+        array.append(LayerWithOutput(layer=self, output=output))
+        return output
+
+    return fn
+
+
 class AutoregressiveTransformer(tf.keras.Model):
     def __init__(self, transformer_params, output_size, **kwargs):
         # TODO(mmatena): Add docs
         super().__init__(**kwargs)
         self.transformer_params = transformer_params
         self.output_size = output_size
+        self.layers_with_output = []
 
     def build(self, input_shape):
         hidden_size = self.transformer_params.hidden_size
@@ -50,7 +67,19 @@ class AutoregressiveTransformer(tf.keras.Model):
         self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
         super().build(input_shape)
 
-    def call(self, inputs, mask=None, training=None):
+    def get_output_of_layer(self, layer):
+        for layer, output in self.layers_with_output:
+            if layer is layer:
+                return output
+        raise ValueError("Layer not found.")
+
+    def call(self, *args, **kwargs):
+        self.layers_with_output = []
+        override = _get_our_layer_call(self.layers_with_output)
+        with mock.patch.object(tf.keras.layers.Layer, "__call__", override):
+            return self._call_inner(*args, **kwargs)
+
+    def _call_inner(self, inputs, mask=None, training=None):
         # TODO(mmatena): Make sure this is right.
         seqlen = tf.shape(inputs)[1]
         ar_mask = _create_ar_mask(seqlen)
@@ -72,3 +101,16 @@ class AutoregressiveTransformer(tf.keras.Model):
             output = self.transformer(inputs, mask=mask, training=training)
         output = self.final_layer(output, training=training)
         return output
+
+
+# from unittest import mock
+# class C(object):
+#     def __init__(self):
+#         self.value = 10
+#     def method(self, a):
+#         return a * self.value
+# fn = C.method
+# def _our_method(self, a):
+#     return 2 * fn(self, a)d
+# with mock.patch.object(C, "method", _our_method):
+#     c = C();print(c.method(17))

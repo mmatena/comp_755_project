@@ -119,7 +119,7 @@ def get_keys(model):
 def get_keys_and_values(inputs, targets, key_model):
     print("@@@", inputs)
     keys = key_model(inputs, training=False)[:, -1]
-    keys = get_keys(key_model)[:, -1]
+    # keys = get_keys(key_model)[:, -1]
     values = targets[:, -1]
     return keys, values
 

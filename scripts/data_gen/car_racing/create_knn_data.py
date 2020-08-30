@@ -117,24 +117,17 @@ def get_keys(model):
     return x
 
 
-def get_keys_and_values(inputs, targets, model):
-    # input_ = tf.keras.Input(shape=inputs.shape[1:])
-    # model(input_)
-    # key_model = tf.keras.Model(inputs=model.inputs, outputs=get_keys(model))
-    # keys = key_model(inputs, training=False)[:, -1]
-    keys = model(inputs, training=False)[:, -1]
+def get_keys_and_values(inputs, targets, key_model):
+    keys = key_model(inputs, training=False)[:, -1]
     values = targets[:, -1]
     return keys, values
 
 
-def run_shard(model, ds, sub_shard_index):
-    input_ = tf.keras.Input(shape=[SEQUENCE_LENGTH, 32 + 4 + 1])
-    model(input_)
-    key_model = tf.keras.Model(inputs=model.inputs, outputs=get_keys(model))
+def run_shard(key_model, ds, sub_shard_index):
 
     ds = ds.prefetch(4)
     ds = ds.map(
-        functools.partial(get_keys_and_values, model=key_model),
+        functools.partial(get_keys_and_values, key_model=key_model),
         num_parallel_calls=tf.data.experimental.AUTOTUNE,
     )
     num_total_shards = FLAGS.num_outer_shards * FLAGS.num_sub_shards
@@ -164,12 +157,15 @@ def main(_):
     ds = get_dataset()
 
     model = get_model()
+    input_ = tf.keras.Input(shape=[SEQUENCE_LENGTH, 32 + 4 + 1])
+    model(input_)
+    key_model = tf.keras.Model(inputs=input_, outputs=get_keys(model))
 
     start = time.time()
 
     for i in range(FLAGS.num_sub_shards):
         run_shard(
-            model=model,
+            key_model=key_model,
             ds=ds.shard(num_shards=FLAGS.num_sub_shards, index=i),
             sub_shard_index=i,
         )

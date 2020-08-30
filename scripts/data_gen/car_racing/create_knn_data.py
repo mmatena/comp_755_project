@@ -40,6 +40,8 @@ flags.DEFINE_integer(
     "The index of the GPU to use on multi-gpu systems.",
     lower_bound=0,
 )
+flags.DEFINE_string("out_dir", None, "The directory to write the tfrecords to.")
+flags.DEFINE_string("out_name", None, "Prefix to give the generated tfrecord files.")
 
 flags.DEFINE_integer(
     "num_passes",
@@ -53,6 +55,8 @@ flags.mark_flag_as_required("num_outer_shards")
 flags.mark_flag_as_required("outer_shard_index")
 flags.mark_flag_as_required("num_sub_shards")
 flags.mark_flag_as_required("gpu_index")
+flags.mark_flag_as_required("out_dir")
+flags.mark_flag_as_required("out_name")
 
 SEQUENCE_LENGTH = 32
 

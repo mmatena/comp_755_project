@@ -164,6 +164,8 @@ def main(_):
 
     print("@", [v.name for v in model.variables])
     key_model = model
+    if True:
+        raise ValueError("asdf")
 
     start = time.time()
 

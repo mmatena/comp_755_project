@@ -157,15 +157,16 @@ def main(_):
     ds = get_dataset()
 
     model = get_model()
-    input_ = tf.keras.Input(shape=[SEQUENCE_LENGTH, 32 + 4 + 1])
-    model(input_)
-    key_model = tf.keras.Model(inputs=input_, outputs=get_keys(model))
+    # input_ = tf.keras.Input(shape=[SEQUENCE_LENGTH, 32 + 4 + 1])
+    # model(input_)
+    # key_model = tf.keras.Model(inputs=input_, outputs=get_keys(model))
 
     start = time.time()
 
     for i in range(FLAGS.num_sub_shards):
         run_shard(
-            key_model=key_model,
+            # key_model=key_model,
+            key_model=model,
             ds=ds.shard(num_shards=FLAGS.num_sub_shards, index=i),
             sub_shard_index=i,
         )

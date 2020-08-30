@@ -156,11 +156,14 @@ def main(_):
     ds = get_dataset()
 
     model = get_model()
-    input_ = tf.keras.Input(shape=[SEQUENCE_LENGTH, 32 + 4 + 1])
-    model(input_)
-    layer = model.transformer.encoder_layers[-1].self_attention_layer
-    # key_model = tf.keras.Model(inputs=input_, outputs=model.output)
-    key_model = tf.keras.Model(inputs=input_, outputs=layer.output)
+    # input_ = tf.keras.Input(shape=[SEQUENCE_LENGTH, 32 + 4 + 1])
+    # model(input_)
+    # layer = model.transformer.encoder_layers[-1].self_attention_layer
+    # # key_model = tf.keras.Model(inputs=input_, outputs=model.output)
+    # key_model = tf.keras.Model(inputs=input_, outputs=layer.output)
+
+    print(model.variables)
+    key_model = model
 
     start = time.time()
 

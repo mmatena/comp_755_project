@@ -62,7 +62,6 @@ class AutoregressiveTransformer(tf.keras.Model):
             mask *= ar_mask
 
         inputs = self.initial_layer(inputs, training=training)
-        print(inputs)
         # Have to do this hack as the mask in the original transformer just represents non-padded
         # regions of the input. We need a different shape of the input mask to make the transformer
         # autoregressive. The function `_our_create_attention_mask` justs passes through our mask

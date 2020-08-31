@@ -31,8 +31,10 @@ def ignore_prefix_loss(loss_fn, prefix_size):
 
     def fn(y_true, y_pred):
         # We assume that the sequence dimension is the second dimension.
-        y_true = y_true[:, prefix_size:]
-        y_pred = y_pred[:, prefix_size:]
+        # y_true = y_true[:, prefix_size:]
+        # y_pred = y_pred[:, prefix_size:]
+        y_true = tf.reshape(y_true, [-1, tf.shape[y_true][-1]])
+        y_pred = tf.reshape(y_pred, [-1, tf.shape[y_true][-1]])
         return loss_fn(y_true, y_pred)
 
     return fn

@@ -19,6 +19,16 @@ flags.DEFINE_integer("batch_size", 128, "Batch size for eval.", lower_bound=1)
 SEQUENCE_LENGTH = 32
 
 
+def get_metrics():
+    obs_mse = transformer.observation_only_metric(
+        tf.keras.metrics.MeanSquaredError(name="obs_mse")
+    )
+    rewward_mse = transformer.observation_only_metric(
+        tf.keras.metrics.MeanSquaredError(name="rewward_mse")
+    )
+    return [obs_mse, rewward_mse]
+
+
 def get_ds():
     # NOTE: This won't be deterministic.
     ds = encoded_rollouts.random_rollout_slices(
@@ -43,7 +53,7 @@ def main(_):
     )
 
     model = saved_models.encoded_rollout_transformer()
-    model.compile(optimizer="adam", loss=loss_fn)
+    model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
     model.evaluate(ds)
 
 

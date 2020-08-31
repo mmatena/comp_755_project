@@ -47,6 +47,9 @@ def get_ds():
 
 def main(_):
     ds = get_ds()
+    for x in ds:
+        print("@@", x)
+        break
 
     loss_fn = transformer.ignore_prefix_loss(
         tf.keras.losses.MeanSquaredError(), prefix_size=4

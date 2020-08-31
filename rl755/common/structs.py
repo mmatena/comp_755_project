@@ -86,7 +86,7 @@ def key_value_to_tfrecord(key, value):
     return tf.train.Example(features=tf.train.Features(feature=features))
 
 
-def tfrecord_to_key_value(record, key_size=768, value_size=32):
+def tfrecord_to_key_value(record, key_size=768, value_size=33):
     # TODO(mmatena): Add docs
     features = {
         "key": tf.io.FixedLenFeature([key_size], tf.float32),

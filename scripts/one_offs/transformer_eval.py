@@ -56,6 +56,7 @@ def main(_):
     )
 
     model = saved_models.encoded_rollout_transformer()
+    model.return_layer_outputs = False
     # model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
     model.compile(optimizer="adam", loss=loss_fn)
     # model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())

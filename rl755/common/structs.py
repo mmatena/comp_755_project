@@ -86,11 +86,11 @@ def key_value_to_tfrecord(key, value):
     return tf.train.Example(features=tf.train.Features(feature=features))
 
 
-def tfrecord_to_key_value(record, sequence_length=32):
+def tfrecord_to_key_value(record, key_size=768, value_size=32):
     # TODO(mmatena): Add docs
     features = {
-        "key": tf.io.FixedLenFeature([sequence_length], tf.float32),
-        "value": tf.io.FixedLenFeature([sequence_length], tf.float32),
+        "key": tf.io.FixedLenFeature([key_size], tf.float32),
+        "value": tf.io.FixedLenFeature([value_size], tf.float32),
     }
     return tf.io.parse_single_example(record, features)
 

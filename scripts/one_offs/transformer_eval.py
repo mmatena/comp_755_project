@@ -53,7 +53,8 @@ def main(_):
     )
 
     model = saved_models.encoded_rollout_transformer()
-    model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
+    # model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
+    model.compile(optimizer="adam", loss=loss_fn)
     model.evaluate(ds)
 
 

@@ -57,10 +57,10 @@ def main(_):
     # model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
     model.compile(optimizer="adam", loss=loss_fn)
     # model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
-    for x in ds:
-        print("@@", x)
-        print("$$$", model(x[0]))
-        break
+    # for x in ds:
+    #     print("@@", x)
+    #     print("$$$", model(x[0]))
+    #     break
     model.evaluate(ds)
 
 

@@ -37,7 +37,7 @@ def get_ds():
     ds = ds.take(FLAGS.num_examples)
     ds = ds.map(
         functools.partial(
-            transformer.to_ar_inputs_and_targets, sequence_length=FLAGS.sequence_length
+            transformer.to_ar_inputs_and_targets, sequence_length=SEQUENCE_LENGTH
         ),
         num_parallel_calls=tf.data.experimental.AUTOTUNE,
     )

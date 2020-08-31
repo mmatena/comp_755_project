@@ -145,7 +145,6 @@ def run_shard(model, ds, sub_shard_index):
     )
     with tf.io.TFRecordWriter(filepath) as file_writer:
         for keys, values in ds:
-            print("@", keys)
             for key, value in zip(keys, values):
                 file_writer.write(
                     structs.key_value_to_tfrecord(key, value).SerializeToString()

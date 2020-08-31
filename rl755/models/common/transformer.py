@@ -101,16 +101,3 @@ class AutoregressiveTransformer(tf.keras.Model):
             output = self.transformer(inputs, mask=mask, training=training)
         output = self.final_layer(output, training=training)
         return output
-
-
-# from unittest import mock
-# class C(object):
-#     def __init__(self):
-#         self.value = 10
-#     def method(self, a):
-#         return a * self.value
-# fn = C.method
-# def _our_method(self, a):
-#     return 2 * fn(self, a)d
-# with mock.patch.object(C, "method", _our_method):
-#     c = C();print(c.method(17))

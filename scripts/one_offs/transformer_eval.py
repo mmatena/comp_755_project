@@ -51,11 +51,12 @@ def main(_):
     # loss_fn = transformer.ignore_prefix_loss(
     #     tf.keras.losses.MeanSquaredError(), prefix_size=4
     # )
+    loss_fn = tf.keras.losses.MeanSquaredError()
 
     model = saved_models.encoded_rollout_transformer()
     # model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
     # model.compile(optimizer="adam", loss=loss_fn)
-    model.compile(optimizer="adam", metrics=get_metrics())
+    model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
     model.evaluate(ds)
 
 

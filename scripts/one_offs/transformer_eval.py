@@ -47,9 +47,6 @@ def get_ds():
 
 def main(_):
     ds = get_ds()
-    for x in ds:
-        print("@@", x)
-        break
 
     loss_fn = transformer.ignore_prefix_loss(
         tf.keras.losses.MeanSquaredError(), prefix_size=4
@@ -60,6 +57,10 @@ def main(_):
     # model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
     model.compile(optimizer="adam", loss=loss_fn)
     # model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
+    for x in ds:
+        print("@@", x)
+        print("$$$", model(x[0]))
+        break
     model.evaluate(ds)
 
 

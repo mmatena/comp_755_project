@@ -57,7 +57,7 @@ def to_ar_inputs_and_targets(x, sequence_length, latent_size=32, action_size=4):
     targets = tf.concat([o[1:], r[:-1]], axis=-1)
     inputs = tf.reshape(inputs, [sequence_length, latent_size + action_size + 1])
     targets = tf.reshape(targets, [sequence_length, latent_size + 1])
-    return inputs, targets, 1.0
+    return inputs, targets
 
 
 def observation_only_metric(metric_fn, latent_size=32):

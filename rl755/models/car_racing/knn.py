@@ -25,3 +25,7 @@ def get_knn_ds(num_points=None):
     return ds.map(
         structs.tfrecord_to_key_value, num_parallel_calls=tf.data.experimental.AUTOTUNE
     )
+
+
+for x in get_knn_ds(num_points=5):
+    print(x["value"])

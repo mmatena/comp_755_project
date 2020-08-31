@@ -8,19 +8,20 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-NUM_OUTER_SHARDS=4
-NUM_SUBSHARDS=4
+# Let's go for 80 shards total.
+NUM_OUTER_SHARDS=8
+NUM_SUBSHARDS=10
 BASE_OUTER_SHARD_INDEX=$1
 
 OUT_DIR=/pine/scr/m/m/mmatena/comp_755_project/test_knn_data
 OUT_NAME=knn_data
 
-NUM_PASSES=2
+NUM_PASSES=100
 
-NUM_GPUS=2
-NUM_CORES=6
-MEMORY=15g
-TIME="5:30:00"
+NUM_GPUS=4
+NUM_CORES=8
+MEMORY=16g
+TIME="23:30:00"
 #############################################################
 
 unset OMP_NUM_THREADS

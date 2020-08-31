@@ -65,7 +65,11 @@ def observation_only_metric(metric_fn, latent_size=32):
 
     def fn(y_true, y_pred):
         y_true = y_true[..., :latent_size]
+        y_true = tf.reshape(y_true, [-1, latent_size])
+
         y_pred = y_pred[..., :latent_size]
+        y_pred = tf.reshape(y_pred, [-1, latent_size])
+
         return metric_fn(y_true, y_pred)
 
     return fn
@@ -76,7 +80,11 @@ def reward_only_metric(metric_fn, latent_size=32):
 
     def fn(y_true, y_pred):
         y_true = y_true[..., -1:]
+        y_true = tf.reshape(y_true, [-1, 1])
+
         y_pred = y_pred[..., -1:]
+        y_pred = tf.reshape(y_pred, [-1, 1])
+
         return metric_fn(y_true, y_pred)
 
     return fn

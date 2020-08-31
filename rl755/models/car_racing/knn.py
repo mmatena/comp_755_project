@@ -18,7 +18,6 @@ def get_knn_ds(num_points=None):
     ds = files.interleave(
         tf.data.TFRecordDataset,
         num_parallel_calls=tf.data.experimental.AUTOTUNE,
-        deterministic=False,
     )
     if num_points is not None:
         ds = ds.take(num_points)

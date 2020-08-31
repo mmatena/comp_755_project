@@ -59,7 +59,6 @@ def get_rollouts_ds(split="train"):
     ds = files.interleave(
         tf.data.TFRecordDataset,
         num_parallel_calls=tf.data.experimental.AUTOTUNE,
-        deterministic=False,
     )
     ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
     return ds.map(parse_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)

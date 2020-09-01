@@ -46,7 +46,7 @@ launch() {
   #   --qos=gpu_access \
   #   --pty \
   #   $(run_singularity))
-  # eval $CMD
+  eval $CMD
 }
 
 # Run the command to actually launch the job.

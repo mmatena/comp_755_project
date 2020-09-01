@@ -5,6 +5,7 @@ discrete tokens, so we'll assume that we aren't using embeddings layers
 unless explicitly stated otherwise.
 """
 import collections
+import functools
 
 from bert.attention import AttentionLayer
 from bert.transformer import TransformerEncoderLayer
@@ -22,12 +23,13 @@ def _create_ar_mask(seq_len):
     return mask
 
 
-def _our_create_attention_mask(from_shape, input_mask):
+def _our_create_attention_mask(from_shape, input_mask, mask):
     """Overide of AttentionLayer.create_attention_mask for our purposes.
 
     We create the attention mask outside of this function and just pass it through.
     """
-    return input_mask
+    del from_shape, input_mask
+    return mask
 
 
 _original_layer_call = tf.keras.layers.Layer.__call__
@@ -81,6 +83,7 @@ class AutoregressiveTransformer(tf.keras.Model):
 
     def _call_inner(self, inputs, mask=None, training=None):
         # TODO(mmatena): Make sure this is right.
+        orig_mask = mask
         seqlen = tf.shape(inputs)[1]
         ar_mask = _create_ar_mask(seqlen)
         if mask is None:
@@ -96,8 +99,10 @@ class AutoregressiveTransformer(tf.keras.Model):
         # autoregressive. The function `_our_create_attention_mask` justs passes through our mask
         # unchanged.
         with mock.patch.object(
-            AttentionLayer, "create_attention_mask", _our_create_attention_mask
+            AttentionLayer,
+            "create_attention_mask",
+            functools.partial(_our_create_attention_mask, mask=mask),
         ):
-            output = self.transformer(inputs, mask=mask, training=training)
+            output = self.transformer(inputs, mask=orig_mask, training=training)
         output = self.final_layer(output, training=training)
         return output

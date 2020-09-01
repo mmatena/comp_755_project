@@ -60,31 +60,23 @@ def to_ar_inputs_and_targets(x, sequence_length, latent_size=32, action_size=4):
     return inputs, targets
 
 
-def observation_only_metric(metric_fn, latent_size=32):
+def observation_only_metric(metric_fn, latent_size=32, prefix_size=0):
     """Computes a metric only on the observations."""
 
     def fn(y_true, y_pred):
-        y_true = y_true[..., :latent_size]
-        # y_true = tf.reshape(y_true, [-1, latent_size])
-
-        y_pred = y_pred[..., :latent_size]
-        # y_pred = tf.reshape(y_pred, [-1, latent_size])
-
+        y_true = y_true[:, prefix_size:, :latent_size]
+        y_pred = y_pred[:, prefix_size:, :latent_size]
         return metric_fn(y_true, y_pred)
 
     return fn
 
 
-def reward_only_metric(metric_fn):
+def reward_only_metric(metric_fn, prefix_size=0):
     """Computes a metric only on the rewards."""
 
     def fn(y_true, y_pred):
-        y_true = y_true[..., -1:]
-        # y_true = tf.reshape(y_true, [-1, 1])
-
-        y_pred = y_pred[..., -1:]
-        # y_pred = tf.reshape(y_pred, [-1, 1])
-
+        y_true = y_true[:, prefix_size:, -1:]
+        y_pred = y_pred[:, prefix_size:, -1:]
         return metric_fn(y_true, y_pred)
 
     return fn

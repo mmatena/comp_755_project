@@ -20,10 +20,12 @@ SEQUENCE_LENGTH = 32
 
 
 def get_metrics():
-    obs_mse = transformer.observation_only_metric(tf.keras.metrics.MeanSquaredError())
+    obs_mse = transformer.observation_only_metric(
+        tf.keras.metrics.MeanSquaredError(), prefix_size=4
+    )
     obs_mse.__name__ = "obs_mse"
     reward_mse = transformer.reward_only_metric(
-        tf.keras.metrics.MeanSquaredError(name="reward_mse")
+        tf.keras.metrics.MeanSquaredError(), prefix_size=4
     )
     reward_mse.__name__ = "reward_mse"
     return [obs_mse, reward_mse]

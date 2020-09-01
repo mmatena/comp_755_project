@@ -71,13 +71,14 @@ class AutoregressiveTransformer(tf.keras.Model):
 
     def call(self, inputs, mask=None, training=None):
         call_inner = lambda: self._call_inner(inputs, mask=mask, training=training)
-        if not self.return_layer_outputs:
-            return call_inner()
-        layers_with_output = []
-        override = _get_our_layer_call(layers_with_output)
-        with mock.patch.object(tf.keras.layers.Layer, "__call__", override):
-            call_inner()
-            return layers_with_output
+        return call_inner()
+        # if not self.return_layer_outputs:
+        #     return call_inner()
+        # layers_with_output = []
+        # override = _get_our_layer_call(layers_with_output)
+        # with mock.patch.object(tf.keras.layers.Layer, "__call__", override):
+        #     call_inner()
+        #     return layers_with_output
 
     def _call_inner(self, inputs, mask=None, training=None):
         # TODO(mmatena): Make sure this is right.

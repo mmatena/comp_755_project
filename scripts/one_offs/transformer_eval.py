@@ -46,6 +46,10 @@ def get_ds():
 
 
 def main(_):
+    gpus = tf.config.list_physical_devices("GPU")
+    for gpu in gpus:
+        tf.config.experimental.set_memory_growth(gpu, True)
+
     ds = get_ds()
 
     loss_fn = transformer.ignore_prefix_loss(

@@ -10,12 +10,9 @@ PROJECT_DIR=~/projects/comp_755_project
 unset OMP_NUM_THREADS
 SIMG_PATH=/nas/longleaf/apps/tensorflow_py3/2.1.0/simg
 SIMG_NAME=tensorflow2.1.0-py3-cuda10.1-ubuntu18.04.simg
-# SIMG_PATH=/nas/longleaf/apps/tensorflow_py3/2.0.0/simg
-# SIMG_NAME=tensorflow2.0.0-py3-cuda10.0-ubuntu18.04.simg
 
 module add python/3.6.6
 module add tensorflow_py3/2.1.0
-# module add tensorflow_py3/2.0.0
 
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 

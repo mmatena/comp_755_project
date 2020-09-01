@@ -1,14 +1,13 @@
 """Code for looking up the k-nearest neighbors.
 See https://arxiv.org/pdf/1911.00172.pdf for more details.
 """
+import scann
 import tensorflow as tf
 
 from rl755.common import structs
 
 # TODO(mmatena): Change when we have something permanent.
-TFRECORDS_PATTERN = (
-    "/pine/scr/m/m/mmatena/comp_755_project/test_knn_data/knn_data.tfrecord*"
-)
+TFRECORDS_PATTERN = "/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/encoded_knn/knn_data.tfrecord*"
 
 
 def get_knn_ds(num_points=None):

@@ -23,10 +23,10 @@ def get_metrics():
     obs_mse = transformer.observation_only_metric(
         tf.keras.metrics.MeanSquaredError(name="obs_mse")
     )
-    rewward_mse = transformer.observation_only_metric(
+    reward_mse = transformer.observation_only_metric(
         tf.keras.metrics.MeanSquaredError(name="rewward_mse")
     )
-    return [obs_mse, rewward_mse]
+    return [obs_mse, reward_mse]
 
 
 def get_ds():

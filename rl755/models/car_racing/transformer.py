@@ -31,6 +31,8 @@ def ignore_prefix_loss(loss_fn, prefix_size):
 
     def fn(y_true, y_pred):
         # We assume that the sequence dimension is the second dimension.
+        print("@true", y_true)
+        print("@pred", y_true)
         y_true = y_true[:, prefix_size:]
         y_pred = y_pred[:, prefix_size:]
         return loss_fn(y_true, y_pred)

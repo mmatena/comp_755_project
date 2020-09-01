@@ -32,7 +32,7 @@ launch() {
     --time=0:30:00 \
     --mem=6g \
     --partition=gpu \
-    --gres=gpu:1 \
+    --gres=volta-gpu:1 \
     --qos=gpu_access \
     --wrap="\"$(run_singularity)\"")
   eval $CMD

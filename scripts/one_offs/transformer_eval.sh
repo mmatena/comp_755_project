@@ -20,7 +20,7 @@ module add tensorflow_py3/2.0.0
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 
 run_python() {
-  echo "rm -r ~/.nv/ & python $PROJECT_DIR/scripts/one_offs/transformer_eval.py && fg"
+  echo "python $PROJECT_DIR/scripts/one_offs/transformer_eval.py"
   # echo python pdb $PROJECT_DIR/scripts/one_offs/transformer_eval.py
 }
 

@@ -12,7 +12,7 @@ from rl755.models.car_racing import transformer
 FLAGS = flags.FLAGS
 
 flags.DEFINE_integer(
-    "num_examples", 512, "The number of examples to evaluate on.", lower_bound=1
+    "num_examples", 1024, "The number of examples to evaluate on.", lower_bound=1
 )
 flags.DEFINE_integer("batch_size", 128, "Batch size for eval.", lower_bound=1)
 
@@ -58,13 +58,7 @@ def main(_):
 
     model = saved_models.encoded_rollout_transformer()
     model.return_layer_outputs = False
-    # model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
-    model.compile(optimizer="adam", loss=loss_fn, metrics=[])
-    # model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
-    # for x in ds:
-    #     print("@@", x)
-    #     print("$$$", model(x[0]))
-    #     break
+    model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
     model.evaluate(ds)
 
 

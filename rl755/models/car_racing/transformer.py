@@ -33,7 +33,7 @@ def ignore_prefix_loss(loss_fn, prefix_size):
         # We assume that the sequence dimension is the second dimension.
         y_true = y_true[:, prefix_size:]
         y_pred = y_pred[:, prefix_size:]
-        return loss_fn(y_true, y_pred, sample_weight=1.0)
+        return loss_fn(y_true, y_pred)
 
     return fn
 
@@ -75,7 +75,7 @@ def observation_only_metric(metric_fn, latent_size=32):
     return fn
 
 
-def reward_only_metric(metric_fn, latent_size=32):
+def reward_only_metric(metric_fn):
     """Computes a metric only on the rewards."""
 
     def fn(y_true, y_pred):

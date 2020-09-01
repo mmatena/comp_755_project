@@ -44,7 +44,8 @@ launch() {
     --partition=volta-gpu \
     --gres=gpu:1 \
     --qos=gpu_access \
-    --wrap="\"$(run_singularity)\"")
+    --pty \
+    $(run_singularity))
   eval $CMD
 }
 

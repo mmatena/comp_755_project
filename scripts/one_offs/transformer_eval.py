@@ -14,7 +14,8 @@ FLAGS = flags.FLAGS
 flags.DEFINE_integer(
     "num_examples", 512, "The number of examples to evaluate on.", lower_bound=1
 )
-flags.DEFINE_integer("batch_size", 128, "Batch size for eval.", lower_bound=1)
+# flags.DEFINE_integer("batch_size", 128, "Batch size for eval.", lower_bound=1)
+flags.DEFINE_integer("batch_size", 1, "Batch size for eval.", lower_bound=1)
 
 SEQUENCE_LENGTH = 32
 

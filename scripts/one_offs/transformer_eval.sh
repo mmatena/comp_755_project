@@ -23,7 +23,7 @@ run_python() {
 
 run_singularity() {
   # echo singularity exec --nv -B /pine -B /proj $SIMG_PATH/$SIMG_NAME bash -c "\\\"$(run_python)\\\""
-  echo singularity shell --nv -B /pine -B /proj $SIMG_PATH/$SIMG_NAME bash -c "\\\"$(run_python)\\\""
+  echo singularity shell --nv -B /pine -B /proj $SIMG_PATH/$SIMG_NAME # bash -c "\\\"$(run_python)\\\""
 }
 
 launch() {

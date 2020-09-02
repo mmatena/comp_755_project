@@ -24,7 +24,7 @@ export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 LD_EXPORT_CMD="export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/package_hacks/gcc/9.1.0/lib64"
 
 run_python() {
-  echo "$LD_EXPORT_CMD && python $PROJECT_DIR/scripts/one_offs/transformer_eval.py"
+  echo "$LD_EXPORT_CMD && python $PROJECT_DIR/scripts/one_offs/transformer_eval.py ${MORE_FLAGS}"
 }
 
 run_singularity() {

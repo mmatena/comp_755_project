@@ -148,10 +148,10 @@ class AutoregressiveLookupTransformer(tf.keras.Model):
 
         values = tf.reshape(
             values,
-            tf.concat([tf.shape(outputs)[:2], 10, tf.shape(outputs)[-1]], axis=0),
+            tf.concat([tf.shape(outputs)[:2], [10, tf.shape(outputs)[-1]]], axis=0),
         )
         distances = tf.reshape(
-            distances, tf.concat([tf.shape(outputs)[:2], 10], axis=0)
+            distances, tf.concat([tf.shape(outputs)[:2], [10]], axis=0)
         )
 
         weights = tf.nn.softmax(distances)

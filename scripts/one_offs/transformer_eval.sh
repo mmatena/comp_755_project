@@ -5,8 +5,8 @@
 #############################################################
 PROJECT_DIR=~/projects/comp_755_project
 
-MORE_FLAGS="--model='encoded_knn_rollout_transformer'\
-    --model_kwargs='{'k': 10, 'corpus_size': 1000, 'lambda_knn': 0.0}'"
+# MORE_FLAGS="--model='encoded_knn_rollout_transformer'\
+#     --model_kwargs='{'k': 10, 'corpus_size': 1000, 'lambda_knn': 0.0}'"
 #############################################################
 
 
@@ -24,7 +24,9 @@ export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 LD_EXPORT_CMD="export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/package_hacks/gcc/9.1.0/lib64"
 
 run_python() {
-  echo "$LD_EXPORT_CMD && python $PROJECT_DIR/scripts/one_offs/transformer_eval.py ${MORE_FLAGS}"
+  echo "$LD_EXPORT_CMD && python $PROJECT_DIR/scripts/one_offs/transformer_eval.py \
+      --model=encoded_knn_rollout_transformer \
+      --model_kwargs={k:10,corpus_size:1000,lambda_knn:0.0}"
 }
 
 run_singularity() {

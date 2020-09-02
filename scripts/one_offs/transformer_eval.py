@@ -1,4 +1,5 @@
 """Evaluate an autoregressive transformer on a validation set."""
+import ast
 import functools
 
 from absl import app
@@ -15,6 +16,11 @@ flags.DEFINE_integer(
     "num_examples", 1024, "The number of examples to evaluate on.", lower_bound=1
 )
 flags.DEFINE_integer("batch_size", 128, "Batch size for eval.", lower_bound=1)
+
+flags.DEFINE_string("model", "encoded_rollout_transformer", "Name of model to use.")
+flags.DEFINE_string(
+    "model_kwargs", "{}", "Kwargs dict literal for intstantiating the model."
+)
 
 SEQUENCE_LENGTH = 32
 
@@ -58,7 +64,7 @@ def main(_):
         tf.keras.losses.MeanSquaredError(), prefix_size=4
     )
 
-    model = saved_models.encoded_rollout_transformer()
+    model = getattr(saved_models, FLAGS.model)(ast.literal_eval(FLAGS.model_kwargs))
     model.return_layer_outputs = False
     model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
     model.evaluate(ds)

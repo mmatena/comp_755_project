@@ -88,3 +88,12 @@ class KnnLookup(object):
             inp=[queries],
             Tout=[tf.float32, tf.float32],
         )
+
+
+class KnnLookupLayer(tf.keras.layers.Layer):
+    def __init__(self, k, num_points=None, **kwargs):
+        super().__init__(**kwargs)
+        self.look_up = KnnLookup(k=k, num_points=num_points)
+
+    def call(self, inputs):
+        return self.look_up.get_batched(inputs)

@@ -114,7 +114,7 @@ def get_output_of_layer(layers_with_output, layer_):
 
 
 def get_keys_and_values(inputs, targets, model):
-    layers_with_output = model(inputs, training=False)
+    _, layers_with_output = model(inputs, training=False)
     keys = get_output_of_layer(
         layers_with_output,
         # Use the output of the last self attention after the layer norm as the key.

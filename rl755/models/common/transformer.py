@@ -78,8 +78,8 @@ class AutoregressiveTransformer(tf.keras.Model):
         layers_with_output = []
         override = _get_our_layer_call(layers_with_output)
         with mock.patch.object(tf.keras.layers.Layer, "__call__", override):
-            call_inner()
-            return layers_with_output
+            outputs = call_inner()
+            return outputs, layers_with_output
 
     def _call_inner(self, inputs, mask=None, training=None):
         # TODO(mmatena): Make sure this is right.
@@ -106,3 +106,29 @@ class AutoregressiveTransformer(tf.keras.Model):
             output = self.transformer(inputs, mask=orig_mask, training=training)
         output = self.final_layer(output, training=training)
         return output
+
+
+# TODO(mmatena): Reduce code duplication here.
+def get_output_of_layer(layers_with_output, layer_):
+    for layer, output in layers_with_output:
+        if layer is layer_:
+            return output
+    raise ValueError("Layer not found.")
+
+
+class AutoregressiveLookupTransformer(AutoregressiveTransformer):
+    def __init__(self, knn_lookup, lambda_knn, **kwargs):
+        super().__init__(return_layer_outputs=True, **kwargs)
+        self.knn_lookup = knn_lookup
+        self.lambda_knn = lambda_knn
+
+    def get_queries(self, layers_with_output):
+        layer = self.transformer.encoder_layers[-1].self_attention_layer
+        return get_output_of_layer(layers_with_output, layer)
+
+    def call(self, inputs, mask=None, training=None):
+        outputs, layers_with_output = super().__call__(
+            inputs, mask=mask, training=training
+        )
+        queries = self.get_queries(layers_with_output)
+        values, distances = self.knn_lookup.get_batched(queries)

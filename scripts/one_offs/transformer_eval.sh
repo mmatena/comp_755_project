@@ -26,7 +26,7 @@ LD_EXPORT_CMD="export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/package_hacks/gcc/9
 run_python() {
   echo "$LD_EXPORT_CMD && python $PROJECT_DIR/scripts/one_offs/transformer_eval.py \
       --model=encoded_knn_rollout_transformer \
-      --model_kwargs={\\\\\"k\\\\\":10,\\\\\"corpus_size\\\\\":1000,\\\\\"lambda_knn\\\\\":0.0}"
+      --model_kwargs={'k':10,'corpus_size':1000,'lambda_knn':0.0}"
 }
 
 run_singularity() {

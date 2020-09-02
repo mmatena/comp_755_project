@@ -79,15 +79,14 @@ class KnnLookup(object):
         )
         distances = tf.reshape(distances, tf.concat([batch_shape, [self.k]], axis=0))
 
-        return values  # , distances
+        return values, distances
 
     def get_batched(self, queries):
         # TODO(mmatena): add support for kwargs for search_batched
-        return tf.py_function(
+        return tf.compat.v1.py_func(
             self._get_batched,
             inp=[queries],
-            # Tout=[tf.float32, tf.float32],
-            Tout=tf.float32,
+            Tout=[tf.float32, tf.float32],
         )
 
 

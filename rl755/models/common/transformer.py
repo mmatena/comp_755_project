@@ -49,7 +49,7 @@ class AutoregressiveTransformer(tf.keras.Model):
         self, transformer_params, output_size, return_layer_outputs=False, **kwargs
     ):
         # TODO(mmatena): Add docs
-        tf.keras.Model.__init__(self, **kwargs)
+        super().__init__(**kwargs)
         self.transformer_params = transformer_params
         self.output_size = output_size
         self.return_layer_outputs = return_layer_outputs
@@ -69,7 +69,7 @@ class AutoregressiveTransformer(tf.keras.Model):
             tf.keras.layers.Dense(units=self.output_size, activation=None)
         )
         self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
-        tf.keras.Model.build(self, input_shape)
+        super().build(input_shape)
 
     def call(self, inputs, mask=None, training=None):
         call_inner = lambda: self._call_inner(inputs, mask=mask, training=training)
@@ -116,19 +116,24 @@ def get_output_of_layer(layers_with_output, layer_):
     raise ValueError("Layer not found.")
 
 
-class AutoregressiveLookupTransformer(AutoregressiveTransformer):
-    def __init__(self, knn_lookup, lambda_knn, **kwargs):
-        AutoregressiveTransformer.__init__(self, return_layer_outputs=True, **kwargs)
+class AutoregressiveLookupTransformer(tf.keras.Model):
+    def __init__(self, ar_transformer, knn_lookup, lambda_knn, **kwargs):
+        super().__init__(return_layer_outputs=True, **kwargs)
         self.knn_lookup = knn_lookup
         self.lambda_knn = lambda_knn
+        self.ar_transformer = ar_transformer
+
+    def build(self, input_shape):
+        self.ar_transformer.build(input_shape)
+        super().build(input_shape)
 
     def get_queries(self, layers_with_output):
         layer = self.transformer.encoder_layers[-1].self_attention_layer
         return get_output_of_layer(layers_with_output, layer)
 
     def call(self, inputs, mask=None, training=None):
-        outputs, layers_with_output = AutoregressiveTransformer.__call__(
-            self, inputs, mask=mask, training=training
+        outputs, layers_with_output = self.ar_transformer(
+            inputs, mask=mask, training=training
         )
         queries = self.get_queries(layers_with_output)
         values, distances = self.knn_lookup.get_batched(queries)

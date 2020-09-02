@@ -37,7 +37,6 @@ def _get_knn_np(num_points=None):
     knn_ds = _get_knn_ds(num_points=num_points)
     knn_ds = _ds_to_np(knn_ds)
 
-    print("a", knn_ds["value"].shape)  # Just curious.
     return knn_ds["key"], knn_ds["value"]
 
 
@@ -65,6 +64,7 @@ class KnnLookup(object):
 
     def get_batched(self, queries, **kwargs):
         neighbors, distances = self.searcher.search_batched(queries, **kwargs)
+        neighbors = tf.cast(neighbors, tf.int32)
         values = tf.gather(self.values, neighbors, axis=0)
         return values, tf.constant(distances)
 

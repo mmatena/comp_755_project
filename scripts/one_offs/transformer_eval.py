@@ -42,6 +42,7 @@ def get_ds():
     ds = encoded_rollouts.random_rollout_slices(
         slice_size=SEQUENCE_LENGTH + 1, split="validation"
     )
+    ds = ds.repeat()
     ds = ds.take(FLAGS.num_examples)
     ds = ds.map(
         functools.partial(

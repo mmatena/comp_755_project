@@ -123,7 +123,7 @@ class AutoregressiveLookupTransformer(tf.keras.Model):
         self.knn_lookup = knn_lookup
         self.lambda_knn = lambda_knn
         self.ar_transformer = ar_transformer
-        self.lookup_layer = tf.keras.layers.Lambda(self.lambda_knn.get_batched)
+        self.lookup_layer = tf.keras.layers.Lambda(self.knn_lookup.get_batched)
 
     def build(self, input_shape):
         self.ar_transformer.build(input_shape)

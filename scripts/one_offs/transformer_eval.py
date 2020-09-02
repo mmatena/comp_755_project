@@ -66,7 +66,7 @@ def main(_):
     )
 
     # model = getattr(saved_models, FLAGS.model)(**ast.literal_eval(FLAGS.model_kwargs))
-    model = getattr(saved_models, FLAGS.model)(k=10, corpus_size=250, lambda_knn=0.0)
+    model = getattr(saved_models, FLAGS.model)(k=10, corpus_size=None, lambda_knn=0.2)
     model.return_layer_outputs = False
     model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
     model.evaluate(ds)
@@ -77,4 +77,4 @@ if __name__ == "__main__":
 
 # 100k, 0.2: loss: 0.3411 - obs_mse: 0.3486 - reward_mse: 0.1190
 # 100k, 0.2: loss: 0.3407 - obs_mse: 0.3471 - reward_mse: 0.1227
-# 100k, 0.0:
+# 100k, 0.0: loss: 0.3405 - obs_mse: 0.3463 - reward_mse: 0.1274

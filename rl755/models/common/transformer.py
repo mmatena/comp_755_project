@@ -12,6 +12,8 @@ from bert.transformer import TransformerEncoderLayer
 from unittest import mock
 import tensorflow as tf
 
+from rl755.models.car_racing.knn import KnnLookupLayer
+
 LayerWithOutput = collections.namedtuple("LayerWithOutput", ["layer", "output"])
 
 
@@ -123,7 +125,7 @@ class AutoregressiveLookupTransformer(tf.keras.Model):
         self.knn_lookup = knn_lookup
         self.lambda_knn = lambda_knn
         self.ar_transformer = ar_transformer
-        self.lookup_layer = tf.keras.layers.Lambda(self.knn_lookup.get_batched)
+        self.lookup_layer = KnnLookupLayer(self.knn_lookup)
 
     def build(self, input_shape):
         self.ar_transformer.build(input_shape)

@@ -91,9 +91,9 @@ class KnnLookup(object):
 
 
 class KnnLookupLayer(tf.keras.layers.Layer):
-    def __init__(self, k, num_points=None, **kwargs):
+    def __init__(self, knn_lookup, **kwargs):
         super().__init__(**kwargs)
-        self.look_up = KnnLookup(k=k, num_points=num_points)
+        self.knn_lookup = knn_lookup
 
     def call(self, inputs):
-        return self.look_up.get_batched(inputs)
+        return self.knn_lookup.get_batched(inputs)

@@ -139,7 +139,7 @@ class AutoregressiveLookupTransformer(tf.keras.Model):
         queries = self.get_queries(layers_with_output)
 
         values, distances = tf.py_function(
-            lambda queries: self.knn_lookup.get_batched(queries),
+            lambda q: self.knn_lookup.get_batched(q),
             inp=[queries],
             Tout=[tf.float32, tf.float32],
         )

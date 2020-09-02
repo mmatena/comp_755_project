@@ -68,8 +68,10 @@ def encoded_knn_rollout_transformer(k, corpus_size, lambda_knn):
     # TODO(mmatena): Add docs explaing all the parameters this was trained with.
     seqlen = 32
     input_size = 32 + 4 + 1  # latent_dim + action_dim + reward_dim
+    ar_transformer = encoded_rollout_transformer()
+    ar_transformer.return_layer_outputs = True
     model = AutoregressiveLookupTransformer(
-        ar_transformer=encoded_rollout_transformer(),
+        ar_transformer=ar_transformer,
         knn_lookup=KnnLookup(k=k, num_points=corpus_size),
         lambda_knn=lambda_knn,
     )

@@ -118,7 +118,8 @@ def get_output_of_layer(layers_with_output, layer_):
 
 class AutoregressiveLookupTransformer(tf.keras.Model):
     def __init__(self, ar_transformer, knn_lookup, lambda_knn, **kwargs):
-        super().__init__(return_layer_outputs=True, **kwargs)
+        super().__init__(**kwargs)
+        assert ar_transformer.return_layer_outputs
         self.knn_lookup = knn_lookup
         self.lambda_knn = lambda_knn
         self.ar_transformer = ar_transformer

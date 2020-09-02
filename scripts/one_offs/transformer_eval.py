@@ -65,7 +65,7 @@ def main(_):
     )
 
     # model = getattr(saved_models, FLAGS.model)(**ast.literal_eval(FLAGS.model_kwargs))
-    model = getattr(saved_models, FLAGS.model)(k=10, corpus_size=100, lambda_knn=40.0)
+    model = getattr(saved_models, FLAGS.model)(k=10, corpus_size=10000, lambda_knn=1.0)
     model.return_layer_outputs = False
     model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
     model.evaluate(ds)

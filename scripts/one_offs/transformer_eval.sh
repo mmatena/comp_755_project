@@ -16,7 +16,9 @@ module add tensorflow_py3/2.1.0
 module add gcc/9.1.0
 
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
-LD_EXPORT_CMD="export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/nas/longleaf/apps/gcc/9.1.0/lib64"
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/nas/longleaf/apps/gcc/9.1.0/lib64
+# I copied the module to here since we can't access the original one in singularity.
+LD_EXPORT_CMD="export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/package_hacks/gcc/9.1.0/lib64"
 
 run_python() {
   echo "$LD_EXPORT_CMD && python $PROJECT_DIR/scripts/one_offs/transformer_eval.py"

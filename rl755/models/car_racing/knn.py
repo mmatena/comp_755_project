@@ -28,7 +28,7 @@ def _get_knn_ds(num_points=None):
 
 
 def _ds_to_np(ds):
-    max_elems = np.iinfo(np.int64).max
+    max_elems = np.iinfo(np.int32).max
     ds = ds.batch(max_elems)
     return tf.data.experimental.get_single_element(ds)
 

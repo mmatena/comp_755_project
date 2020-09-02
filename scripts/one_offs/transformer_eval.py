@@ -13,9 +13,9 @@ from rl755.models.car_racing import transformer
 FLAGS = flags.FLAGS
 
 flags.DEFINE_integer(
-    "num_examples", 1024, "The number of examples to evaluate on.", lower_bound=1
+    "num_examples", 32 * 1024, "The number of examples to evaluate on.", lower_bound=1
 )
-flags.DEFINE_integer("batch_size", 128, "Batch size for eval.", lower_bound=1)
+flags.DEFINE_integer("batch_size", 256, "Batch size for eval.", lower_bound=1)
 
 flags.DEFINE_string("model", "encoded_rollout_transformer", "Name of model to use.")
 flags.DEFINE_string(
@@ -73,3 +73,5 @@ def main(_):
 
 if __name__ == "__main__":
     app.run(main)
+
+# 100k, 0.2: 4/Unknown - 7s 2s/step - loss: 0.3376 - obs_mse: 0.3482 - reward_mse: 0.1521

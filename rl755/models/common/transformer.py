@@ -147,7 +147,7 @@ class AutoregressiveLookupTransformer(tf.keras.Model):
 
         # values, distances = self.lookup_layer(queries)
         values = self.lookup_layer(queries)
-        distances = values[..., 0]
+        distances = values[:, :, 0]
 
         weights = tf.nn.softmax(distances)
         knn_estimates = tf.reduce_sum(

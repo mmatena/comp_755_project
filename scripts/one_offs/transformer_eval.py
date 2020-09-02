@@ -64,7 +64,8 @@ def main(_):
         tf.keras.losses.MeanSquaredError(), prefix_size=4
     )
 
-    model = getattr(saved_models, FLAGS.model)(**ast.literal_eval(FLAGS.model_kwargs))
+    # model = getattr(saved_models, FLAGS.model)(**ast.literal_eval(FLAGS.model_kwargs))
+    model = getattr(saved_models, FLAGS.model)(k=10, corpus_size=1000, lambda_knn=0.0)
     model.return_layer_outputs = False
     model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
     model.evaluate(ds)

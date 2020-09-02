@@ -158,7 +158,7 @@ class AutoregressiveLookupTransformer(tf.keras.Model):
             distances, tf.concat([tf.shape(outputs)[:2], [self.knn_lookup.k]], axis=0)
         )
 
-        weights = tf.nn.softmax(distances)
+        weights = tf.nn.softmax(-distances)
         knn_estimates = tf.reduce_sum(
             values * tf.expand_dims(weights, axis=-1), axis=-2
         )

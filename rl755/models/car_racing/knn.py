@@ -87,7 +87,7 @@ class KnnLookup(object):
             self._get_batched,
             inp=[queries],
             # Tout=[tf.float32, tf.float32],
-            Tout=[tf.float32],
+            Tout=tf.float32,
         )
 
 

@@ -6,7 +6,7 @@
 PROJECT_DIR=~/projects/comp_755_project
 
 MORE_FLAGS="--model='encoded_knn_rollout_transformer'\
-    --model_kwargs=\"{'k': 10, 'corpus_size': None, 'lambda_knn': 0.2}\""
+    --model_kwargs=\"{'k': 10, 'corpus_size': None, 'lambda_knn': 1.0}\""
 #############################################################
 
 

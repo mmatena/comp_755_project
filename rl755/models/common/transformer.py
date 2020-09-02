@@ -145,12 +145,10 @@ class AutoregressiveLookupTransformer(tf.keras.Model):
         )
         queries = self.get_queries(layers_with_output)
 
-        # values, distances = tf.py_function(
-        #     lambda q: self.knn_lookup.get_batched(q.numpy()),
-        #     inp=[queries],
-        #     Tout=[tf.float32, tf.float32],
-        # )
-        values, distances = self.lookup_layer(queries)
+        # values, distances = self.lookup_layer(queries)
+        values = self.lookup_layer(queries)
+        distances = values[..., 0]
+
         weights = tf.nn.softmax(distances)
         knn_estimates = tf.reduce_sum(
             values * tf.expand_dims(weights, axis=-1), axis=-2

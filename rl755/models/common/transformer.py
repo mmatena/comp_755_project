@@ -132,6 +132,9 @@ class AutoregressiveLookupTransformer(tf.keras.Model):
         layer = self.ar_transformer.transformer.encoder_layers[-1].self_attention_layer
         return get_output_of_layer(layers_with_output, layer)
 
+    def load_ar_weights(self, weights_path):
+        self.ar_transformer.load_weights(weights_path)
+
     def call(self, inputs, mask=None, training=None):
         outputs, layers_with_output = self.ar_transformer(
             inputs, mask=mask, training=training

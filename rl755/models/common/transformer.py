@@ -49,7 +49,7 @@ class AutoregressiveTransformer(tf.keras.Model):
         self, transformer_params, output_size, return_layer_outputs=False, **kwargs
     ):
         # TODO(mmatena): Add docs
-        super().__init__(**kwargs)
+        super(AutoregressiveTransformer, self).__init__(**kwargs)
         self.transformer_params = transformer_params
         self.output_size = output_size
         self.return_layer_outputs = return_layer_outputs
@@ -69,7 +69,7 @@ class AutoregressiveTransformer(tf.keras.Model):
             tf.keras.layers.Dense(units=self.output_size, activation=None)
         )
         self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
-        super().build(input_shape)
+        super(AutoregressiveTransformer, self).build(input_shape)
 
     def call(self, inputs, mask=None, training=None):
         call_inner = lambda: self._call_inner(inputs, mask=mask, training=training)
@@ -118,7 +118,9 @@ def get_output_of_layer(layers_with_output, layer_):
 
 class AutoregressiveLookupTransformer(AutoregressiveTransformer):
     def __init__(self, knn_lookup, lambda_knn, **kwargs):
-        super().__init__(return_layer_outputs=True, **kwargs)
+        super(AutoregressiveLookupTransformer, self).__init__(
+            return_layer_outputs=True, **kwargs
+        )
         self.knn_lookup = knn_lookup
         self.lambda_knn = lambda_knn
 
@@ -127,9 +129,9 @@ class AutoregressiveLookupTransformer(AutoregressiveTransformer):
         return get_output_of_layer(layers_with_output, layer)
 
     def call(self, inputs, mask=None, training=None):
-        outputs, layers_with_output = super().__call__(
-            inputs, mask=mask, training=training
-        )
+        outputs, layers_with_output = super(
+            AutoregressiveLookupTransformer, self
+        ).__call__(inputs, mask=mask, training=training)
         queries = self.get_queries(layers_with_output)
         values, distances = self.knn_lookup.get_batched(queries)
         weights = tf.nn.softmax(distances)

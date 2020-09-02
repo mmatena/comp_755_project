@@ -129,7 +129,7 @@ class AutoregressiveLookupTransformer(tf.keras.Model):
         super().build(input_shape)
 
     def get_queries(self, layers_with_output):
-        layer = self.transformer.encoder_layers[-1].self_attention_layer
+        layer = self.ar_transformer.transformer.encoder_layers[-1].self_attention_layer
         return get_output_of_layer(layers_with_output, layer)
 
     def call(self, inputs, mask=None, training=None):

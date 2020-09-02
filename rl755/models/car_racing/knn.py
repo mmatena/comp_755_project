@@ -63,7 +63,7 @@ class KnnLookup(object):
         self.searcher = _create_searcher(keys, k=k)
         self.values = values
 
-    def get_batched(self, queries, **kwargs):
+    def _get_batched(self, queries, **kwargs):
         # TODO(mmatena): add docs
         # Returned shapes = [<batch>, k, d_value], [<batch>, k]
         batch_shape, key_size = tf.shape(queries)[:-1], tf.shape(queries)[-1]
@@ -81,10 +81,10 @@ class KnnLookup(object):
 
         return values, distances
 
-    # def get_batched(self, queries):
-    #     # TODO(mmatena): add support for kwargs for search_batched
-    #     return tf.py_function(
-    #         self._get_batched,
-    #         inp=[queries],
-    #         Tout=[tf.float32, tf.float32],
-    #     )
+    def get_batched(self, queries):
+        # TODO(mmatena): add support for kwargs for search_batched
+        return tf.py_function(
+            self._get_batched,
+            inp=[queries],
+            Tout=[tf.float32, tf.float32],
+        )

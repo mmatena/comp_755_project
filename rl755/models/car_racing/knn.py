@@ -61,18 +61,12 @@ class KnnLookup(object):
     def __init__(self, k, num_points=None):
         keys, values = _get_knn_np(num_points=num_points)
         self.searcher = _create_searcher(keys, k=k)
-        # TODO(mmatena): Keys are large and values are small. There is probably a far more
-        # memory efficient way to do this involving storing the index as in the mantissa of
-        # an added column in the key with a very small exponent.
-        self.hash_table = tf.lookup.StaticHashTable(
-            tf.lookup.KeyValueTensorInitializer(keys, values),
-            -tf.ones([values.shape[1]]),
-        )
+        self.values = values
 
     def get_batched(self, queries, **kwargs):
         neighbors, distances = self.searcher.search_batched(queries, **kwargs)
-        values = self.hash_table.lookup(neighbors)
-        return values, distances
+        values = tf.gather(self.values, neighbors, axis=0)
+        return values, tf.constant(distances)
 
 
 # array = _get_knn_np()

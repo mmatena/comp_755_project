@@ -77,6 +77,6 @@ class KnnLookup(object):
         values = tf.reshape(
             values, tf.concat([batch_shape, [self.k, value_size]], axis=0)
         )
-        distances = tf.reshape(values, tf.concat([batch_shape, [self.k]], axis=0))
+        distances = tf.reshape(distances, tf.concat([batch_shape, [self.k]], axis=0))
 
         return values, distances

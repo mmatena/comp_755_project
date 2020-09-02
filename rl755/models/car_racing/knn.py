@@ -58,16 +58,25 @@ def _create_searcher(array, k):
 
 class KnnLookup(object):
     def __init__(self, k, num_points=None):
+        self.k = k
         keys, values = _get_knn_np(num_points=num_points)
         self.searcher = _create_searcher(keys, k=k)
         self.values = values
 
     def get_batched(self, queries, **kwargs):
+        # TODO(mmatena): add docs
+        # Returned shapes = [<batch>, k, d_value], [<batch>, k]
+        batch_shape, key_size = tf.shape(queries)[:-1], tf.shape(queries)[-1]
+        queries = tf.reshape(queries, [-1, key_size])
+
         neighbors, distances = self.searcher.search_batched(queries, **kwargs)
         neighbors = tf.cast(neighbors, tf.int32)
         values = tf.gather(self.values, neighbors, axis=0)
-        return values, tf.constant(distances)
 
+        value_size = tf.shape(values)[-1]
+        values = tf.reshape(
+            values, tf.concat([batch_shape, [self.k, value_size]], axis=0)
+        )
+        distances = tf.reshape(values, tf.concat([batch_shape, [self.k]], axis=0))
 
-# array = _get_knn_np()
-# searcher = _create_searcher(array, k=10)
+        return values, distances

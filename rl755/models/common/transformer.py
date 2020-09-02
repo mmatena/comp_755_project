@@ -132,3 +132,8 @@ class AutoregressiveLookupTransformer(AutoregressiveTransformer):
         )
         queries = self.get_queries(layers_with_output)
         values, distances = self.knn_lookup.get_batched(queries)
+        weights = tf.nn.softmax(distances)
+        knn_estimates = tf.reduce_sum(
+            values * tf.expand_dims(weights, axis=-1), axis=-2
+        )
+        return self.lambda_knn * knn_estimates + (1 - self.lambda_knn) * outputs

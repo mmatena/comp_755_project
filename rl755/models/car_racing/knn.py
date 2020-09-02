@@ -63,13 +63,13 @@ class KnnLookup(object):
         self.searcher = _create_searcher(keys, k=k)
         self.values = values
 
-    def get_batched(self, queries, **kwargs):
+    def _get_batched(self, queries, **kwargs):
         # TODO(mmatena): add docs
         # Returned shapes = [<batch>, k, d_value], [<batch>, k]
         batch_shape, key_size = tf.shape(queries)[:-1], tf.shape(queries)[-1]
         queries = tf.reshape(queries, [-1, key_size])
 
-        neighbors, distances = self.searcher.search_batched(queries, **kwargs)
+        neighbors, distances = self.searcher.search_batched(queries.numpy(), **kwargs)
         neighbors = tf.cast(neighbors, tf.int32)
         values = tf.gather(self.values, neighbors, axis=0)
 
@@ -80,3 +80,11 @@ class KnnLookup(object):
         distances = tf.reshape(distances, tf.concat([batch_shape, [self.k]], axis=0))
 
         return values, distances
+
+    def get_batched(self, queries):
+        # TODO(mmatena): add support for kwargs for search_batched
+        return tf.py_function(
+            self._get_batched,
+            inp=[queries],
+            Tout=[tf.float32, tf.float32],
+        )

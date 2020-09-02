@@ -83,7 +83,7 @@ class KnnLookup(object):
 
     def get_batched(self, queries):
         # TODO(mmatena): add support for kwargs for search_batched
-        return tf.compat.v1.py_func(
+        return tf.py_function(
             self._get_batched,
             inp=[queries],
             Tout=[tf.float32, tf.float32],

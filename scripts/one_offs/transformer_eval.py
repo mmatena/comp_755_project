@@ -22,6 +22,8 @@ flags.DEFINE_string(
     "model_kwargs", "{}", "Kwargs dict literal for intstantiating the model."
 )
 
+flags.DEFINE_string("split", "validation", "The split to evaluate on.")
+
 SEQUENCE_LENGTH = 32
 
 
@@ -40,7 +42,7 @@ def get_metrics():
 def get_ds():
     # NOTE: This won't be deterministic.
     ds = encoded_rollouts.random_rollout_slices(
-        slice_size=SEQUENCE_LENGTH + 1, split="validation"
+        slice_size=SEQUENCE_LENGTH + 1, split=FLAGS.split
     )
     ds = ds.repeat()
     ds = ds.take(FLAGS.num_examples)
@@ -55,6 +57,8 @@ def get_ds():
 
 
 def main(_):
+    if True:
+        raise ValueError("TRY EVALUATING ON THE TRAIN SET!")
     gpus = tf.config.list_physical_devices("GPU")
     for gpu in gpus:
         tf.config.experimental.set_memory_growth(gpu, True)
@@ -66,7 +70,7 @@ def main(_):
     )
 
     # model = getattr(saved_models, FLAGS.model)(**ast.literal_eval(FLAGS.model_kwargs))
-    model = getattr(saved_models, FLAGS.model)(k=100, corpus_size=None, lambda_knn=0.2)
+    model = getattr(saved_models, FLAGS.model)(k=10, corpus_size=100000, lambda_knn=0.2)
     model.return_layer_outputs = False
     model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
     model.evaluate(ds)
@@ -82,4 +86,5 @@ if __name__ == "__main__":
 # # None, 0.2, k=10: loss: 0.3414 - obs_mse: 0.3478 - reward_mse: 0.1234
 # # None, 0.2, k=100:
 
-# 100k, 0.2, k=10: loss: 0.3401 - obs_mse: 0.3466 - reward_mse: 0.1204
+# 100k, 0.2, k=10:  loss: 0.3401 - obs_mse: 0.3466 - reward_mse: 0.1204
+# None, 0.2, k=100: loss: 0.3417 - obs_mse: 0.3499 - reward_mse: 0.1223

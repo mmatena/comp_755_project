@@ -29,11 +29,11 @@ SEQUENCE_LENGTH = 32
 
 def get_metrics():
     obs_mse = transformer.observation_only_metric(
-        tf.keras.metrics.MeanSquaredError(), prefix_size=31
+        tf.keras.metrics.MeanSquaredError(), prefix_size=4
     )
     obs_mse.__name__ = "obs_mse"
     reward_mse = transformer.reward_only_metric(
-        tf.keras.metrics.MeanSquaredError(), prefix_size=31
+        tf.keras.metrics.MeanSquaredError(), prefix_size=4
     )
     reward_mse.__name__ = "reward_mse"
     return [obs_mse, reward_mse]
@@ -69,7 +69,7 @@ def main(_):
 
     # model = getattr(saved_models, FLAGS.model)(**ast.literal_eval(FLAGS.model_kwargs))
     # model = getattr(saved_models, FLAGS.model)(k=10, corpus_size=100000, lambda_knn=1.0)
-    model = getattr(saved_models, FLAGS.model)(k=10, corpus_size=250, lambda_knn=0.0)
+    model = getattr(saved_models, FLAGS.model)(k=10, corpus_size=100000, lambda_knn=0.2)
     model.return_layer_outputs = False
     model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
     model.evaluate(ds)

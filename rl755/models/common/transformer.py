@@ -145,7 +145,8 @@ class AutoregressiveLookupTransformer(tf.keras.Model):
         )
         queries = self.get_queries(layers_with_output)
 
-        queries = tf.random.normal(tf.shape(queries))
+        # DJKOAKJFADJK KJAJKLDFLJKAJLKFD LKJALJKFLJKA
+        queries = -queries
 
         values, distances = self.lookup_layer(queries)
 

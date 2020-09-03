@@ -145,9 +145,6 @@ class AutoregressiveLookupTransformer(tf.keras.Model):
         )
         queries = self.get_queries(layers_with_output)
 
-        # DJKOAKJFADJK KJAJKLDFLJKAJLKFD LKJALJKFLJKA
-        queries = -queries
-
         values, distances = self.lookup_layer(queries)
 
         # Need to explicitly set the shapes or else the mod

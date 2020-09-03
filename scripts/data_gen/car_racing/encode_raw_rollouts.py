@@ -67,7 +67,6 @@ def get_dataset_files():
 
 def get_dataset(outer_shard_index, num_outer_shards, num_sub_shards):
     files = get_dataset_files()
-    print("@@@@", outer_shard_index)
     files = misc.evenly_partition(files, num_outer_shards)[outer_shard_index]
     # files = misc.evenly_partition(files, num_sub_shards)[sub_shard_index]
 

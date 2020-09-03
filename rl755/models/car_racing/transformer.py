@@ -8,6 +8,11 @@ from rl755.models.common import transformer as common_transformer
 class AutoregressiveFwdOr(common_transformer.AutoregressiveTransformer):
     pass
 
+    # def predict_next(self, rollout, action):
+    #     # TODO(mmatena): Return maybe change the inputs here.
+    #     # TODO(mmatena): Return next state, next reward
+    #     pass
+
 
 def ignore_prefix_loss(loss_fn, prefix_size):
     """Ignore the losses on the first few tokens.
@@ -53,3 +58,25 @@ def to_ar_inputs_and_targets(x, sequence_length, latent_size=32, action_size=4):
     inputs = tf.reshape(inputs, [sequence_length, latent_size + action_size + 1])
     targets = tf.reshape(targets, [sequence_length, latent_size + 1])
     return inputs, targets
+
+
+def observation_only_metric(metric_fn, latent_size=32, prefix_size=0):
+    """Computes a metric only on the observations."""
+
+    def fn(y_true, y_pred):
+        y_true = y_true[:, prefix_size:, :latent_size]
+        y_pred = y_pred[:, prefix_size:, :latent_size]
+        return metric_fn(y_true, y_pred)
+
+    return fn
+
+
+def reward_only_metric(metric_fn, prefix_size=0):
+    """Computes a metric only on the rewards."""
+
+    def fn(y_true, y_pred):
+        y_true = y_true[:, prefix_size:, -1:]
+        y_pred = y_pred[:, prefix_size:, -1:]
+        return metric_fn(y_true, y_pred)
+
+    return fn

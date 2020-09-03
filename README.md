@@ -23,6 +23,7 @@ When running on longleaf, please use the following modules
 ```bash
 module add python/3.6.6
 module add tensorflow_py3/2.1.0
+module add gcc/9.1.0
 ```
 
 Some of our infrastructure goals include:

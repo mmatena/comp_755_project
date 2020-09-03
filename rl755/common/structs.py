@@ -70,6 +70,31 @@ def raw_rollout_to_tfrecord(rollout):
     )
 
 
+def key_value_to_tfrecord(key, value):
+    """Converts a key value pair to the equivalent tfrecord.
+
+    Args:
+        key: a 1-d float tensor
+        value: a 1-d float tensor
+    Returns:
+        A tf.train.Example.
+    """
+    features = {
+        "key": tf.train.Feature(float_list=tf.train.FloatList(value=key)),
+        "value": tf.train.Feature(float_list=tf.train.FloatList(value=value)),
+    }
+    return tf.train.Example(features=tf.train.Features(feature=features))
+
+
+def tfrecord_to_key_value(record, key_size=768, value_size=33):
+    # TODO(mmatena): Add docs
+    features = {
+        "key": tf.io.FixedLenFeature([key_size], tf.float32),
+        "value": tf.io.FixedLenFeature([value_size], tf.float32),
+    }
+    return tf.io.parse_single_example(record, features)
+
+
 def latent_image_rollout_to_tfrecord(obs_latents, actions, rewards, obs_std_devs=None):
     """Converts a rollout with the images encoded by e.g. a VAE to the equivalent tfrecord.
 

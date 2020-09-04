@@ -9,9 +9,12 @@ import tensorflow as tf  # noqa: E402
 from rl755.common import structs  # noqa: E402
 
 # Needed for scann to link properly.
-os.environ[
-    "LD_LIBRARY_PATH"
-] = f"{os.environ['LD_LIBRARY_PATH']}:/nas/longleaf/home/mmatena/package_hacks/gcc/9.1.0/lib64"
+# os.environ[
+#     "LD_LIBRARY_PATH"
+# ] = f"{os.environ['LD_LIBRARY_PATH']}:/nas/longleaf/home/mmatena/package_hacks/gcc/9.1.0/lib64"
+os.system(
+    "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/nas/longleaf/home/mmatena/package_hacks/gcc/9.1.0/lib64"
+)
 import scann  # noqa: E402
 
 

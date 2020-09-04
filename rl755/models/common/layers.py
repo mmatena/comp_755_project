@@ -11,7 +11,9 @@ class MixtureOfGaussiansLayer(object):
         # super().__init__(name=name, **kwargs)
         self.dimensionality = dimensionality
         self.num_components = num_components
-        self.logits = tf.Variable(np.random.normal([num_components]), trainable=True)
+        self.logits = tf.Variable(
+            np.random.normal(size=[num_components]), trainable=True
+        )
 
     def _get_gauss_params(self, inputs):
         locs, scales = tf.split(inputs, num_or_size_splits=2, axis=-1)

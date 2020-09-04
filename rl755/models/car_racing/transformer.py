@@ -39,28 +39,27 @@ def ignore_prefix_loss(loss_fn, prefix_size):
 
 
 def to_ar_inputs_and_targets(
-    x, sequence_length, latent_size=32, action_size=4, sample=False
+    x, sequence_length, latent_size=32, action_size=3, sample=False
 ):
     """Given a slice of a rollout, convert it to inputs and targets for autoregressive modelling.
 
     We do it like this:
-        o[i], a[i], r[i-1] => o[i+1], r[i]
-    The goal is to predict the next observation and reward given the action taken and the previous states
-    and rewards.
+        o[i], a[i] => o[i+1] - o[i]
+    The goal is to predict the change in observation given the action taken and the previous states
+    and actions.
     """
     # TODO(mmatena): Make sure this is correct!
-    r = tf.expand_dims(x["rewards"], axis=-1)
-    a = x["actions"]
+    a = x["actions"][:, :action_size]
     o = x["observations"]
     if sample:
         o += x["observation_std_devs"] * tf.random.normal(shape=tf.shape(o))
     inputs = tf.concat(
-        [o[:-1], a[:-1], tf.concat([[[0.0]], r[:-2]], axis=0)],
+        [o[:-1], a[:-1]],
         axis=-1,
     )
-    targets = tf.concat([o[1:], r[:-1]], axis=-1)
-    inputs = tf.reshape(inputs, [sequence_length, latent_size + action_size + 1])
-    targets = tf.reshape(targets, [sequence_length, latent_size + 1])
+    targets = o[1:] - o[:-1]
+    inputs = tf.reshape(inputs, [sequence_length, latent_size + action_size])
+    targets = tf.reshape(targets, [sequence_length, latent_size])
     return inputs, targets
 
 

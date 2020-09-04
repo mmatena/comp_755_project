@@ -12,10 +12,10 @@ MODEL_DIR=/pine/scr/m/m/mmatena/mog_ar_transformer_train
 
 TRAIN_STEPS=100000
 
-NUM_GPUS=1
-NUM_CORES=8
-MEMORY=8g
-TIME="8:30:00"
+NUM_GPUS=4
+NUM_CORES=12
+MEMORY=12g
+TIME="2-"
 #############################################################
 
 
@@ -28,11 +28,13 @@ module add tensorflow_py3/2.1.0
 
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/package_hacks/gcc/9.1.0/lib64
+# I copied the module to here since we can't access the original one in singularity.
+LD_EXPORT_CMD="export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/package_hacks/gcc/9.1.0/lib64"
 
 run_python() {
-  echo python $PROJECT_DIR/scripts/models/car_racing/train_ar_transformer.py \
-    --model_dir=$MODEL_DIR \
-    --train_steps=$TRAIN_STEPS
+  echo "$LD_EXPORT_CMD && python $PROJECT_DIR/scripts/models/car_racing/train_ar_transformer.py \
+      --model_dir=$MODEL_DIR \
+      --train_steps=$TRAIN_STEPS"
 }
 
 

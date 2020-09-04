@@ -173,25 +173,7 @@ class AutoregressiveTransformer(tf.keras.Model):
 
         return nll_loss
 
-    # def _train_step_inner(self, data):
-    #     self.step.assign_add(1)
-
-    #     x, y = data
-    #     with tf.GradientTape() as tape:
-    #         out_dist = self(x, training=True)
-    #         loss = -out_dist.log_prob(y)
-
-    #     trainable_vars = self.trainable_variables
-    #     gradients = tape.gradient(loss, trainable_vars)
-    #     self.optimizer.apply_gradients(zip(gradients, trainable_vars))
-    #     tf.summary.scalar("loss", data=loss, step=self.step)
-    #     return {"loss": loss}
-
-    # def train_step(self, data):
-    #     if self.mirrored_strategy:
-    #         pass
-    #     else:
-    #         return self._train_step_inner(data)
+    # 1 gpu, 32: 62 s
 
 
 # TODO(mmatena): Reduce code duplication here.

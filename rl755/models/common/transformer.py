@@ -128,7 +128,10 @@ class AutoregressiveTransformer(tf.keras.Model):
         return output
 
     def _get_mog_params(self, outputs):
-        logits, outputs = outputs[: self.num_components], outputs[self.num_components :]
+        logits, outputs = (
+            outputs[..., : self.num_components],
+            outputs[..., self.num_components :],
+        )
         locs, scales = tf.split(outputs, num_or_size_splits=2, axis=-1)
         locs = tf.split(
             locs,

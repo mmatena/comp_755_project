@@ -138,6 +138,8 @@ class AutoregressiveTransformer(tf.keras.Model):
             tf.summary.scalar("loss", data=loss, step=self.step)
             return loss
 
+        return nll_loss
+
     # def _train_step_inner(self, data):
     #     self.step.assign_add(1)
 

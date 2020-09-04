@@ -12,7 +12,7 @@ MODEL_DIR=/pine/scr/m/m/mmatena/mog_ar_transformer_train
 
 TRAIN_STEPS=250000
 
-NUM_GPUS=4
+NUM_GPUS=2
 NUM_CORES=16
 MEMORY=16g
 TIME="2-"
@@ -34,7 +34,8 @@ LD_EXPORT_CMD="export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/package_hacks/gcc/9
 run_python() {
   echo "$LD_EXPORT_CMD && python $PROJECT_DIR/scripts/models/car_racing/train_ar_transformer.py \
       --model_dir=$MODEL_DIR \
-      --train_steps=$TRAIN_STEPS"
+      --train_steps=$TRAIN_STEPS \
+      --batch_size=64"
 }
 
 

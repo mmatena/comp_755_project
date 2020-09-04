@@ -23,11 +23,11 @@ class MixtureOfGaussiansLayer(tf.keras.layers.Layer):
             axis=-1,
         )
         scales = tf.split(
-            scales,
+            tf.nn.softplus(scales),
             num_or_size_splits=self.num_components * [self.dimensionality],
             axis=-1,
         )
-        return locs, tf.nn.softplus(scales)
+        return locs, scales
 
     def _get_gauss_components(self, inputs):
         locs, scales = self._get_gauss_params(inputs)

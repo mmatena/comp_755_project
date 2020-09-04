@@ -5,13 +5,13 @@ import tensorflow_probability as tfp
 tfd = tfp.distributions
 
 
-class MixtureOfGaussiansLayer(tf.keras.layers.Layer):
+class MixtureOfGaussiansLayer(object):
     def __init__(self, dimensionality, num_components, name="mog", **kwargs):
-        super().__init__(name=name, **kwargs)
+        # super().__init__(name=name, **kwargs)
         self.dimensionality = dimensionality
         self.num_components = num_components
         self.logits = self.add_weight(
-            shape=[1, 1, num_components], initializer="random_normal", trainable=True
+            shape=[num_components], initializer="random_normal", trainable=True
         )
         self.cat_dist = tfd.Categorical(logits=self.logits)
 
@@ -41,5 +41,5 @@ class MixtureOfGaussiansLayer(tf.keras.layers.Layer):
             cat=self.cat_dist, components=self._get_gauss_components(inputs)
         )
 
-    def call(self, inputs):
+    def __call__(self, inputs, training=None):
         return self._get_mix_of_gauss_distribution(inputs)

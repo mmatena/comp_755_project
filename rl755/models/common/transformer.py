@@ -86,7 +86,7 @@ class AutoregressiveTransformer(tf.keras.Model):
         self.mog_layer = MixtureOfGaussiansLayer(
             dimensionality=self.output_size, num_components=self.num_components
         )
-        self.mog_layer.build(list(input_shape[:-1]) + [final_layer_size])
+        # self.mog_layer.build(list(input_shape[:-1]) + [final_layer_size])
 
         super().build(input_shape)
 

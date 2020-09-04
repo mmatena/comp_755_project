@@ -4,7 +4,8 @@
 
 from absl import app
 
-# from absl import flags
+from absl import flags
+
 # from bert.transformer import TransformerEncoderLayer
 import tensorflow as tf
 
@@ -13,36 +14,36 @@ import tensorflow as tf
 # from rl755.models.car_racing import transformer
 # from rl755.models.common import transformer as common_transformer
 
-# FLAGS = flags.FLAGS
+FLAGS = flags.FLAGS
 
-# flags.DEFINE_string(
-#     "model_dir", None, "The directory to write checkpoints and logs to."
-# )
-# flags.DEFINE_integer(
-#     "train_steps", None, "The number of steps to train for.", lower_bound=1
-# )
+flags.DEFINE_string(
+    "model_dir", None, "The directory to write checkpoints and logs to."
+)
+flags.DEFINE_integer(
+    "train_steps", None, "The number of steps to train for.", lower_bound=1
+)
 
+flags.DEFINE_integer(
+    "batch_size", 32, "The number of sequences in each batch.", lower_bound=1
+)
+flags.DEFINE_integer(
+    "sequence_length", 32, "Size of windows to train on.", lower_bound=1
+)
 # flags.DEFINE_integer(
-#     "batch_size", 32, "The number of sequences in each batch.", lower_bound=1
+#     "ignore_loss_prefix_size",
+#     4,
+#     "Ignore losses on the first few tokens.",
+#     lower_bound=0,
 # )
-# flags.DEFINE_integer(
-#     "sequence_length", 32, "Size of windows to train on.", lower_bound=1
-# )
-# # flags.DEFINE_integer(
-# #     "ignore_loss_prefix_size",
-# #     4,
-# #     "Ignore losses on the first few tokens.",
-# #     lower_bound=0,
-# # )
-# flags.DEFINE_integer(
-#     "num_components",
-#     5,
-#     "Number of components in the Guassian mixture model.",
-#     lower_bound=1,
-# )
+flags.DEFINE_integer(
+    "num_components",
+    5,
+    "Number of components in the Guassian mixture model.",
+    lower_bound=1,
+)
 
-# flags.mark_flag_as_required("model_dir")
-# flags.mark_flag_as_required("train_steps")
+flags.mark_flag_as_required("model_dir")
+flags.mark_flag_as_required("train_steps")
 
 
 # def get_train_ds():

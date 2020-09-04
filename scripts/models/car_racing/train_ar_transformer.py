@@ -1,5 +1,5 @@
 """Trains an autoregressive transformer on windows of data."""
-import functools.partial
+import functools
 import os
 
 from absl import app

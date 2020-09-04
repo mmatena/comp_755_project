@@ -36,7 +36,9 @@ class MixtureOfGaussiansLayer(object):
 
     def _get_mix_of_gauss_distribution(self, inputs):
         batch_dims = tf.shape(inputs)[-1]
-        logits = tf.reshape(self.logits, len(batch_dims) * [1] + [self.num_components])
+        logits = tf.reshape(
+            self.logits, (len(inputs.shape) - 1) * [1] + [self.num_components]
+        )
         logits = tf.broadcast_to(
             logits, tf.concat([batch_dims, [self.num_components]], axis=0)
         )

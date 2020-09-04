@@ -81,16 +81,16 @@ def main(_):
         size_per_head=int(hidden_size / num_attention_heads),
     )
 
-    # mirrored_strategy = tf.distribute.MirroredStrategy()
-    # with mirrored_strategy.scope():
-    model = common_transformer.AutoregressiveTransformer(
-        transformer_params,
-        output_size=output_size,
-        num_components=FLAGS.num_components,
-    )
-    model.compile(
-        loss=model.nll_loss(global_batch_size=FLAGS.batch_size), optimizer="adam"
-    )
+    mirrored_strategy = tf.distribute.MirroredStrategy()
+    with mirrored_strategy.scope():
+        model = common_transformer.AutoregressiveTransformer(
+            transformer_params,
+            output_size=output_size,
+            num_components=FLAGS.num_components,
+        )
+        model.compile(
+            loss=model.nll_loss(global_batch_size=FLAGS.batch_size), optimizer="adam"
+        )
 
     ds = get_train_ds()
 

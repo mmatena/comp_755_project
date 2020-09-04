@@ -12,3 +12,6 @@ inputs = tf.expand_dims(inputs, axis=0)
 
 model = encoded_rollouts.encoded_rollout_transformer()
 y = model(x)
+var = tf.math.reduce_std(y, axis=-1)
+var = tf.squeeze(var)
+print(var)

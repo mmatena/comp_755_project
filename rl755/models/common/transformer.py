@@ -65,9 +65,6 @@ class AutoregressiveTransformer(tf.keras.Model):
         self.output_size = output_size
         self.num_components = num_components
         self.return_layer_outputs = return_layer_outputs
-        self.logits = self.add_weight(
-            shape=[num_components], initializer="random_normal", trainable=True
-        )
 
     def build(self, input_shape):
         hidden_size = self.transformer_params.hidden_size
@@ -154,14 +151,6 @@ class AutoregressiveTransformer(tf.keras.Model):
 
     def get_mix_of_gauss(self, outputs):
         logits, locs, scales = self._get_mog_params(outputs)
-        # batch_dims = tf.shape(outputs)[:-1]
-        # logits = tf.reshape(
-        #     self.logits, (len(outputs.shape) - 1) * [1] + [self.num_components]
-        # )
-        # logits = tf.broadcast_to(
-        #     logits, tf.concat([batch_dims, [self.num_components]], axis=0)
-        # )
-        # cat_dist = tfd.Categorical(logits=logits)
         return tfd.Mixture(
             cat=tfd.Categorical(logits=logits),
             components=[

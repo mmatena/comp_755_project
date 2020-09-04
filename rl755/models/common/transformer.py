@@ -11,9 +11,12 @@ from bert.attention import AttentionLayer
 from bert.transformer import TransformerEncoderLayer
 from unittest import mock
 import tensorflow as tf
+import tensorflow_probability as tfp
 
 from rl755.models.car_racing.knn import KnnLookupLayer
 from rl755.models.common.layers import MixtureOfGaussiansLayer
+
+tfd = tfp.distributions
 
 LayerWithOutput = collections.namedtuple("LayerWithOutput", ["layer", "output"])
 
@@ -121,13 +124,42 @@ class AutoregressiveTransformer(tf.keras.Model):
         ):
             output = self.transformer(inputs, mask=orig_mask, training=training)
         output = self.final_layer(output, training=training)
-        return output, self.logits
+        return output
+
+    def _get_gauss_params(self, inputs):
+        locs, scales = tf.split(inputs, num_or_size_splits=2, axis=-1)
+        locs = tf.split(
+            locs,
+            num_or_size_splits=self.num_components * [self.output_size],
+            axis=-1,
+        )
+        scales = tf.split(
+            tf.nn.softplus(scales),
+            num_or_size_splits=self.num_components * [self.output_size],
+            axis=-1,
+        )
+        return locs, scales
+
+    def _get_gauss_components(self, inputs):
+        locs, scales = self._get_gauss_params(inputs)
+        return [
+            tfd.MultivariateNormalDiag(loc=loc, scale_diag=scale)
+            for loc, scale in zip(locs, scales)
+        ]
+
+    def _get_mix_of_gauss_distribution(self, inputs):
+        # batch_dims = tf.shape(inputs)[-1]
+        logits = tf.reshape(
+            self.logits, (len(inputs.shape) - 1) * [1] + [self.num_components]
+        )
+        # logits = tf.broadcast_to(
+        #     logits, tf.concat([batch_dims, [self.num_components]], axis=0)
+        # )
+        cat_dist = tfd.Categorical(logits=logits)
+        return tfd.Mixture(cat=cat_dist, components=self._get_gauss_components(inputs))
 
     def nll_loss(self, global_batch_size=None):
-        def nll_loss(y_true, y_pred, t):
-            print(y_true)
-            print(y_pred)
-            print(t)
+        def nll_loss(y_true, y_pred):
             loss = -y_pred.log_prob(y_true)
             if not global_batch_size:
                 loss = tf.reduce_mean(loss)

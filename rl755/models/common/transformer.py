@@ -124,9 +124,10 @@ class AutoregressiveTransformer(tf.keras.Model):
         return output, self.logits
 
     def nll_loss(self, global_batch_size=None):
-        def nll_loss(y_true, y_pred):
+        def nll_loss(y_true, y_pred, t):
             print(y_true)
             print(y_pred)
+            print(t)
             loss = -y_pred.log_prob(y_true)
             if not global_batch_size:
                 loss = tf.reduce_mean(loss)

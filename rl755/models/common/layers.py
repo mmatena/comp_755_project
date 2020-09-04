@@ -11,7 +11,10 @@ class MixtureOfGaussiansLayer(object):
         # super().__init__(name=name, **kwargs)
         self.dimensionality = dimensionality
         self.num_components = num_components
-        self.logits = tf.Variable(np.random.normal([num_components]), trainable=True)
+        # TODO(mmatena): Make this in call with the 1s based on the shape of the input.
+        self.logits = tf.Variable(
+            np.random.normal([1, 1, num_components]), trainable=True
+        )
         self.cat_dist = tfd.Categorical(logits=self.logits)
 
     def _get_gauss_params(self, inputs):

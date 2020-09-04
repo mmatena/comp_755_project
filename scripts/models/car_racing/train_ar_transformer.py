@@ -88,7 +88,9 @@ def main(_):
             output_size=output_size,
             num_components=FLAGS.num_components,
         )
-        model.compile(loss=model.nll_loss(FLAGS.batch_size), optimizer="adam")
+        model.compile(
+            loss=model.nll_loss(global_batch_size=FLAGS.batch_size), optimizer="adam"
+        )
 
     ds = get_train_ds()
 

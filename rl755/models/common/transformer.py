@@ -124,6 +124,7 @@ class AutoregressiveTransformer(tf.keras.Model):
         ):
             output = self.transformer(inputs, mask=orig_mask, training=training)
         output = self.final_layer(output, training=training)
+        output = self.mog_layer(output, training=training)
         return output
 
     def nll_loss(self, global_batch_size=None):

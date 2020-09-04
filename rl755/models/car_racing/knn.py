@@ -1,12 +1,19 @@
 """Code for looking up the k-nearest neighbors.
 See https://arxiv.org/pdf/1911.00172.pdf for more details.
 """
-import numpy as np
+import os
 
-import scann
-import tensorflow as tf
+import numpy as np  # noqa: E402
+import tensorflow as tf  # noqa: E402
 
-from rl755.common import structs
+from rl755.common import structs  # noqa: E402
+
+# Needed for scann to link properly.
+os.environ[
+    "LD_LIBRARY_PATH"
+] = f"{os.environ['LD_LIBRARY_PATH']}:/nas/longleaf/home/mmatena/package_hacks/gcc/9.1.0/lib64"
+import scann  # noqa: E402
+
 
 # TODO(mmatena): Change when we have something permanent.
 TFRECORDS_PATTERN = "/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/encoded_knn/knn_data.tfrecord*"

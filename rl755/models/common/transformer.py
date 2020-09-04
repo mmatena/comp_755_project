@@ -65,7 +65,6 @@ class AutoregressiveTransformer(tf.keras.Model):
         self.output_size = output_size
         self.num_components = num_components
         self.return_layer_outputs = return_layer_outputs
-        self.step = tf.Variable(0, trainable=False, dtype=tf.int64)
         self.logits = self.add_weight(
             shape=[num_components], initializer="random_normal", trainable=True
         )
@@ -168,7 +167,6 @@ class AutoregressiveTransformer(tf.keras.Model):
                 loss = tf.nn.compute_average_loss(
                     loss, global_batch_size=global_batch_size
                 )
-            tf.summary.scalar("loss", data=loss, step=self.step)
             return loss
 
         return nll_loss

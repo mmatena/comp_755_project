@@ -64,9 +64,6 @@ def get_train_ds():
 def main(_):
     model_dir = FLAGS.model_dir
 
-    file_writer = tf.summary.create_file_writer(model_dir)
-    file_writer.set_as_default()
-
     # TODO(mmatena): Make these settable or inferred from the data. These correspond to BERT Base
     output_size = 32
     num_attention_heads = 12
@@ -100,13 +97,12 @@ def main(_):
         save_weights_only=True,
         save_best_only=False,
     )
-    tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=model_dir)
 
     model.fit(
         ds,
         epochs=1,
         steps_per_epoch=FLAGS.train_steps,
-        callbacks=[model_checkpoint_cb, tensorboard_cb],
+        callbacks=[model_checkpoint_cb],
     )
 
 

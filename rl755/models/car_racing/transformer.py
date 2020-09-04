@@ -38,7 +38,9 @@ def ignore_prefix_loss(loss_fn, prefix_size):
     return fn
 
 
-def to_ar_inputs_and_targets(x, sequence_length, latent_size=32, action_size=4):
+def to_ar_inputs_and_targets(
+    x, sequence_length, latent_size=32, action_size=4, sample=False
+):
     """Given a slice of a rollout, convert it to inputs and targets for autoregressive modelling.
 
     We do it like this:
@@ -50,6 +52,8 @@ def to_ar_inputs_and_targets(x, sequence_length, latent_size=32, action_size=4):
     r = tf.expand_dims(x["rewards"], axis=-1)
     a = x["actions"]
     o = x["observations"]
+    if sample:
+        o += x["observation_std_devs"] * tf.random.normal(shape=tf.shape(o))
     inputs = tf.concat(
         [o[:-1], a[:-1], tf.concat([[[0.0]], r[:-2]], axis=0)],
         axis=-1,

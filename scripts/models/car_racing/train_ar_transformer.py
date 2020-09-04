@@ -43,7 +43,9 @@ def get_train_ds():
     ds = encoded_rollouts.random_rollout_slices(slice_size=FLAGS.sequence_length + 1)
     ds = ds.map(
         functools.partial(
-            transformer.to_ar_inputs_and_targets, sequence_length=FLAGS.sequence_length
+            transformer.to_ar_inputs_and_targets,
+            sequence_length=FLAGS.sequence_length,
+            sample=True,
         ),
         num_parallel_calls=tf.data.experimental.AUTOTUNE,
     )

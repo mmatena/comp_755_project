@@ -63,6 +63,9 @@ class AutoregressiveTransformer(tf.keras.Model):
         self.num_components = num_components
         self.return_layer_outputs = return_layer_outputs
         self.step = tf.Variable(0, trainable=False, dtype=tf.int64)
+        self.logits = self.add_weight(
+            shape=[num_components], initializer="random_normal", trainable=True
+        )
 
     def build(self, input_shape):
         hidden_size = self.transformer_params.hidden_size
@@ -82,12 +85,6 @@ class AutoregressiveTransformer(tf.keras.Model):
             tf.keras.layers.Dense(units=final_layer_size, activation=None)
         )
         self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
-
-        self.mog_layer = MixtureOfGaussiansLayer(
-            dimensionality=self.output_size, num_components=self.num_components
-        )
-        # self.mog_layer.build(list(input_shape[:-1]) + [final_layer_size])
-
         super().build(input_shape)
 
     def call(self, inputs, mask=None, training=None):
@@ -124,8 +121,7 @@ class AutoregressiveTransformer(tf.keras.Model):
         ):
             output = self.transformer(inputs, mask=orig_mask, training=training)
         output = self.final_layer(output, training=training)
-        output = self.mog_layer(output, training=training)
-        return output
+        return output, self.logits
 
     def nll_loss(self, global_batch_size=None):
         def nll_loss(y_true, y_pred):

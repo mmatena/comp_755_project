@@ -66,11 +66,10 @@ def get_train_ds():
 def main(_):
     model_dir = FLAGS.model_dir
 
-    # gpus = tf.config.experimental.list_physical_devices("GPU")
-    # for gpu in gpus:
-    #     tf.config.experimental.set_visible_devices(gpu, "GPU")
-    #     tf.config.experimental.set_memory_growth(gpu, True)
-    # print(f"Training on {len(gpus)} GPUS.")
+    gpus = tf.config.experimental.list_physical_devices("GPU")
+    for gpu in gpus:
+        tf.config.experimental.set_memory_growth(gpu, True)
+    print(f"Training on {len(gpus)} GPUS.")
 
     # TODO(mmatena): Make these settable or inferred from the data. These correspond to BERT Base
     output_size = 32

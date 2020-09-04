@@ -1,21 +1,10 @@
 """Code for looking up the k-nearest neighbors.
 See https://arxiv.org/pdf/1911.00172.pdf for more details.
 """
-import os
+import numpy as np
+import tensorflow as tf
 
-import numpy as np  # noqa: E402
-import tensorflow as tf  # noqa: E402
-
-from rl755.common import structs  # noqa: E402
-
-# Needed for scann to link properly.
-# os.environ[
-#     "LD_LIBRARY_PATH"
-# ] = f"{os.environ['LD_LIBRARY_PATH']}:/nas/longleaf/home/mmatena/package_hacks/gcc/9.1.0/lib64"
-os.system(
-    "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/nas/longleaf/home/mmatena/package_hacks/gcc/9.1.0/lib64"
-)
-import scann  # noqa: E402
+from rl755.common import structs
 
 
 # TODO(mmatena): Change when we have something permanent.
@@ -52,6 +41,10 @@ def _get_knn_np(num_points=None):
 
 
 def _create_searcher(array, k):
+    # TODO(mmatena): I can't figure out how to do the LD_LIBRARY and launch python
+    # in one command without not giving python access to the GPUS for some reason.
+    import scann  # noqa: E402
+
     size = array.shape[0]
     # TODO(mmatena): Most of these value are copied from a demo. Look into them more.
     return (

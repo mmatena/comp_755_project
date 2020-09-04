@@ -57,7 +57,7 @@ def encoded_rollout_transformer():
     input_size = 32 + 3  # latent_dim + action_dim
     output_size = 32  # latent_dim + reward_dim
     model = AutoregressiveTransformer(
-        _get_transformer_params(), output_size=output_size
+        _get_transformer_params(), output_size=output_size, num_components=5
     )
     model.build(input_shape=(None, seqlen, input_size))
     model.load_weights(weights_path)

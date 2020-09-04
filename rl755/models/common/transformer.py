@@ -82,7 +82,9 @@ class AutoregressiveTransformer(tf.keras.Model):
         transformer_input_shape = list(input_shape[:-1]) + [hidden_size]
         self.transformer.build(transformer_input_shape)
 
-        final_layer_size = 2 * self.num_components * self.output_size
+        final_layer_size = (
+            self.num_components + 2 * self.num_components * self.output_size
+        )
         self.final_layer = tf.keras.layers.TimeDistributed(
             tf.keras.layers.Dense(units=final_layer_size, activation=None)
         )
@@ -125,7 +127,8 @@ class AutoregressiveTransformer(tf.keras.Model):
         output = self.final_layer(output, training=training)
         return output
 
-    def _get_gauss_params(self, outputs):
+    def _get_mog_params(self, outputs):
+        logits, outputs = outputs[: self.num_components], outputs[self.num_components :]
         locs, scales = tf.split(outputs, num_or_size_splits=2, axis=-1)
         locs = tf.split(
             locs,
@@ -137,7 +140,7 @@ class AutoregressiveTransformer(tf.keras.Model):
             num_or_size_splits=self.num_components * [self.output_size],
             axis=-1,
         )
-        return locs, scales
+        return logits, locs, scales
 
     def _get_gauss_components(self, outputs):
         locs, scales = self._get_gauss_params(outputs)
@@ -147,15 +150,22 @@ class AutoregressiveTransformer(tf.keras.Model):
         ]
 
     def get_mix_of_gauss(self, outputs):
-        batch_dims = tf.shape(outputs)[:-1]
-        logits = tf.reshape(
-            self.logits, (len(outputs.shape) - 1) * [1] + [self.num_components]
+        logits, locs, scales = self._get_mog_params(outputs)
+        # batch_dims = tf.shape(outputs)[:-1]
+        # logits = tf.reshape(
+        #     self.logits, (len(outputs.shape) - 1) * [1] + [self.num_components]
+        # )
+        # logits = tf.broadcast_to(
+        #     logits, tf.concat([batch_dims, [self.num_components]], axis=0)
+        # )
+        # cat_dist = tfd.Categorical(logits=logits)
+        return tfd.Mixture(
+            cat=tfd.Categorical(logits=logits),
+            components=[
+                tfd.MultivariateNormalDiag(loc=loc, scale_diag=scale)
+                for loc, scale in zip(locs, scales)
+            ],
         )
-        logits = tf.broadcast_to(
-            logits, tf.concat([batch_dims, [self.num_components]], axis=0)
-        )
-        cat_dist = tfd.Categorical(logits=logits)
-        return tfd.Mixture(cat=cat_dist, components=self._get_gauss_components(outputs))
 
     def nll_loss(self, global_batch_size=None):
         def nll_loss(y_true, y_pred):

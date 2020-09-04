@@ -52,10 +52,10 @@ def _get_transformer_params():
 
 def encoded_rollout_transformer():
     # TODO(mmatena): Add docs explaing all the parameters this was trained with.
-    weights_path = "/pine/scr/m/m/mmatena/test_ar_transformer_train/model.hdf5"
+    weights_path = "/pine/scr/m/m/mmatena/mog_ar_transformer_train/model.hdf5"
     seqlen = 32
-    input_size = 32 + 4 + 1  # latent_dim + action_dim + reward_dim
-    output_size = 32 + 1  # latent_dim + reward_dim
+    input_size = 32 + 3  # latent_dim + action_dim
+    output_size = 32  # latent_dim + reward_dim
     model = AutoregressiveTransformer(
         _get_transformer_params(), output_size=output_size
     )
@@ -66,9 +66,9 @@ def encoded_rollout_transformer():
 
 def encoded_knn_rollout_transformer(k, corpus_size, lambda_knn):
     # TODO(mmatena): Add docs explaing all the parameters this was trained with.
-    weights_path = "/pine/scr/m/m/mmatena/test_ar_transformer_train/model.hdf5"
+    weights_path = "/pine/scr/m/m/mmatena/mog_ar_transformer_train/model.hdf5"
     seqlen = 32
-    input_size = 32 + 4 + 1  # latent_dim + action_dim + reward_dim
+    input_size = 32 + 3  # latent_dim + action_dim
     ar_transformer = encoded_rollout_transformer()
     ar_transformer.return_layer_outputs = True
     model = AutoregressiveLookupTransformer(

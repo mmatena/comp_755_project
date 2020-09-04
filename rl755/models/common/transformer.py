@@ -148,13 +148,13 @@ class AutoregressiveTransformer(tf.keras.Model):
         ]
 
     def get_mix_of_gauss(self, outputs):
-        # batch_dims = tf.shape(outputs)[-1]
+        batch_dims = tf.shape(outputs)[:-1]
         logits = tf.reshape(
             self.logits, (len(outputs.shape) - 1) * [1] + [self.num_components]
         )
-        # logits = tf.broadcast_to(
-        #     logits, tf.concat([batch_dims, [self.num_components]], axis=0)
-        # )
+        logits = tf.broadcast_to(
+            logits, tf.concat([batch_dims, [self.num_components]], axis=0)
+        )
         cat_dist = tfd.Categorical(logits=logits)
         return tfd.Mixture(cat=cat_dist, components=self._get_gauss_components(outputs))
 

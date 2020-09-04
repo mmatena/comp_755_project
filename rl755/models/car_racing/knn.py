@@ -3,14 +3,13 @@ See https://arxiv.org/pdf/1911.00172.pdf for more details.
 """
 import numpy as np
 
-# import scann
+import scann
 import tensorflow as tf
 
 from rl755.common import structs
 
 # TODO(mmatena): Change when we have something permanent.
 TFRECORDS_PATTERN = "/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/encoded_knn/knn_data.tfrecord*"
-scann = None
 
 
 def _get_knn_ds(num_points=None):

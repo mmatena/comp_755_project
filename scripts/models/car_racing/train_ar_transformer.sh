@@ -33,14 +33,14 @@ export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 LD_EXPORT_CMD="export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/package_hacks/gcc/9.1.0/lib64"
 
 run_python() {
-  # echo "$LD_EXPORT_CMD && python $PROJECT_DIR/scripts/models/car_racing/train_ar_transformer.py \
-  #     --model_dir=$MODEL_DIR \
-  #     --train_steps=$TRAIN_STEPS \
-  #     --batch_size=64"
-  echo "python $PROJECT_DIR/scripts/models/car_racing/train_ar_transformer.py \
+  echo "$LD_EXPORT_CMD; python $PROJECT_DIR/scripts/models/car_racing/train_ar_transformer.py \
       --model_dir=$MODEL_DIR \
       --train_steps=$TRAIN_STEPS \
       --batch_size=64"
+  # echo "python $PROJECT_DIR/scripts/models/car_racing/train_ar_transformer.py \
+  #     --model_dir=$MODEL_DIR \
+  #     --train_steps=$TRAIN_STEPS \
+  #     --batch_size=64"
 }
 
 

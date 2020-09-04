@@ -12,7 +12,7 @@ MODEL_DIR=/pine/scr/m/m/mmatena/mog_ar_transformer_train
 
 TRAIN_STEPS=250000
 
-NUM_GPUS=2
+NUM_GPUS=1
 NUM_CORES=16
 MEMORY=16g
 TIME="2-"
@@ -57,6 +57,7 @@ launch() {
     --gres=gpu:${NUM_GPUS} \
     --qos=gpu_access \
     --wrap="\"$(run_singularity)\"")
+  echo $CMD
   eval $CMD
 }
 

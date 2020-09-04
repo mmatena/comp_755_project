@@ -1,4 +1,5 @@
 """Common layers to use."""
+import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 
@@ -10,9 +11,7 @@ class MixtureOfGaussiansLayer(object):
         # super().__init__(name=name, **kwargs)
         self.dimensionality = dimensionality
         self.num_components = num_components
-        self.logits = tf.Variable(
-            shape=[num_components], initializer="random_normal", trainable=True
-        )
+        self.logits = tf.Variable(np.random.normal([num_components]), trainable=True)
         self.cat_dist = tfd.Categorical(logits=self.logits)
 
     def _get_gauss_params(self, inputs):

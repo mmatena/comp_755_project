@@ -126,8 +126,8 @@ class AutoregressiveTransformer(tf.keras.Model):
         output = self.final_layer(output, training=training)
         return output
 
-    def _get_gauss_params(self, inputs):
-        locs, scales = tf.split(inputs, num_or_size_splits=2, axis=-1)
+    def _get_gauss_params(self, outputs):
+        locs, scales = tf.split(outputs, num_or_size_splits=2, axis=-1)
         locs = tf.split(
             locs,
             num_or_size_splits=self.num_components * [self.output_size],
@@ -140,26 +140,27 @@ class AutoregressiveTransformer(tf.keras.Model):
         )
         return locs, scales
 
-    def _get_gauss_components(self, inputs):
-        locs, scales = self._get_gauss_params(inputs)
+    def _get_gauss_components(self, outputs):
+        locs, scales = self._get_gauss_params(outputs)
         return [
             tfd.MultivariateNormalDiag(loc=loc, scale_diag=scale)
             for loc, scale in zip(locs, scales)
         ]
 
-    def _get_mix_of_gauss_distribution(self, inputs):
-        # batch_dims = tf.shape(inputs)[-1]
+    def get_mix_of_gauss(self, outputs):
+        # batch_dims = tf.shape(outputs)[-1]
         logits = tf.reshape(
-            self.logits, (len(inputs.shape) - 1) * [1] + [self.num_components]
+            self.logits, (len(outputs.shape) - 1) * [1] + [self.num_components]
         )
         # logits = tf.broadcast_to(
         #     logits, tf.concat([batch_dims, [self.num_components]], axis=0)
         # )
         cat_dist = tfd.Categorical(logits=logits)
-        return tfd.Mixture(cat=cat_dist, components=self._get_gauss_components(inputs))
+        return tfd.Mixture(cat=cat_dist, components=self._get_gauss_components(outputs))
 
     def nll_loss(self, global_batch_size=None):
         def nll_loss(y_true, y_pred):
+            y_pred = self.get_mix_of_gauss(y_pred)
             loss = -y_pred.log_prob(y_true)
             if not global_batch_size:
                 loss = tf.reduce_mean(loss)

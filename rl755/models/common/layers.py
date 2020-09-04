@@ -11,11 +11,7 @@ class MixtureOfGaussiansLayer(object):
         # super().__init__(name=name, **kwargs)
         self.dimensionality = dimensionality
         self.num_components = num_components
-        # TODO(mmatena): Make this in call with the 1s based on the shape of the input.
-        self.logits = tf.Variable(
-            np.random.normal([1, 1, num_components]), trainable=True
-        )
-        self.cat_dist = tfd.Categorical(logits=self.logits)
+        self.logits = tf.Variable(np.random.normal([num_components]), trainable=True)
 
     def _get_gauss_params(self, inputs):
         locs, scales = tf.split(inputs, num_or_size_splits=2, axis=-1)
@@ -39,9 +35,12 @@ class MixtureOfGaussiansLayer(object):
         ]
 
     def _get_mix_of_gauss_distribution(self, inputs):
-        return tfd.Mixture(
-            cat=self.cat_dist, components=self._get_gauss_components(inputs)
+        batch_dims = tf.shape(inputs)[-1]
+        logits = tf.broadcast_to(
+            self.logits, tf.concat([batch_dims, [self.num_components]], axis=0)
         )
+        cat_dist = tfd.Categorical(logits=logits)
+        return tfd.Mixture(cat=cat_dist, components=self._get_gauss_components(inputs))
 
     def __call__(self, inputs, training=None):
         return self._get_mix_of_gauss_distribution(inputs)

@@ -11,7 +11,7 @@ class MixtureOfGaussiansLayer(tf.keras.layers.Layer):
         self.dimensionality = dimensionality
         self.num_components = num_components
         self.logits = self.add_weight(
-            shape=[num_components], initializer="random_normal", trainable=True
+            shape=[1, 1, num_components], initializer="random_normal", trainable=True
         )
         self.cat_dist = tfd.Categorical(logits=self.logits)
 

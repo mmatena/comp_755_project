@@ -27,6 +27,7 @@ module add python/3.6.6
 module add tensorflow_py3/2.1.0
 
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/package_hacks/gcc/9.1.0/lib64
 
 run_python() {
   echo python $PROJECT_DIR/scripts/models/car_racing/train_ar_transformer.py \

@@ -62,7 +62,7 @@ def get_train_ds():
 
 
 def main(_):
-    model_dir = FLAGS.model_dir
+    # model_dir = FLAGS.model_dir
 
     gpus = tf.config.experimental.list_physical_devices("GPU")
     for gpu in gpus:
@@ -70,46 +70,46 @@ def main(_):
         tf.config.experimental.set_memory_growth(gpu, True)
     print(f"Training on {len(gpus)} GPUS.")
 
-    # TODO(mmatena): Make these settable or inferred from the data. These correspond to BERT Base
-    output_size = 32
-    num_attention_heads = 12
-    hidden_size = 768
-    transformer_params = TransformerEncoderLayer.Params(
-        num_layers=12,
-        hidden_size=hidden_size,
-        hidden_dropout=0.1,
-        intermediate_size=4 * hidden_size,
-        intermediate_activation="gelu",
-        num_heads=num_attention_heads,
-        size_per_head=int(hidden_size / num_attention_heads),
-    )
+    # # TODO(mmatena): Make these settable or inferred from the data. These correspond to BERT Base
+    # output_size = 32
+    # num_attention_heads = 12
+    # hidden_size = 768
+    # transformer_params = TransformerEncoderLayer.Params(
+    #     num_layers=12,
+    #     hidden_size=hidden_size,
+    #     hidden_dropout=0.1,
+    #     intermediate_size=4 * hidden_size,
+    #     intermediate_activation="gelu",
+    #     num_heads=num_attention_heads,
+    #     size_per_head=int(hidden_size / num_attention_heads),
+    # )
 
-    mirrored_strategy = tf.distribute.MirroredStrategy()
-    with mirrored_strategy.scope():
-        model = common_transformer.AutoregressiveTransformer(
-            transformer_params,
-            output_size=output_size,
-            num_components=FLAGS.num_components,
-        )
-        model.compile(
-            loss=model.nll_loss(global_batch_size=FLAGS.batch_size), optimizer="adam"
-        )
+    # mirrored_strategy = tf.distribute.MirroredStrategy()
+    # with mirrored_strategy.scope():
+    #     model = common_transformer.AutoregressiveTransformer(
+    #         transformer_params,
+    #         output_size=output_size,
+    #         num_components=FLAGS.num_components,
+    #     )
+    #     model.compile(
+    #         loss=model.nll_loss(global_batch_size=FLAGS.batch_size), optimizer="adam"
+    #     )
 
-    ds = get_train_ds()
+    # ds = get_train_ds()
 
-    model_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
-        filepath=os.path.join(model_dir, "model.hdf5"),
-        save_freq=1000,
-        save_weights_only=True,
-        save_best_only=False,
-    )
+    # model_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
+    #     filepath=os.path.join(model_dir, "model.hdf5"),
+    #     save_freq=1000,
+    #     save_weights_only=True,
+    #     save_best_only=False,
+    # )
 
-    model.fit(
-        ds,
-        epochs=1,
-        steps_per_epoch=FLAGS.train_steps,
-        callbacks=[model_checkpoint_cb],
-    )
+    # model.fit(
+    #     ds,
+    #     epochs=1,
+    #     steps_per_epoch=FLAGS.train_steps,
+    #     callbacks=[model_checkpoint_cb],
+    # )
 
 
 if __name__ == "__main__":

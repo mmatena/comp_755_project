@@ -8,7 +8,7 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-MODEL_DIR=/pine/scr/m/m/mmatena/test_ar_transformer_train
+MODEL_DIR=/pine/scr/m/m/mmatena/mog_ar_transformer_train
 
 TRAIN_STEPS=100000
 

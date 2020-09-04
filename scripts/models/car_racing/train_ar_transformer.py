@@ -33,6 +33,12 @@ flags.DEFINE_integer(
     "Ignore losses on the first few tokens.",
     lower_bound=0,
 )
+flags.DEFINE_integer(
+    "num_components",
+    5,
+    "Number of components in the Guassian mixture model.",
+    lower_bound=1,
+)
 
 flags.mark_flag_as_required("model_dir")
 flags.mark_flag_as_required("train_steps")
@@ -74,9 +80,15 @@ def main(_):
         num_heads=num_attention_heads,
         size_per_head=int(hidden_size / num_attention_heads),
     )
-    model = common_transformer.AutoregressiveTransformer(
-        transformer_params, output_size=output_size
-    )
+
+    mirrored_strategy = tf.distribute.MirroredStrategy()
+    with mirrored_strategy.scope():
+        model = common_transformer.AutoregressiveTransformer(
+            transformer_params,
+            output_size=output_size,
+            num_components=FLAGS.num_components,
+        )
+        model.compile(loss=model.nll_loss(), optimizer="adam")
 
     ds = get_train_ds()
 
@@ -87,12 +99,6 @@ def main(_):
         save_best_only=False,
     )
     tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=model_dir)
-
-    loss_fn = transformer.ignore_prefix_loss(
-        tf.keras.losses.MeanSquaredError(), prefix_size=FLAGS.ignore_loss_prefix_size
-    )
-
-    model.compile(loss=loss_fn, optimizer="adam")
 
     model.fit(
         ds,

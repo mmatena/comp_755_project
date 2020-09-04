@@ -13,6 +13,7 @@ from unittest import mock
 import tensorflow as tf
 
 from rl755.models.car_racing.knn import KnnLookupLayer
+from rl755.models.common.layers import MixtureOfGaussiansLayer
 
 LayerWithOutput = collections.namedtuple("LayerWithOutput", ["layer", "output"])
 
@@ -48,13 +49,20 @@ def _get_our_layer_call(array):
 
 class AutoregressiveTransformer(tf.keras.Model):
     def __init__(
-        self, transformer_params, output_size, return_layer_outputs=False, **kwargs
+        self,
+        transformer_params,
+        output_size,
+        num_components,
+        return_layer_outputs=False,
+        **kwargs
     ):
         # TODO(mmatena): Add docs
         super().__init__(**kwargs)
         self.transformer_params = transformer_params
         self.output_size = output_size
+        self.num_components = num_components
         self.return_layer_outputs = return_layer_outputs
+        self.step = tf.Variable(0, trainable=False, dtype=tf.int64)
 
     def build(self, input_shape):
         hidden_size = self.transformer_params.hidden_size
@@ -62,15 +70,24 @@ class AutoregressiveTransformer(tf.keras.Model):
             tf.keras.layers.Dense(units=hidden_size, activation=None)
         )
         self.initial_layer.build(input_shape)
+
         self.transformer = TransformerEncoderLayer.from_params(
             self.transformer_params, name="transformer"
         )
         transformer_input_shape = list(input_shape[:-1]) + [hidden_size]
         self.transformer.build(transformer_input_shape)
+
+        final_layer_size = 2 * self.num_components * self.output_size
         self.final_layer = tf.keras.layers.TimeDistributed(
-            tf.keras.layers.Dense(units=self.output_size, activation=None)
+            tf.keras.layers.Dense(units=final_layer_size, activation=None)
         )
         self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
+
+        self.mog_layer = MixtureOfGaussiansLayer(
+            dimensionality=self.output_size, num_components=self.num_components
+        )
+        self.mog_layer.build(list(input_shape[:-1]) + [final_layer_size])
+
         super().build(input_shape)
 
     def call(self, inputs, mask=None, training=None):
@@ -108,6 +125,38 @@ class AutoregressiveTransformer(tf.keras.Model):
             output = self.transformer(inputs, mask=orig_mask, training=training)
         output = self.final_layer(output, training=training)
         return output
+
+    def nll_loss(self, global_batch_size=None):
+        def nll_loss(y_true, y_pred):
+            loss = -y_pred.log_prob(y_true)
+            if not global_batch_size:
+                loss = tf.reduce_mean(loss)
+            else:
+                loss = tf.nn.compute_average_loss(
+                    loss, global_batch_size=global_batch_size
+                )
+            tf.summary.scalar("loss", data=loss, step=self.step)
+            return loss
+
+    # def _train_step_inner(self, data):
+    #     self.step.assign_add(1)
+
+    #     x, y = data
+    #     with tf.GradientTape() as tape:
+    #         out_dist = self(x, training=True)
+    #         loss = -out_dist.log_prob(y)
+
+    #     trainable_vars = self.trainable_variables
+    #     gradients = tape.gradient(loss, trainable_vars)
+    #     self.optimizer.apply_gradients(zip(gradients, trainable_vars))
+    #     tf.summary.scalar("loss", data=loss, step=self.step)
+    #     return {"loss": loss}
+
+    # def train_step(self, data):
+    #     if self.mirrored_strategy:
+    #         pass
+    #     else:
+    #         return self._train_step_inner(data)
 
 
 # TODO(mmatena): Reduce code duplication here.

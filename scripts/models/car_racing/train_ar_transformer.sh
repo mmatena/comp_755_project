@@ -25,6 +25,7 @@ SIMG_NAME=tensorflow2.1.0-py3-cuda10.1-ubuntu18.04.simg
 
 module add python/3.6.6
 module add tensorflow_py3/2.1.0
+module add gcc/9.1.0
 
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/package_hacks/gcc/9.1.0/lib64

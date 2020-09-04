@@ -1,64 +1,65 @@
 """Trains an autoregressive transformer on windows of data."""
-import functools
-import os
+# import functools
+# import os
 
 from absl import app
-from absl import flags
-from bert.transformer import TransformerEncoderLayer
+
+# from absl import flags
+# from bert.transformer import TransformerEncoderLayer
 import tensorflow as tf
 
-from rl755.data.car_racing import encoded_rollouts
-from rl755.data.car_racing import processing
-from rl755.models.car_racing import transformer
-from rl755.models.common import transformer as common_transformer
+# from rl755.data.car_racing import encoded_rollouts
+# from rl755.data.car_racing import processing
+# from rl755.models.car_racing import transformer
+# from rl755.models.common import transformer as common_transformer
 
-FLAGS = flags.FLAGS
+# FLAGS = flags.FLAGS
 
-flags.DEFINE_string(
-    "model_dir", None, "The directory to write checkpoints and logs to."
-)
-flags.DEFINE_integer(
-    "train_steps", None, "The number of steps to train for.", lower_bound=1
-)
-
-flags.DEFINE_integer(
-    "batch_size", 32, "The number of sequences in each batch.", lower_bound=1
-)
-flags.DEFINE_integer(
-    "sequence_length", 32, "Size of windows to train on.", lower_bound=1
-)
-# flags.DEFINE_integer(
-#     "ignore_loss_prefix_size",
-#     4,
-#     "Ignore losses on the first few tokens.",
-#     lower_bound=0,
+# flags.DEFINE_string(
+#     "model_dir", None, "The directory to write checkpoints and logs to."
 # )
-flags.DEFINE_integer(
-    "num_components",
-    5,
-    "Number of components in the Guassian mixture model.",
-    lower_bound=1,
-)
+# flags.DEFINE_integer(
+#     "train_steps", None, "The number of steps to train for.", lower_bound=1
+# )
 
-flags.mark_flag_as_required("model_dir")
-flags.mark_flag_as_required("train_steps")
+# flags.DEFINE_integer(
+#     "batch_size", 32, "The number of sequences in each batch.", lower_bound=1
+# )
+# flags.DEFINE_integer(
+#     "sequence_length", 32, "Size of windows to train on.", lower_bound=1
+# )
+# # flags.DEFINE_integer(
+# #     "ignore_loss_prefix_size",
+# #     4,
+# #     "Ignore losses on the first few tokens.",
+# #     lower_bound=0,
+# # )
+# flags.DEFINE_integer(
+#     "num_components",
+#     5,
+#     "Number of components in the Guassian mixture model.",
+#     lower_bound=1,
+# )
+
+# flags.mark_flag_as_required("model_dir")
+# flags.mark_flag_as_required("train_steps")
 
 
-def get_train_ds():
-    # We need the `+1` due to how we are processing the sequences.
-    ds = encoded_rollouts.random_rollout_slices(slice_size=FLAGS.sequence_length + 1)
-    ds = ds.map(
-        functools.partial(
-            transformer.to_ar_inputs_and_targets,
-            sequence_length=FLAGS.sequence_length,
-            sample=True,
-        ),
-        num_parallel_calls=tf.data.experimental.AUTOTUNE,
-    )
-    ds = processing.standard_dataset_prep(
-        ds, batch_size=FLAGS.batch_size, repeat=True, shuffle_buffer_size=1000
-    )
-    return ds
+# def get_train_ds():
+#     # We need the `+1` due to how we are processing the sequences.
+#     ds = encoded_rollouts.random_rollout_slices(slice_size=FLAGS.sequence_length + 1)
+#     ds = ds.map(
+#         functools.partial(
+#             transformer.to_ar_inputs_and_targets,
+#             sequence_length=FLAGS.sequence_length,
+#             sample=True,
+#         ),
+#         num_parallel_calls=tf.data.experimental.AUTOTUNE,
+#     )
+#     ds = processing.standard_dataset_prep(
+#         ds, batch_size=FLAGS.batch_size, repeat=True, shuffle_buffer_size=1000
+#     )
+#     return ds
 
 
 def main(_):

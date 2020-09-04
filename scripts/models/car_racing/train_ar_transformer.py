@@ -27,12 +27,12 @@ flags.DEFINE_integer(
 flags.DEFINE_integer(
     "sequence_length", 32, "Size of windows to train on.", lower_bound=1
 )
-flags.DEFINE_integer(
-    "ignore_loss_prefix_size",
-    4,
-    "Ignore losses on the first few tokens.",
-    lower_bound=0,
-)
+# flags.DEFINE_integer(
+#     "ignore_loss_prefix_size",
+#     4,
+#     "Ignore losses on the first few tokens.",
+#     lower_bound=0,
+# )
 flags.DEFINE_integer(
     "num_components",
     5,
@@ -68,7 +68,7 @@ def main(_):
     file_writer.set_as_default()
 
     # TODO(mmatena): Make these settable or inferred from the data. These correspond to BERT Base
-    output_size = 32 + 1  # latent_dim + reward_dim
+    output_size = 32
     num_attention_heads = 12
     hidden_size = 768
     transformer_params = TransformerEncoderLayer.Params(

@@ -173,8 +173,6 @@ class AutoregressiveTransformer(tf.keras.Model):
 
         return nll_loss
 
-    # 1 gpu, 32: 62 s
-
 
 # TODO(mmatena): Reduce code duplication here.
 def get_output_of_layer(layers_with_output, layer_):

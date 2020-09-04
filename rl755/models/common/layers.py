@@ -10,7 +10,7 @@ class MixtureOfGaussiansLayer(object):
         # super().__init__(name=name, **kwargs)
         self.dimensionality = dimensionality
         self.num_components = num_components
-        self.logits = self.add_weight(
+        self.logits = tf.Variable(
             shape=[num_components], initializer="random_normal", trainable=True
         )
         self.cat_dist = tfd.Categorical(logits=self.logits)

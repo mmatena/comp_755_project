@@ -119,12 +119,14 @@ class AutoregressiveTransformer(tf.keras.Model):
         # regions of the input. We need a different shape of the input mask to make the transformer
         # autoregressive. The function `_our_create_attention_mask` justs passes through our mask
         # unchanged.
-        with mock.patch.object(
-            AttentionLayer,
-            "create_attention_mask",
-            functools.partial(_our_create_attention_mask, mask=mask),
-        ):
-            output = self.transformer(inputs, mask=orig_mask, training=training)
+        print("NOT ACTUALLY DOING AR STUFF")
+        output = self.transformer(inputs, mask=orig_mask, training=training)
+        # with mock.patch.object(
+        #     AttentionLayer,
+        #     "create_attention_mask",
+        #     functools.partial(_our_create_attention_mask, mask=mask),
+        # ):
+        #     output = self.transformer(inputs, mask=orig_mask, training=training)
         output = self.final_layer(output, training=training)
         return output
 

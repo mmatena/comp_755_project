@@ -111,23 +111,6 @@ def main(_):
         steps_per_epoch=FLAGS.train_steps,
         callbacks=[model_checkpoint_cb],
     )
-    # #####################################################3
-    # #####################################################3
-    # #####################################################3
-    # #####################################################3
-    # #####################################################3
-    for x in encoded_rollouts.get_rollouts_ds():
-        break
-
-    a = x["actions"][:, :3]
-    o = x["observations"]
-    inputs = tf.concat([o, a], axis=-1)
-    inputs = tf.expand_dims(inputs, axis=0)
-
-    y = model(inputs)
-    var = tf.math.reduce_std(y, axis=-2)
-    var = tf.squeeze(var)
-    print(var)
 
 
 if __name__ == "__main__":

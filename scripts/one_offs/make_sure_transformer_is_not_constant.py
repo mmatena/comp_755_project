@@ -15,3 +15,8 @@ y = model(inputs)
 var = tf.math.reduce_std(y, axis=-2)
 var = tf.squeeze(var)
 print(var)
+
+targets = o[1:] - o[:-1]
+var = tf.math.reduce_std(targets, axis=-2)
+var = tf.squeeze(var)
+print(var)

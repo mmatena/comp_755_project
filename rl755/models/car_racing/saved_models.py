@@ -53,8 +53,6 @@ def _get_transformer_params():
 def encoded_rollout_transformer():
     # TODO(mmatena): Add docs explaing all the parameters this was trained with.
     weights_path = "/pine/scr/m/m/mmatena/mog_ar_transformer_train/model.hdf5"
-    weights_path = "/pine/scr/m/m/mmatena/mog_ar_transformer_train/model.test.hdf5"
-    print("USING WRONG WEIGHTS PATH. FIRST ONE IS CORRECT. SECOND IS FOR TESTING.")
     seqlen = 32
     input_size = 32 + 3  # latent_dim + action_dim
     output_size = 32  # latent_dim + reward_dim

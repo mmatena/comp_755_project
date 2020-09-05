@@ -8,14 +8,21 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-MODEL_DIR=/pine/scr/m/m/mmatena/mog_ar_transformer_train
+# MODEL_DIR=/pine/scr/m/m/mmatena/mog_ar_transformer_train
+MODEL_DIR=/pine/scr/m/m/mmatena/test_mog_ar_transformer_train
 
-TRAIN_STEPS=250000
+# TRAIN_STEPS=250000
 
-NUM_GPUS=4
-NUM_CORES=16
-MEMORY=16g
-TIME="2-"
+# NUM_GPUS=4
+# NUM_CORES=16
+# MEMORY=16g
+# TIME="2-"
+TRAIN_STEPS=2500
+
+NUM_GPUS=1
+NUM_CORES=6
+MEMORY=8g
+TIME="1:00:00"
 #############################################################
 
 
@@ -32,14 +39,14 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/package_hacks/gcc/9.1.0/lib64
 # I copied the module to here since we can't access the original one in singularity.
 
 run_python() {
-  echo "python $PROJECT_DIR/scripts/models/car_racing/train_ar_transformer.py \
-      --model_dir=$MODEL_DIR \
-      --train_steps=$TRAIN_STEPS \
-      --batch_size=128"
   # echo "python $PROJECT_DIR/scripts/models/car_racing/train_ar_transformer.py \
   #     --model_dir=$MODEL_DIR \
   #     --train_steps=$TRAIN_STEPS \
-  #     --batch_size=64"
+  #     --batch_size=128"
+  echo "python $PROJECT_DIR/scripts/models/car_racing/train_ar_transformer.py \
+      --model_dir=$MODEL_DIR \
+      --train_steps=$TRAIN_STEPS \
+      --batch_size=32"
 }
 
 
@@ -60,7 +67,6 @@ launch() {
     --gres=gpu:${NUM_GPUS} \
     --qos=gpu_access \
     --wrap="\"$(run_singularity)\"")
-  echo $CMD
   eval $CMD
 }
 

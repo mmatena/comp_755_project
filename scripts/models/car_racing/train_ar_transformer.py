@@ -83,10 +83,6 @@ def main(_):
         intermediate_activation="gelu",
         num_heads=num_attention_heads,
         size_per_head=int(hidden_size / num_attention_heads),
-        # ####################
-        # Experimenting/debugging
-        # #####################
-        use_position_embeddings=True,
     )
 
     mirrored_strategy = tf.distribute.MirroredStrategy()

@@ -164,6 +164,7 @@ class AutoregressiveTransformer(tf.keras.Model):
 
     def get_mix_of_gauss(self, outputs):
         logits, locs, scales = self._get_mog_params(outputs)
+        print(locs)
         # batch_dims = tf.shape(outputs)[:-1]
         # logits = tf.reshape(
         #     self.logits, (len(outputs.shape) - 1) * [1] + [self.num_components]

@@ -71,7 +71,9 @@ class AutoregressiveTransformer(tf.keras.Model):
 
         # TODO(mmatena): Use relative attention instead.
         self.pos_embeddings = self.add_weight(
-            shape=input_shape[-2:], initializer="random_normal", trainable=True
+            shape=[input_shape[-2], hidden_size],
+            initializer="random_normal",
+            trainable=True,
         )
 
         # self.initial_layer = tf.keras.layers.TimeDistributed(
@@ -120,8 +122,8 @@ class AutoregressiveTransformer(tf.keras.Model):
             mask = tf.cast(tf.expand_dims(mask, axis=1), tf.float32)
             mask *= ar_mask
 
-        inputs += self.pos_embeddings
         inputs = self.initial_layer(inputs, training=training)
+        inputs += self.pos_embeddings
         # Have to do this hack as the mask in the original transformer just represents non-padded
         # regions of the input. We need a different shape of the input mask to make the transformer
         # autoregressive. The function `_our_create_attention_mask` justs passes through our mask

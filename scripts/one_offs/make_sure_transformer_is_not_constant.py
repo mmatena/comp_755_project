@@ -2,7 +2,7 @@ import tensorflow as tf
 from rl755.data.car_racing import encoded_rollouts
 from rl755.models.car_racing import saved_models
 
-for x in encoded_rollouts.get_rollouts_ds():
+for x in encoded_rollouts.get_rollouts_ds(split="validation"):
     break
 
 a = x["actions"][:, :3]

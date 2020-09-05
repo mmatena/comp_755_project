@@ -51,8 +51,9 @@ def to_ar_inputs_and_targets(
     # TODO(mmatena): Make sure this is correct!
     a = x["actions"][:, :action_size]
     o = x["observations"]
-    if sample:
-        o += x["observation_std_devs"] * tf.random.normal(shape=tf.shape(o))
+    print("DEBUGGING/EXPERIMENTING")
+    # if sample:
+    #     o += x["observation_std_devs"] * tf.random.normal(shape=tf.shape(o))
     inputs = tf.concat(
         [o[:-1], a[:-1]],
         axis=-1,

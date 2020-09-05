@@ -65,15 +65,13 @@ class AutoregressiveTransformer(tf.keras.Model):
         self.output_size = output_size
         self.num_components = num_components
         self.return_layer_outputs = return_layer_outputs
-        self.logits = self.add_weight(
-            shape=[num_components], initializer="random_normal", trainable=True
-        )
 
     def build(self, input_shape):
         hidden_size = self.transformer_params.hidden_size
-        self.initial_layer = tf.keras.layers.TimeDistributed(
-            tf.keras.layers.Dense(units=hidden_size, activation=None)
-        )
+        # self.initial_layer = tf.keras.layers.TimeDistributed(
+        #     tf.keras.layers.Dense(units=hidden_size, activation=None)
+        # )
+        self.initial_layer = tf.keras.layers.Dense(units=hidden_size, activation=None)
         self.initial_layer.build(input_shape)
 
         self.transformer = TransformerEncoderLayer.from_params(
@@ -85,9 +83,12 @@ class AutoregressiveTransformer(tf.keras.Model):
         final_layer_size = (
             self.num_components + 2 * self.num_components * self.output_size
         )
-        self.final_layer = tf.keras.layers.TimeDistributed(
-            tf.keras.layers.Dense(units=final_layer_size, activation=None)
+        self.final_layer = tf.keras.layers.Dense(
+            units=final_layer_size, activation=None
         )
+        # self.final_layer = tf.keras.layers.TimeDistributed(
+        #     tf.keras.layers.Dense(units=final_layer_size, activation=None)
+        # )
         self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
         super().build(input_shape)
 

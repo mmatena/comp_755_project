@@ -16,6 +16,9 @@ var = tf.math.reduce_std(y, axis=-2)
 var = tf.squeeze(var)
 print(var)
 
+mix = model.get_mix_of_gauss(y)
+print(-mix.log_prob(y))
+
 targets = o[1:] - o[:-1]
 var = tf.math.reduce_std(targets[200:232], axis=-2)
 var = tf.squeeze(var)

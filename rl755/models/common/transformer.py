@@ -76,10 +76,10 @@ class AutoregressiveTransformer(tf.keras.Model):
             trainable=True,
         )
 
-        # self.initial_layer = tf.keras.layers.TimeDistributed(
-        #     tf.keras.layers.Dense(units=hidden_size, activation=None)
-        # )
-        self.initial_layer = tf.keras.layers.Dense(units=hidden_size, activation=None)
+        self.initial_layer = tf.keras.layers.TimeDistributed(
+            tf.keras.layers.Dense(units=hidden_size, activation=None)
+        )
+        # self.initial_layer = tf.keras.layers.Dense(units=hidden_size, activation=None)
         self.initial_layer.build(input_shape)
 
         self.transformer = TransformerEncoderLayer.from_params(
@@ -91,12 +91,12 @@ class AutoregressiveTransformer(tf.keras.Model):
         final_layer_size = (
             self.num_components + 2 * self.num_components * self.output_size
         )
-        self.final_layer = tf.keras.layers.Dense(
-            units=final_layer_size, activation=None
-        )
-        # self.final_layer = tf.keras.layers.TimeDistributed(
-        #     tf.keras.layers.Dense(units=final_layer_size, activation=None)
+        # self.final_layer = tf.keras.layers.Dense(
+        #     units=final_layer_size, activation=None
         # )
+        self.final_layer = tf.keras.layers.TimeDistributed(
+            tf.keras.layers.Dense(units=final_layer_size, activation=None)
+        )
         self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
         super().build(input_shape)
 
@@ -128,14 +128,12 @@ class AutoregressiveTransformer(tf.keras.Model):
         # regions of the input. We need a different shape of the input mask to make the transformer
         # autoregressive. The function `_our_create_attention_mask` justs passes through our mask
         # unchanged.
-        print("NOT ACTUALLY DOING AR STUFF")
-        output = self.transformer(inputs, mask=orig_mask, training=training)
-        # with mock.patch.object(
-        #     AttentionLayer,
-        #     "create_attention_mask",
-        #     functools.partial(_our_create_attention_mask, mask=mask),
-        # ):
-        #     output = self.transformer(inputs, mask=orig_mask, training=training)
+        with mock.patch.object(
+            AttentionLayer,
+            "create_attention_mask",
+            functools.partial(_our_create_attention_mask, mask=mask),
+        ):
+            output = self.transformer(inputs, mask=orig_mask, training=training)
         output = self.final_layer(output, training=training)
         return output
 

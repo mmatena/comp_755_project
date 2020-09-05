@@ -11,7 +11,7 @@ inputs = tf.concat([o, a], axis=-1)
 inputs = tf.expand_dims(inputs, axis=0)
 
 model = saved_models.encoded_rollout_transformer()
-y = model(inputs)
+y = model(inputs[200:232])
 var = tf.math.reduce_std(y, axis=-2)
 var = tf.squeeze(var)
 print(var)

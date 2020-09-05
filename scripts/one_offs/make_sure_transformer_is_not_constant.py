@@ -17,6 +17,6 @@ var = tf.squeeze(var)
 print(var)
 
 targets = o[1:] - o[:-1]
-var = tf.math.reduce_std(targets, axis=-2)
+var = tf.math.reduce_std(targets[200:232], axis=-2)
 var = tf.squeeze(var)
 print(var)

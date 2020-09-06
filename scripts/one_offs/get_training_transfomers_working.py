@@ -74,7 +74,7 @@ def gen():
 #     (tf.TensorShape([seqlen, input_size]), tf.TensorShape([seqlen, input_size])),
 # )
 
-ds = encoded_rollouts.random_rollout_slices(seqlen)
+ds = encoded_rollouts.random_rollout_slices(seqlen + 1)
 ds = ds.map(
     lambda x: (x["observations"][:-1], x["observations"][1:]),
     num_parallel_calls=tf.data.experimental.AUTOTUNE,

@@ -14,22 +14,20 @@ from rl755.data.car_racing import processing
 from rl755.models.car_racing import transformer
 from rl755.models.common import transformer as common_transformer
 
-hidden_size = 4
-num_attention_heads = 1
+hidden_size = 256
+num_attention_heads = 4
 transformer_params = TransformerEncoderLayer.Params(
-    num_layers=1,
+    num_layers=3,
     hidden_size=hidden_size,
-    hidden_dropout=0.0,
-    attention_dropout=0.0,
-    intermediate_size=hidden_size,
-    intermediate_activation=None,
+    hidden_dropout=0.1,
+    attention_dropout=0.1,
+    intermediate_size=4 * hidden_size,
+    intermediate_activation=None,  # #############################3
     num_heads=num_attention_heads,
     size_per_head=int(hidden_size / num_attention_heads),
-    initializer_range=0.02,
-    negative_infinity=0.0,
 )
 
-seqlen = 1
+seqlen = 2
 
 layer = TransformerEncoderLayer.from_params(transformer_params, name="transformer")
 model = tf.keras.models.Sequential(

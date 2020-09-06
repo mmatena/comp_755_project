@@ -25,7 +25,8 @@ transformer_params = TransformerEncoderLayer.Params(
     intermediate_activation=None,
     num_heads=num_attention_heads,
     size_per_head=int(hidden_size / num_attention_heads),
-    initializer_range=1.0,
+    initializer_range=0.02,
+    negative_infinity=0.0,
 )
 
 seqlen = 1

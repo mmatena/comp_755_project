@@ -23,7 +23,7 @@ transformer_params = TransformerEncoderLayer.Params(
     hidden_dropout=0.1,
     attention_dropout=0.1,
     intermediate_size=4 * hidden_size,
-    intermediate_activation=None,  # #############################3
+    intermediate_activation="gelu",
     num_heads=num_attention_heads,
     size_per_head=int(hidden_size / num_attention_heads),
 )
@@ -38,6 +38,37 @@ model = tf.keras.models.Sequential(
         tf.keras.layers.Dense(input_size, activation=None),
     ]
 )
+
+
+def gen():
+    while True:
+        x = tf.random.normal([seqlen, input_size])
+        yield x, x
+
+
+ds = tf.data.Dataset.from_generator(
+    gen,
+    (tf.float32, tf.float32),
+    (tf.TensorShape([seqlen, input_size]), tf.TensorShape([seqlen, input_size])),
+)
+ds = ds.batch(32)
+
+train_steps = 5000
+ds = ds.take(train_steps)
+model.compile(
+    loss=tf.keras.losses.MeanSquaredError(),
+    # optimizer="adam",
+    optimizer=tf.keras.optimizers.Adam(
+        learning_rate=1e-3, beta_1=0.9, beta_2=0.98, epsilon=1e-9
+    ),
+)
+model.fit(
+    ds,
+    epochs=1,
+    steps_per_epoch=train_steps,
+)
+
+
 """
 num_layers     = None
 out_layer_ndxs = None   # [-1]
@@ -69,34 +100,3 @@ value_activation  = None
 attention_dropout = 0.1
 negative_infinity = -10000.0  # used for attention scores before softmax
 """
-
-
-def gen():
-    while True:
-        x = tf.random.normal([seqlen, input_size])
-        # x = tf.random.normal([seqlen * input_size])
-        yield x, x
-
-
-ds = tf.data.Dataset.from_generator(
-    gen,
-    (tf.float32, tf.float32),
-    (tf.TensorShape([seqlen, input_size]), tf.TensorShape([seqlen, input_size])),
-    # (tf.TensorShape([seqlen * input_size]), tf.TensorShape([seqlen * input_size])),
-)
-ds = ds.batch(32)
-
-train_steps = 5000
-ds = ds.take(train_steps)
-model.compile(
-    loss=tf.keras.losses.MeanSquaredError(),
-    # optimizer="adam",
-    optimizer=tf.keras.optimizers.Adam(
-        learning_rate=1e-3, beta_1=0.9, beta_2=0.98, epsilon=1e-9
-    ),
-)
-model.fit(
-    ds,
-    epochs=1,
-    steps_per_epoch=train_steps,
-)

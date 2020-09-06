@@ -35,7 +35,7 @@ layer = TransformerEncoderLayer.from_params(transformer_params, name="transforme
 model = tf.keras.models.Sequential(
     [
         layer,
-        # tf.keras.layers.Dense(hidden_size, activation=None)
+        tf.keras.layers.Dense(hidden_size, activation=None),
     ]
 )
 """

@@ -34,10 +34,24 @@ transformer_params = TransformerEncoderLayer.Params(
 
 seqlen = 2
 
+
+class PosEmbeddings(tf.keras.layers.Layer):
+    def __init__(self):
+        self.embeddings = tf.keras.add_weight(
+            shape=[seqlen, hidden_size],
+            initializer="random_normal",
+            trainable=True,
+        )
+
+    def call(self, inputs):
+        return inputs + self.embeddings
+
+
 layer = TransformerEncoderLayer.from_params(transformer_params, name="transformer")
 model = tf.keras.models.Sequential(
     [
         tf.keras.layers.Dense(hidden_size, activation=None),
+        PosEmbeddings(),
         layer,
         tf.keras.layers.Dense(input_size, activation=None),
     ]

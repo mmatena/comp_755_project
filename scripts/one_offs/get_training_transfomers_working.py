@@ -40,20 +40,24 @@ model = tf.keras.models.Sequential(
 )
 
 
-def gen():
-    while True:
-        x = tf.random.normal([seqlen, input_size])
-        yield x, x
+# def gen():
+#     while True:
+#         x = tf.random.normal([seqlen, input_size])
+#         yield x, x
 
 
-ds = tf.data.Dataset.from_generator(
-    gen,
-    (tf.float32, tf.float32),
-    (tf.TensorShape([seqlen, input_size]), tf.TensorShape([seqlen, input_size])),
-)
+# ds = tf.data.Dataset.from_generator(
+#     gen,
+#     (tf.float32, tf.float32),
+#     (tf.TensorShape([seqlen, input_size]), tf.TensorShape([seqlen, input_size])),
+# )
+
+ds = encoded_rollouts.random_rollout_slices(seqlen)
+ds = ds.map(lambda x: (x["observations"], x["observations"]))
+
 ds = ds.batch(32)
 
-train_steps = 5000
+train_steps = 4000
 ds = ds.take(train_steps)
 model.compile(
     loss=tf.keras.losses.MeanSquaredError(),

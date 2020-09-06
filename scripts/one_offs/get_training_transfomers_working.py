@@ -26,7 +26,12 @@ transformer_params = TransformerEncoderLayer.Params(
     size_per_head=int(hidden_size / num_attention_heads),
 )
 
-model = TransformerEncoderLayer.from_params(transformer_params, name="transformer")
+layer = TransformerEncoderLayer.from_params(transformer_params, name="transformer")
+model = tf.keras.models.Sequential(
+    [
+        layer,
+    ]
+)
 
 seqlen = 8
 

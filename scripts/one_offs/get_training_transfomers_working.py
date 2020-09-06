@@ -89,7 +89,9 @@ ds = ds.take(train_steps)
 model.compile(
     loss=tf.keras.losses.MeanSquaredError(),
     # optimizer="adam",
-    optimizer=tf.keras.optimizers.Adam(learning_rate=3e-5),
+    optimizer=tf.keras.optimizers.Adam(
+        learning_rate=1e-3, beta_1=0.9, beta_2=0.98, epsilon=1e-9
+    ),
 )
 model.fit(
     ds,

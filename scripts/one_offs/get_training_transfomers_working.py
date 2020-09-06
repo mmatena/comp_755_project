@@ -29,7 +29,8 @@ transformer_params = TransformerEncoderLayer.Params(
 layer = TransformerEncoderLayer.from_params(transformer_params, name="transformer")
 model = tf.keras.models.Sequential(
     [
-        layer,
+        # layer,
+        tf.keras.layers.Dense(hidden_size)
     ]
 )
 

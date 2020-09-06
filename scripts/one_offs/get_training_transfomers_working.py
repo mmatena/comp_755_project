@@ -26,27 +26,31 @@ transformer_params = TransformerEncoderLayer.Params(
     size_per_head=int(hidden_size / num_attention_heads),
 )
 
+seqlen = 2
+
 layer = TransformerEncoderLayer.from_params(transformer_params, name="transformer")
 model = tf.keras.models.Sequential(
     [
+        tf.keras.layers.Reshape((seqlen, hidden_size)),
         layer,
+        tf.keras.layers.Flatten(),
         # tf.keras.layers.Dense(hidden_size, activation=None)
     ]
 )
 
-seqlen = 2
-
 
 def gen():
     while True:
-        x = tf.random.normal([seqlen, hidden_size])
+        # x = tf.random.normal([seqlen, hidden_size])
+        x = tf.random.normal([seqlen * hidden_size])
         yield x, x
 
 
 ds = tf.data.Dataset.from_generator(
     gen,
     (tf.float32, tf.float32),
-    (tf.TensorShape([seqlen, hidden_size]), tf.TensorShape([seqlen, hidden_size])),
+    # (tf.TensorShape([seqlen, hidden_size]), tf.TensorShape([seqlen, hidden_size])),
+    (tf.TensorShape([seqlen * hidden_size]), tf.TensorShape([seqlen * hidden_size])),
 )
 ds = ds.batch(32)
 

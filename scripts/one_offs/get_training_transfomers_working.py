@@ -14,6 +14,7 @@ from rl755.data.car_racing import processing
 from rl755.models.car_racing import transformer
 from rl755.models.common import transformer as common_transformer
 
+input_size = 32
 hidden_size = 256
 num_attention_heads = 4
 transformer_params = TransformerEncoderLayer.Params(
@@ -32,8 +33,9 @@ seqlen = 2
 layer = TransformerEncoderLayer.from_params(transformer_params, name="transformer")
 model = tf.keras.models.Sequential(
     [
-        layer,
         tf.keras.layers.Dense(hidden_size, activation=None),
+        layer,
+        tf.keras.layers.Dense(input_size, activation=None),
     ]
 )
 """
@@ -71,16 +73,16 @@ negative_infinity = -10000.0  # used for attention scores before softmax
 
 def gen():
     while True:
-        x = tf.random.normal([seqlen, hidden_size])
-        # x = tf.random.normal([seqlen * hidden_size])
+        x = tf.random.normal([seqlen, input_size])
+        # x = tf.random.normal([seqlen * input_size])
         yield x, x
 
 
 ds = tf.data.Dataset.from_generator(
     gen,
     (tf.float32, tf.float32),
-    (tf.TensorShape([seqlen, hidden_size]), tf.TensorShape([seqlen, hidden_size])),
-    # (tf.TensorShape([seqlen * hidden_size]), tf.TensorShape([seqlen * hidden_size])),
+    (tf.TensorShape([seqlen, input_size]), tf.TensorShape([seqlen, input_size])),
+    # (tf.TensorShape([seqlen * input_size]), tf.TensorShape([seqlen * input_size])),
 )
 ds = ds.batch(32)
 

@@ -29,12 +29,12 @@ transformer_params = TransformerEncoderLayer.Params(
 layer = TransformerEncoderLayer.from_params(transformer_params, name="transformer")
 model = tf.keras.models.Sequential(
     [
-        # layer,
-        tf.keras.layers.Dense(hidden_size, activation=None)
+        layer,
+        # tf.keras.layers.Dense(hidden_size, activation=None)
     ]
 )
 
-seqlen = 8
+seqlen = 2
 
 
 def gen():

@@ -31,7 +31,7 @@ flags.DEFINE_integer(
     "sequence_length", 32, "Size of windows to train on.", lower_bound=1
 )
 flags.DEFINE_integer(
-    "vocab_size", 16, "Size of vocab for discretization.", lower_bound=1
+    "vocab_size", 32, "Size of vocab for discretization.", lower_bound=1
 )
 # flags.DEFINE_integer(
 #     "ignore_loss_prefix_size",
@@ -106,6 +106,7 @@ def main(_):
     num_attention_heads = 12
     hidden_size = 768
     transformer_params = BertModelLayer.Params(
+        max_position_embeddings=32 * FLAGS.sequence_length,
         vocab_size=FLAGS.vocab_size,
         use_token_type=False,
         use_position_embeddings=True,

@@ -15,6 +15,7 @@ model = saved_models.encoded_rollout_transformer()
 y = model(inputs[:, 300:332])
 var = tf.math.reduce_std(y, axis=-2)
 var = tf.squeeze(var)
+print(var)
 # targets = o[1:] - o[:-1]
 
 # mix = model.get_mix_of_gauss(y)

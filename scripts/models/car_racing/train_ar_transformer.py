@@ -31,7 +31,7 @@ flags.DEFINE_integer(
     "sequence_length", 32, "Size of windows to train on.", lower_bound=1
 )
 flags.DEFINE_integer(
-    "vocab_size", 32, "Size of vocab for discretization.", lower_bound=1
+    "vocab_size", 16, "Size of vocab for discretization.", lower_bound=1
 )
 # flags.DEFINE_integer(
 #     "ignore_loss_prefix_size",
@@ -134,7 +134,6 @@ def main(_):
                 tf.keras.layers.Dense(FLAGS.vocab_size, activation=None),
             ]
         )
-        model.build([None, 32 ** 2])
         model.compile(
             # loss=model.nll_loss(global_batch_size=FLAGS.batch_size), optimizer="adam"
             loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),

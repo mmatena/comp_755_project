@@ -1,7 +1,11 @@
 """Car racing specific transformer code."""
+import numpy as np
 import tensorflow as tf
+import tensorflow_probability as tfp
 
 from rl755.models.common import transformer as common_transformer
+
+tfd = tfp.distributions
 
 
 # TODO(mmatena): Put some special stuff here.
@@ -64,23 +68,33 @@ def to_ar_inputs_and_targets(
     return inputs, targets
 
 
-def observation_only_metric(metric_fn, latent_size=32, prefix_size=0):
-    """Computes a metric only on the observations."""
+def discretization(inputs, targets, sequence_length, action_size=3, vocab_size=32):
+    bins = np.arange(1, vocab_size) / float(vocab_size)
+    bins = tfp.bijectors.NormalCDF().reverse(bins)
+    discretizer = tf.keras.layers.experimental.preprocessing.Discretization(bins)
 
-    def fn(y_true, y_pred):
-        y_true = y_true[:, prefix_size:, :latent_size]
-        y_pred = y_pred[:, prefix_size:, :latent_size]
-        return metric_fn(y_true, y_pred)
-
-    return fn
+    targets = tf.concat([targets, tf.zeros([targets.shape[0], action_size])], axis=-1)
+    return discretizer(inputs), discretizer(targets)
+    # inputs = tf.reshape(inputs, [sequence_length, vocab_size * inputs.shape[0]])
 
 
-def reward_only_metric(metric_fn, prefix_size=0):
-    """Computes a metric only on the rewards."""
+# def observation_only_metric(metric_fn, latent_size=32, prefix_size=0):
+#     """Computes a metric only on the observations."""
 
-    def fn(y_true, y_pred):
-        y_true = y_true[:, prefix_size:, -1:]
-        y_pred = y_pred[:, prefix_size:, -1:]
-        return metric_fn(y_true, y_pred)
+#     def fn(y_true, y_pred):
+#         y_true = y_true[:, prefix_size:, :latent_size]
+#         y_pred = y_pred[:, prefix_size:, :latent_size]
+#         return metric_fn(y_true, y_pred)
 
-    return fn
+#     return fn
+
+
+# def reward_only_metric(metric_fn, prefix_size=0):
+#     """Computes a metric only on the rewards."""
+
+#     def fn(y_true, y_pred):
+#         y_true = y_true[:, prefix_size:, -1:]
+#         y_pred = y_pred[:, prefix_size:, -1:]
+#         return metric_fn(y_true, y_pred)
+
+#     return fn

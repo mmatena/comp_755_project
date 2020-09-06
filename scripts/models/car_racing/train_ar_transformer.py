@@ -6,6 +6,7 @@ from absl import app
 
 from absl import flags
 
+from bert import BertModelLayer
 from bert.transformer import TransformerEncoderLayer
 import tensorflow as tf
 
@@ -28,6 +29,9 @@ flags.DEFINE_integer(
 )
 flags.DEFINE_integer(
     "sequence_length", 32, "Size of windows to train on.", lower_bound=1
+)
+flags.DEFINE_integer(
+    "vocab_size", 32, "Size of vocab for discretization.", lower_bound=1
 )
 # flags.DEFINE_integer(
 #     "ignore_loss_prefix_size",
@@ -63,6 +67,14 @@ def get_train_ds():
         identity_train,
         num_parallel_calls=tf.data.experimental.AUTOTUNE,
     )
+    ds = ds.map(
+        functools.partial(
+            transformer.discretization,
+            sequence_length=FLAGS.sequence_length,
+            vocab_size=FLAGS.vocab_size,
+        ),
+        num_parallel_calls=tf.data.experimental.AUTOTUNE,
+    )
     ds = processing.standard_dataset_prep(
         ds, batch_size=FLAGS.batch_size, repeat=True, shuffle_buffer_size=1000
     )
@@ -78,10 +90,25 @@ def main(_):
     print(f"Training on {len(gpus)} GPUS.")
 
     # TODO(mmatena): Make these settable or inferred from the data. These correspond to BERT Base
-    output_size = 32
+    # output_size = 32
+    # num_attention_heads = 12
+    # hidden_size = 768
+    # transformer_params = TransformerEncoderLayer.Params(
+    #     num_layers=12,
+    #     hidden_size=hidden_size,
+    #     hidden_dropout=0.1,
+    #     intermediate_size=4 * hidden_size,
+    #     intermediate_activation="gelu",
+    #     num_heads=num_attention_heads,
+    #     size_per_head=int(hidden_size / num_attention_heads),
+    # )
+    # output_size = 32
     num_attention_heads = 12
     hidden_size = 768
-    transformer_params = TransformerEncoderLayer.Params(
+    transformer_params = BertModelLayer.Params(
+        vocab_size=FLAGS.vocab_size,
+        use_token_type=False,
+        use_position_embeddings=True,
         num_layers=12,
         hidden_size=hidden_size,
         hidden_dropout=0.1,
@@ -89,17 +116,28 @@ def main(_):
         intermediate_activation="gelu",
         num_heads=num_attention_heads,
         size_per_head=int(hidden_size / num_attention_heads),
+        adapter_size=None,
+        shared_layer=False,
+        embedding_size=None,
     )
 
     mirrored_strategy = tf.distribute.MirroredStrategy()
     with mirrored_strategy.scope():
-        model = common_transformer.AutoregressiveTransformer(
-            transformer_params,
-            output_size=output_size,
-            num_components=FLAGS.num_components,
+        # model = common_transformer.AutoregressiveTransformer(
+        #     transformer_params,
+        #     output_size=output_size,
+        #     num_components=FLAGS.num_components,
+        # )
+        model = tf.keras.models.Sequential(
+            [
+                BertModelLayer.from_params(transformer_params),
+                tf.keras.layers.Dense(FLAGS.vocab_size, activation=None),
+            ]
         )
         model.compile(
-            loss=model.nll_loss(global_batch_size=FLAGS.batch_size), optimizer="adam"
+            # loss=model.nll_loss(global_batch_size=FLAGS.batch_size), optimizer="adam"
+            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+            optimizer="adam",
         )
 
     ds = get_train_ds()

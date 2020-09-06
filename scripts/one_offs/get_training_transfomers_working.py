@@ -1,0 +1,57 @@
+import functools
+import os
+
+from absl import app
+
+from absl import flags
+
+from bert import BertModelLayer
+from bert.transformer import TransformerEncoderLayer
+import tensorflow as tf
+
+from rl755.data.car_racing import encoded_rollouts
+from rl755.data.car_racing import processing
+from rl755.models.car_racing import transformer
+from rl755.models.common import transformer as common_transformer
+
+hidden_size = 32
+num_attention_heads = 2
+transformer_params = TransformerEncoderLayer.Params(
+    num_layers=3,
+    hidden_size=hidden_size,
+    hidden_dropout=0.1,
+    intermediate_size=4 * hidden_size,
+    intermediate_activation="gelu",
+    num_heads=num_attention_heads,
+    size_per_head=int(hidden_size / num_attention_heads),
+)
+
+model = TransformerEncoderLayer.from_params(transformer_params, name="transformer")
+
+seqlen = 8
+
+
+def gen():
+    while True:
+        x = tf.random.normal([hidden_size])
+        yield x, x
+
+
+ds = tf.data.Dataset.from_generator(
+    gen,
+    (tf.float32, tf.float32),
+    (tf.TensorShape([seqlen, hidden_size]), tf.TensorShape([seqlen, hidden_size])),
+)
+ds = ds.batch(64)
+
+train_steps = 1000
+ds = ds.take(train_steps)
+model.compile(
+    loss=tf.keras.losses.MeanSquaredError(),
+    optimizer="adam",
+)
+model.fit(
+    ds,
+    epochs=1,
+    steps_per_epoch=train_steps,
+)

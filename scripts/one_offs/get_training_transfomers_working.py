@@ -50,7 +50,7 @@ ds = tf.data.Dataset.from_generator(
 )
 ds = ds.batch(32)
 
-train_steps = 500
+train_steps = 5000
 ds = ds.take(train_steps)
 model.compile(
     loss=tf.keras.losses.MeanSquaredError(),

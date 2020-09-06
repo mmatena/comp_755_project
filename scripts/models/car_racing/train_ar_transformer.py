@@ -134,6 +134,7 @@ def main(_):
                 tf.keras.layers.Dense(FLAGS.vocab_size, activation=None),
             ]
         )
+        model.build([None, 32 ** 2])
         model.compile(
             # loss=model.nll_loss(global_batch_size=FLAGS.batch_size), optimizer="adam"
             loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),

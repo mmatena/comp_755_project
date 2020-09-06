@@ -61,8 +61,10 @@ model = tf.keras.models.Sequential(
 
 def gen():
     while True:
-        x = tf.random.normal([seqlen, input_size])
-        yield x, x
+        # x = tf.random.normal([seqlen, input_size])
+        # yield x, x
+        x = tf.random.normal([seqlen + 1, input_size])
+        yield x[:-1], x[1:]  # Shouldn't predict this when AR.
 
 
 ds = tf.data.Dataset.from_generator(

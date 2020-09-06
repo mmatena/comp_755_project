@@ -17,16 +17,16 @@ from rl755.models.common import transformer as common_transformer
 hidden_size = 4
 num_attention_heads = 1
 transformer_params = TransformerEncoderLayer.Params(
-    num_layers=3,
+    num_layers=2,
     hidden_size=hidden_size,
     hidden_dropout=0.0,
     intermediate_size=4 * hidden_size,
-    intermediate_activation="gelu",
+    intermediate_activation=None,
     num_heads=num_attention_heads,
     size_per_head=int(hidden_size / num_attention_heads),
 )
 
-seqlen = 2
+seqlen = 1
 
 layer = TransformerEncoderLayer.from_params(transformer_params, name="transformer")
 model = tf.keras.models.Sequential(

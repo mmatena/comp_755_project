@@ -32,7 +32,7 @@ transformer_params = TransformerEncoderLayer.Params(
     size_per_head=int(hidden_size / num_attention_heads),
 )
 
-seqlen = 2
+seqlen = 8
 
 
 class PosEmbeddings(tf.keras.layers.Layer):
@@ -65,6 +65,7 @@ def gen():
         # yield x, x
         x = tf.random.normal([seqlen + 1, input_size])
         yield x[:-1], x[1:]  # Shouldn't predict this when AR.
+        yield x[1:], x[-1:]  # Shouldn predict this when AR.
 
 
 ds = tf.data.Dataset.from_generator(

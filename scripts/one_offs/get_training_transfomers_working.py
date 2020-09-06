@@ -64,18 +64,21 @@ def gen():
         # x = tf.random.normal([seqlen, input_size])
         # yield x, x
         x = tf.random.normal([seqlen + 1, input_size])
-        yield x[:-1], x[1:]  # Shouldn't predict this when AR.
-        # yield x[1:], x[:-1]  # Should predict this when AR.
+        # yield x[:-1], x[1:]  # Shouldn't predict this when AR.
+        yield x[1:], x[:-1]  # Should predict this when AR.
 
 
-ds = tf.data.Dataset.from_generator(
-    gen,
-    (tf.float32, tf.float32),
-    (tf.TensorShape([seqlen, input_size]), tf.TensorShape([seqlen, input_size])),
+# ds = tf.data.Dataset.from_generator(
+#     gen,
+#     (tf.float32, tf.float32),
+#     (tf.TensorShape([seqlen, input_size]), tf.TensorShape([seqlen, input_size])),
+# )
+
+ds = encoded_rollouts.random_rollout_slices(seqlen)
+ds = ds.map(
+    lambda x: (x["observations"][:-1], x["observations"][1:]),
+    num_parallel_calls=tf.data.experimental.AUTOTUNE,
 )
-
-# ds = encoded_rollouts.random_rollout_slices(seqlen)
-# ds = ds.map(lambda x: (x["observations"], x["observations"]))
 
 ds = ds.batch(32)
 

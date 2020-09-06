@@ -88,7 +88,8 @@ train_steps = 5000
 ds = ds.take(train_steps)
 model.compile(
     loss=tf.keras.losses.MeanSquaredError(),
-    optimizer="adam",
+    # optimizer="adam",
+    optimizer=tf.keras.optimizers.Adam(learning_rate=3e-5),
 )
 model.fit(
     ds,

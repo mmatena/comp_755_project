@@ -31,9 +31,7 @@ seqlen = 2
 layer = TransformerEncoderLayer.from_params(transformer_params, name="transformer")
 model = tf.keras.models.Sequential(
     [
-        tf.keras.layers.Reshape((seqlen, hidden_size)),
         layer,
-        tf.keras.layers.Flatten(),
         # tf.keras.layers.Dense(hidden_size, activation=None)
     ]
 )

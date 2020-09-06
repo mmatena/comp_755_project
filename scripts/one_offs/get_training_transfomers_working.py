@@ -14,8 +14,8 @@ from rl755.data.car_racing import processing
 from rl755.models.car_racing import transformer
 from rl755.models.common import transformer as common_transformer
 
-hidden_size = 32
-num_attention_heads = 2
+hidden_size = 4
+num_attention_heads = 1
 transformer_params = TransformerEncoderLayer.Params(
     num_layers=3,
     hidden_size=hidden_size,
@@ -47,9 +47,9 @@ ds = tf.data.Dataset.from_generator(
     (tf.float32, tf.float32),
     (tf.TensorShape([seqlen, hidden_size]), tf.TensorShape([seqlen, hidden_size])),
 )
-ds = ds.batch(64)
+ds = ds.batch(256)
 
-train_steps = 1000
+train_steps = 500
 ds = ds.take(train_steps)
 model.compile(
     loss=tf.keras.losses.MeanSquaredError(),

@@ -19,7 +19,7 @@ num_attention_heads = 1
 transformer_params = TransformerEncoderLayer.Params(
     num_layers=3,
     hidden_size=hidden_size,
-    hidden_dropout=0.1,
+    hidden_dropout=0.0,
     intermediate_size=4 * hidden_size,
     intermediate_activation="gelu",
     num_heads=num_attention_heads,
@@ -41,16 +41,16 @@ model = tf.keras.models.Sequential(
 
 def gen():
     while True:
-        # x = tf.random.normal([seqlen, hidden_size])
-        x = tf.random.normal([seqlen * hidden_size])
+        x = tf.random.normal([seqlen, hidden_size])
+        # x = tf.random.normal([seqlen * hidden_size])
         yield x, x
 
 
 ds = tf.data.Dataset.from_generator(
     gen,
     (tf.float32, tf.float32),
-    # (tf.TensorShape([seqlen, hidden_size]), tf.TensorShape([seqlen, hidden_size])),
-    (tf.TensorShape([seqlen * hidden_size]), tf.TensorShape([seqlen * hidden_size])),
+    (tf.TensorShape([seqlen, hidden_size]), tf.TensorShape([seqlen, hidden_size])),
+    # (tf.TensorShape([seqlen * hidden_size]), tf.TensorShape([seqlen * hidden_size])),
 )
 ds = ds.batch(32)
 

@@ -37,7 +37,7 @@ seqlen = 2
 
 class PosEmbeddings(tf.keras.layers.Layer):
     def __init__(self):
-        self.embeddings = tf.keras.add_weight(
+        self.embeddings = self.add_weight(
             shape=[seqlen, hidden_size],
             initializer="random_normal",
             trainable=True,

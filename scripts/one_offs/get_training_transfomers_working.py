@@ -30,7 +30,7 @@ layer = TransformerEncoderLayer.from_params(transformer_params, name="transforme
 model = tf.keras.models.Sequential(
     [
         # layer,
-        tf.keras.layers.Dense(hidden_size)
+        tf.keras.layers.Dense(hidden_size, activation=None)
     ]
 )
 
@@ -48,7 +48,7 @@ ds = tf.data.Dataset.from_generator(
     (tf.float32, tf.float32),
     (tf.TensorShape([seqlen, hidden_size]), tf.TensorShape([seqlen, hidden_size])),
 )
-ds = ds.batch(256)
+ds = ds.batch(32)
 
 train_steps = 500
 ds = ds.take(train_steps)

@@ -72,7 +72,7 @@ def discretization(inputs, targets, sequence_length, action_size=3, vocab_size=3
     bins = norm.ppf(bins).tolist()
     # discretizer = tf.keras.layers.experimental.preprocessing.Discretization(bins)
     discretizer = lambda x: math_ops._bucketize(x, boundaries=bins)
-    targets = tf.concat([targets, tf.zeros([targets.shape[0], action_size])], axis=-1)
+    # targets = tf.concat([targets, tf.zeros([targets.shape[0], action_size])], axis=-1)
     new_seqlen = inputs.shape[0] * inputs.shape[1]
     return discretizer(tf.reshape(inputs, [new_seqlen])), discretizer(
         tf.reshape(targets, [new_seqlen])

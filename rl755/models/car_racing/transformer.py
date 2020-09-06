@@ -1,12 +1,10 @@
 """Car racing specific transformer code."""
 import numpy as np
 import tensorflow as tf
-import tensorflow_probability as tfp
 
 from rl755.models.common import transformer as common_transformer
+from scipy.stats import norm
 from tensorflow.python.ops import math_ops
-
-tfd = tfp.distributions
 
 
 # TODO(mmatena): Put some special stuff here.
@@ -71,7 +69,7 @@ def to_ar_inputs_and_targets(
 
 def discretization(inputs, targets, sequence_length, action_size=3, vocab_size=32):
     bins = np.arange(1, vocab_size) / float(vocab_size)
-    bins = tfp.bijectors.NormalCDF().inverse(bins)
+    bins = norm.ppf(bins).tolist()
     # discretizer = tf.keras.layers.experimental.preprocessing.Discretization(bins)
     discretizer = lambda x: math_ops._bucketize(x, boundaries=bins)
     targets = tf.concat([targets, tf.zeros([targets.shape[0], action_size])], axis=-1)

@@ -46,15 +46,20 @@ flags.mark_flag_as_required("model_dir")
 flags.mark_flag_as_required("train_steps")
 
 
+def identity_train(x):
+    return x["observations"][1:], x["observations"][1:]
+
+
 def get_train_ds():
     # We need the `+1` due to how we are processing the sequences.
     ds = encoded_rollouts.random_rollout_slices(slice_size=FLAGS.sequence_length + 1)
     ds = ds.map(
-        functools.partial(
-            transformer.to_ar_inputs_and_targets,
-            sequence_length=FLAGS.sequence_length,
-            sample=True,
-        ),
+        # functools.partial(
+        #     transformer.to_ar_inputs_and_targets,
+        #     sequence_length=FLAGS.sequence_length,
+        #     sample=True,
+        # ),
+        identity_train,
         num_parallel_calls=tf.data.experimental.AUTOTUNE,
     )
     ds = processing.standard_dataset_prep(

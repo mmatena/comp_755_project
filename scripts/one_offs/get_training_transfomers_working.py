@@ -14,6 +14,10 @@ from rl755.data.car_racing import processing
 from rl755.models.car_racing import transformer
 from rl755.models.common import transformer as common_transformer
 
+from bert.attention import AttentionLayer
+
+from unittest import mock
+
 input_size = 32
 hidden_size = 256
 num_attention_heads = 4
@@ -40,37 +44,62 @@ model = tf.keras.models.Sequential(
 )
 
 
-# def gen():
-#     while True:
-#         x = tf.random.normal([seqlen, input_size])
-#         yield x, x
+def gen():
+    while True:
+        x = tf.random.normal([seqlen, input_size])
+        yield x, x
 
 
-# ds = tf.data.Dataset.from_generator(
-#     gen,
-#     (tf.float32, tf.float32),
-#     (tf.TensorShape([seqlen, input_size]), tf.TensorShape([seqlen, input_size])),
-# )
+ds = tf.data.Dataset.from_generator(
+    gen,
+    (tf.float32, tf.float32),
+    (tf.TensorShape([seqlen, input_size]), tf.TensorShape([seqlen, input_size])),
+)
 
-ds = encoded_rollouts.random_rollout_slices(seqlen)
-ds = ds.map(lambda x: (x["observations"], x["observations"]))
+# ds = encoded_rollouts.random_rollout_slices(seqlen)
+# ds = ds.map(lambda x: (x["observations"], x["observations"]))
 
 ds = ds.batch(32)
 
 train_steps = 4000
 ds = ds.take(train_steps)
-model.compile(
-    loss=tf.keras.losses.MeanSquaredError(),
-    # optimizer="adam",
-    optimizer=tf.keras.optimizers.Adam(
-        learning_rate=1e-3, beta_1=0.9, beta_2=0.98, epsilon=1e-9
-    ),
-)
-model.fit(
-    ds,
-    epochs=1,
-    steps_per_epoch=train_steps,
-)
+
+
+def _create_ar_mask(seq_len):
+    arange = tf.range(seq_len)
+    # Looks like the mask shape corresponds to [batch, from_sequence, to_sequence].
+    mask = tf.less_equal(tf.expand_dims(arange, axis=0), tf.expand_dims(arange, axis=1))
+    mask = tf.cast(tf.expand_dims(mask, axis=0), tf.float32)
+    return mask
+
+
+def _our_create_attention_mask(from_shape, input_mask, mask):
+    """Overide of AttentionLayer.create_attention_mask for our purposes.
+
+    We create the attention mask outside of this function and just pass it through.
+    """
+    del from_shape, input_mask
+    return mask
+
+
+with mock.patch.object(
+    AttentionLayer,
+    "create_attention_mask",
+    functools.partial(_our_create_attention_mask, mask=_create_ar_mask(seqlen)),
+):
+
+    model.compile(
+        loss=tf.keras.losses.MeanSquaredError(),
+        # optimizer="adam",
+        optimizer=tf.keras.optimizers.Adam(
+            learning_rate=1e-3, beta_1=0.9, beta_2=0.98, epsilon=1e-9
+        ),
+    )
+    model.fit(
+        ds,
+        epochs=1,
+        steps_per_epoch=train_steps,
+    )
 
 
 """

@@ -38,7 +38,7 @@ seqlen = 8
 
 def gen():
     while True:
-        x = tf.random.normal([hidden_size])
+        x = tf.random.normal([seqlen, hidden_size])
         yield x, x
 
 

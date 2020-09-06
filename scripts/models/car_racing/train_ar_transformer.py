@@ -47,7 +47,8 @@ flags.mark_flag_as_required("train_steps")
 
 
 def identity_train(x):
-    return x["observations"][1:], x["observations"][1:]
+    y = tf.reshape(x["observations"][1:], [32, 32])
+    return y, y
 
 
 def get_train_ds():

@@ -32,7 +32,8 @@ transformer_params = TransformerEncoderLayer.Params(
     size_per_head=int(hidden_size / num_attention_heads),
 )
 
-seqlen = 8
+# seqlen = 8
+seqlen = 32
 
 
 class PosEmbeddings(tf.keras.layers.Layer):

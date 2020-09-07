@@ -58,6 +58,7 @@ model = tf.keras.models.Sequential(
         tf.keras.layers.Dense(input_size, activation=None),
     ]
 )
+model.build([None, seqlen, input_size])
 
 
 def gen():

@@ -35,7 +35,7 @@ transformer_params = TransformerEncoderLayer.Params(
 seqlen = 32
 
 output_size = 32
-num_attention_heads = 8
+num_attention_heads = 4
 hidden_size = 512
 transformer_params = TransformerEncoderLayer.Params(
     # num_layers=12,

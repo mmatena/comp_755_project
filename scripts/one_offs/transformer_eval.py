@@ -27,18 +27,6 @@ flags.DEFINE_string("split", "validation", "The split to evaluate on.")
 SEQUENCE_LENGTH = 32
 
 
-def get_metrics():
-    obs_mse = transformer.observation_only_metric(
-        tf.keras.metrics.MeanSquaredError(), prefix_size=4
-    )
-    obs_mse.__name__ = "obs_mse"
-    reward_mse = transformer.reward_only_metric(
-        tf.keras.metrics.MeanSquaredError(), prefix_size=4
-    )
-    reward_mse.__name__ = "reward_mse"
-    return [obs_mse, reward_mse]
-
-
 def get_ds():
     # NOTE: This won't be deterministic.
     ds = encoded_rollouts.random_rollout_slices(
@@ -69,23 +57,12 @@ def main(_):
 
     # model = getattr(saved_models, FLAGS.model)(**ast.literal_eval(FLAGS.model_kwargs))
     # model = getattr(saved_models, FLAGS.model)(k=10, corpus_size=100000, lambda_knn=1.0)
-    model = getattr(saved_models, FLAGS.model)(k=10, corpus_size=100000, lambda_knn=0.2)
+    # model = getattr(saved_models, FLAGS.model)(k=10, corpus_size=100000, lambda_knn=0.2)
+    model = getattr(saved_models, FLAGS.model)()
     model.return_layer_outputs = False
-    model.compile(optimizer="adam", loss=loss_fn, metrics=get_metrics())
+    model.compile(optimizer="adam", loss=loss_fn)
     model.evaluate(ds)
 
 
 if __name__ == "__main__":
     app.run(main)
-
-# # These had the distance softmax wrong!!
-# # 100k, 0.2, k=10: loss: 0.3411 - obs_mse: 0.3486 - reward_mse: 0.1190
-# # 100k, 0.2, k=10: loss: 0.3407 - obs_mse: 0.3471 - reward_mse: 0.1227
-# # 100k, 0.0, k=10: loss: 0.3405 - obs_mse: 0.3463 - reward_mse: 0.1274
-# # None, 0.2, k=10: loss: 0.3414 - obs_mse: 0.3478 - reward_mse: 0.1234
-# # None, 0.2, k=100:
-
-# 100k, 0.2, k=10:  loss: 0.3401 - obs_mse: 0.3466 - reward_mse: 0.1204
-# None, 0.2, k=100: loss: 0.3417 - obs_mse: 0.3499 - reward_mse: 0.1223
-
-# - loss: 0.3768 - obs_mse: 0.3833 - reward_mse: 0.1112

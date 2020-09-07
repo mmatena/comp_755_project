@@ -40,7 +40,7 @@ hidden_size = 256
 transformer_params = TransformerEncoderLayer.Params(
     # num_layers=12,
     # num_layers=6,
-    num_layers=4,
+    num_layers=3,
     hidden_size=hidden_size,
     hidden_dropout=0.1,
     intermediate_size=4 * hidden_size,
@@ -93,9 +93,19 @@ def gen():
 #     (tf.TensorShape([seqlen, input_size]), tf.TensorShape([seqlen, input_size])),
 # )
 
+
+def map_fn(x):
+    o = x["observations"]
+    a = x["actions"][:, :3]
+    inputs = tf.concat([o[:-1], a[:-1]], axis=0)
+    targets = o[1:] - o[:-1]
+    return inputs, targets
+
+
 ds = encoded_rollouts.random_rollout_slices(seqlen + 1)
 ds = ds.map(
-    lambda x: (x["observations"][:-1], x["observations"][1:]),
+    # lambda x: (x["observations"][:-1], x["observations"][1:]),
+    map_fn,
     num_parallel_calls=tf.data.experimental.AUTOTUNE,
 )
 ds = ds.map(

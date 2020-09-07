@@ -40,7 +40,7 @@ hidden_size = 256
 transformer_params = TransformerEncoderLayer.Params(
     # num_layers=12,
     # num_layers=6,
-    num_layers=3,
+    num_layers=4,
     hidden_size=hidden_size,
     hidden_dropout=0.1,
     intermediate_size=4 * hidden_size,
@@ -92,6 +92,7 @@ def gen():
 #     (tf.float32, tf.float32),
 #     (tf.TensorShape([seqlen, input_size]), tf.TensorShape([seqlen, input_size])),
 # )
+# 0.0118
 
 
 def map_fn(x):

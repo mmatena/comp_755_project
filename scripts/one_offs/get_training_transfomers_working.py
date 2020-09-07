@@ -36,11 +36,11 @@ seqlen = 32
 
 output_size = 32
 num_attention_heads = 4
-hidden_size = 256
+hidden_size = 128
 transformer_params = TransformerEncoderLayer.Params(
     # num_layers=12,
-    num_layers=6,
-    # num_layers=3,
+    # num_layers=6,
+    num_layers=3,
     hidden_size=hidden_size,
     hidden_dropout=0.1,
     intermediate_size=4 * hidden_size,

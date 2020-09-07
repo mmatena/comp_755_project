@@ -111,7 +111,7 @@ ds = ds.map(
 ds = ds.map(
     lambda x, y: (
         tf.reshape(x, [seqlen, input_size]),
-        tf.reshape(y, [seqlen, input_size]),
+        tf.reshape(y, [seqlen, output_size]),
     ),
     num_parallel_calls=tf.data.experimental.AUTOTUNE,
 )

@@ -15,14 +15,14 @@ y = model(inputs[:, 300:332])
 var = tf.math.reduce_std(y, axis=-2)
 var = tf.squeeze(var)
 print(var)
-# targets = o[1:] - o[:-1]
+targets = o[1:] - o[:-1]
 
-mix = model.get_mix_of_gauss(y)
-# print(-mix.log_prob([targets[200:232]]))
-# print(-mix.log_prob([targets[20:52]]))
-print(-mix.log_prob(inputs[:, 200:232]))
-print(-mix.log_prob(inputs[:, 20:52]))
+# mix = model.get_mix_of_gauss(y)
+# # print(-mix.log_prob([targets[200:232]]))
+# # print(-mix.log_prob([targets[20:52]]))
+# print(-mix.log_prob(inputs[:, 200:232]))
+# print(-mix.log_prob(inputs[:, 20:52]))
 
-# var = tf.math.reduce_std(targets[200:232], axis=-2)
-# var = tf.squeeze(var)
-# print(var)
+var = tf.math.reduce_std(targets[300:332], axis=-2)
+var = tf.squeeze(var)
+print(var)

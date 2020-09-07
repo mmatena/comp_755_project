@@ -32,8 +32,20 @@ transformer_params = TransformerEncoderLayer.Params(
     size_per_head=int(hidden_size / num_attention_heads),
 )
 
-# seqlen = 8
 seqlen = 32
+
+output_size = 32
+num_attention_heads = 12
+hidden_size = 768
+transformer_params = TransformerEncoderLayer.Params(
+    num_layers=12,
+    hidden_size=hidden_size,
+    hidden_dropout=0.1,
+    intermediate_size=4 * hidden_size,
+    intermediate_activation="gelu",
+    num_heads=num_attention_heads,
+    size_per_head=int(hidden_size / num_attention_heads),
+)
 
 
 class PosEmbeddings(tf.keras.layers.Layer):

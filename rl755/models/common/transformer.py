@@ -51,100 +51,18 @@ def _get_our_layer_call(array):
     return fn
 
 
-class DiscretizedAutoregressiveTransformer(tf.keras.Model):
-    def __init__(
-        self, transformer_params, vocab_size, return_layer_outputs=False, **kwargs
-    ):
-        # TODO(mmatena): Add docs
-        super().__init__(**kwargs)
-        self.transformer_params = transformer_params
-
-    def build(self, input_shape):
-        # hidden_size = self.transformer_params.hidden_size
-        pass
-
-        # self.discreti
-
-        # # TODO(mmatena): Use relative attention instead.
-        # self.pos_embeddings = self.add_weight(
-        #     shape=[input_shape[-2], hidden_size],
-        #     initializer="random_normal",
-        #     trainable=True,
-        # )
-
-        # self.initial_layer = tf.keras.layers.TimeDistributed(
-        #     tf.keras.layers.Dense(units=hidden_size, activation=None)
-        # )
-        # # self.initial_layer = tf.keras.layers.Dense(units=hidden_size, activation=None)
-        # self.initial_layer.build(input_shape)
-
-        # self.transformer = TransformerEncoderLayer.from_params(
-        #     self.transformer_params, name="transformer"
-        # )
-        # transformer_input_shape = list(input_shape[:-1]) + [hidden_size]
-        # self.transformer.build(transformer_input_shape)
-
-        # final_layer_size = (
-        #     self.num_components + 2 * self.num_components * self.output_size
-        # )
-        # # self.final_layer = tf.keras.layers.Dense(
-        # #     units=final_layer_size, activation=None
-        # # )
-        # self.final_layer = tf.keras.layers.TimeDistributed(
-        #     tf.keras.layers.Dense(units=final_layer_size, activation=None)
-        # )
-        # self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
-        # super().build(input_shape)
-
-    def call(self, inputs, mask=None, training=None):
-        call_inner = lambda: self._call_inner(inputs, mask=mask, training=training)
-        if not self.return_layer_outputs:
-            return call_inner()
-        layers_with_output = []
-        override = _get_our_layer_call(layers_with_output)
-        with mock.patch.object(tf.keras.layers.Layer, "__call__", override):
-            outputs = call_inner()
-            return outputs, layers_with_output
-
-    def _call_inner(self, inputs, mask=None, training=None):
-        # TODO(mmatena): Make sure this is right.
-        orig_mask = mask
-        seqlen = tf.shape(inputs)[1]
-        ar_mask = _create_ar_mask(seqlen)
-        if mask is None:
-            mask = ar_mask
-        else:
-            # Here we are assuming mask has shape [batch, seq_len] and is used for padding.
-            mask = tf.cast(tf.expand_dims(mask, axis=1), tf.float32)
-            mask *= ar_mask
-
-        inputs = self.initial_layer(inputs, training=training)
-        inputs += self.pos_embeddings
-        # Have to do this hack as the mask in the original transformer just represents non-padded
-        # regions of the input. We need a different shape of the input mask to make the transformer
-        # autoregressive. The function `_our_create_attention_mask` justs passes through our mask
-        # unchanged.
-        with mock.patch.object(
-            AttentionLayer,
-            "create_attention_mask",
-            functools.partial(_our_create_attention_mask, mask=mask),
-        ):
-            output = self.transformer(inputs, mask=orig_mask, training=training)
-        output = self.final_layer(output, training=training)
-        return output
-
-
 class AutoregressiveTransformer(tf.keras.Model):
     def __init__(
         self,
         transformer_params,
         output_size,
-        num_components,
+        num_components=None,
         return_layer_outputs=False,
         **kwargs
     ):
         # TODO(mmatena): Add docs
         super().__init__(**kwargs)
+        assert num_components is None, "TODO(mmatena): Support mix of gaussians output."
         self.transformer_params = transformer_params
         self.output_size = output_size
         self.num_components = num_components
@@ -160,10 +78,7 @@ class AutoregressiveTransformer(tf.keras.Model):
             trainable=True,
         )
 
-        self.initial_layer = tf.keras.layers.TimeDistributed(
-            tf.keras.layers.Dense(units=hidden_size, activation=None)
-        )
-        # self.initial_layer = tf.keras.layers.Dense(units=hidden_size, activation=None)
+        self.initial_layer = tf.keras.layers.Dense(units=hidden_size, activation=None)
         self.initial_layer.build(input_shape)
 
         self.transformer = TransformerEncoderLayer.from_params(
@@ -176,12 +91,8 @@ class AutoregressiveTransformer(tf.keras.Model):
         #     self.num_components + 2 * self.num_components * self.output_size
         # )
         final_layer_size = self.output_size
-        print("WARNING: NOT DOING MOG STUFF HERE!!!")
-        # self.final_layer = tf.keras.layers.Dense(
-        #     units=final_layer_size, activation=None
-        # )
-        self.final_layer = tf.keras.layers.TimeDistributed(
-            tf.keras.layers.Dense(units=final_layer_size, activation=None)
+        self.final_layer = tf.keras.layers.Dense(
+            units=final_layer_size, activation=None
         )
         self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
         super().build(input_shape)
@@ -250,15 +161,6 @@ class AutoregressiveTransformer(tf.keras.Model):
 
     def get_mix_of_gauss(self, outputs):
         logits, locs, scales = self._get_mog_params(outputs)
-        print(logits)
-        # batch_dims = tf.shape(outputs)[:-1]
-        # logits = tf.reshape(
-        #     self.logits, (len(outputs.shape) - 1) * [1] + [self.num_components]
-        # )
-        # logits = tf.broadcast_to(
-        #     logits, tf.concat([batch_dims, [self.num_components]], axis=0)
-        # )
-        # cat_dist = tfd.Categorical(logits=logits)
         return tfd.Mixture(
             cat=tfd.Categorical(logits=logits),
             components=[

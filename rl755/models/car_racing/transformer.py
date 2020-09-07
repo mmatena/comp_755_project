@@ -7,16 +7,6 @@ from scipy.stats import norm
 from tensorflow.python.ops import math_ops
 
 
-# TODO(mmatena): Put some special stuff here.
-class AutoregressiveFwdOr(common_transformer.AutoregressiveTransformer):
-    pass
-
-    # def predict_next(self, rollout, action):
-    #     # TODO(mmatena): Return maybe change the inputs here.
-    #     # TODO(mmatena): Return next state, next reward
-    #     pass
-
-
 def ignore_prefix_loss(loss_fn, prefix_size):
     """Ignore the losses on the first few tokens.
 
@@ -54,7 +44,7 @@ def to_ar_inputs_and_targets(
     # TODO(mmatena): Make sure this is correct!
     a = x["actions"][:, :action_size]
     o = x["observations"]
-    # TODO(mmatena): This messes up training for some reason. I think the std devs are bad.
+    # TODO(mmatena): This might mess up training for some reason.
     # if sample:
     #     o += x["observation_std_devs"] * tf.random.normal(shape=tf.shape(o))
     inputs = tf.concat(
@@ -65,19 +55,6 @@ def to_ar_inputs_and_targets(
     inputs = tf.reshape(inputs, [sequence_length, latent_size + action_size])
     targets = tf.reshape(targets, [sequence_length, latent_size])
     return inputs, targets
-
-
-def discretization(inputs, targets, sequence_length, action_size=3, vocab_size=32):
-    bins = np.arange(1, vocab_size) / float(vocab_size)
-    bins = norm.ppf(bins).tolist()
-    # discretizer = tf.keras.layers.experimental.preprocessing.Discretization(bins)
-    discretizer = lambda x: math_ops._bucketize(x, boundaries=bins)
-    # targets = tf.concat([targets, tf.zeros([targets.shape[0], action_size])], axis=-1)
-    new_seqlen = inputs.shape[0] * inputs.shape[1]
-    return discretizer(tf.reshape(inputs, [new_seqlen])), discretizer(
-        tf.reshape(targets, [new_seqlen])
-    )
-    # inputs = tf.reshape(inputs, [sequence_length, vocab_size * inputs.shape[0]])
 
 
 # def observation_only_metric(metric_fn, latent_size=32, prefix_size=0):

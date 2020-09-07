@@ -30,48 +30,32 @@ flags.DEFINE_integer(
 flags.DEFINE_integer(
     "sequence_length", 32, "Size of windows to train on.", lower_bound=1
 )
-flags.DEFINE_integer(
-    "vocab_size", 32, "Size of vocab for discretization.", lower_bound=1
-)
 # flags.DEFINE_integer(
 #     "ignore_loss_prefix_size",
 #     4,
 #     "Ignore losses on the first few tokens.",
 #     lower_bound=0,
 # )
-flags.DEFINE_integer(
-    "num_components",
-    5,
-    "Number of components in the Guassian mixture model.",
-    lower_bound=1,
-)
+# flags.DEFINE_integer(
+#     "num_components",
+#     5,
+#     "Number of components in the Guassian mixture model.",
+#     lower_bound=1,
+# )
 
 flags.mark_flag_as_required("model_dir")
 flags.mark_flag_as_required("train_steps")
-
-
-def identity_train(x):
-    y = tf.reshape(x["observations"][1:], [32, 32])
-    return y, y
 
 
 def get_train_ds():
     # We need the `+1` due to how we are processing the sequences.
     ds = encoded_rollouts.random_rollout_slices(slice_size=FLAGS.sequence_length + 1)
     ds = ds.map(
-        # functools.partial(
-        #     transformer.to_ar_inputs_and_targets,
-        #     sequence_length=FLAGS.sequence_length,
-        #     sample=True,
-        # ),
-        identity_train,
-        num_parallel_calls=tf.data.experimental.AUTOTUNE,
-    )
-    ds = ds.map(
         functools.partial(
-            transformer.discretization,
+            transformer.to_ar_inputs_and_targets,
             sequence_length=FLAGS.sequence_length,
-            vocab_size=FLAGS.vocab_size,
+            action_size=3,
+            sample=True,
         ),
         num_parallel_calls=tf.data.experimental.AUTOTUNE,
     )
@@ -89,56 +73,33 @@ def main(_):
         tf.config.experimental.set_memory_growth(gpu, True)
     print(f"Training on {len(gpus)} GPUS.")
 
-    # TODO(mmatena): Make these settable or inferred from the data. These correspond to BERT Base
-    # output_size = 32
-    # num_attention_heads = 12
-    # hidden_size = 768
-    # transformer_params = TransformerEncoderLayer.Params(
-    #     num_layers=12,
-    #     hidden_size=hidden_size,
-    #     hidden_dropout=0.1,
-    #     intermediate_size=4 * hidden_size,
-    #     intermediate_activation="gelu",
-    #     num_heads=num_attention_heads,
-    #     size_per_head=int(hidden_size / num_attention_heads),
-    # )
-    # output_size = 32
-    num_attention_heads = 12
-    hidden_size = 768
-    transformer_params = BertModelLayer.Params(
-        max_position_embeddings=32 * FLAGS.sequence_length,
-        vocab_size=FLAGS.vocab_size,
-        use_token_type=False,
-        use_position_embeddings=True,
-        num_layers=12,
+    # TODO(mmatena): Make these settable or inferred from the data.
+    output_size = 32
+    num_attention_heads = 4
+    hidden_size = 256
+    transformer_params = TransformerEncoderLayer.Params(
+        num_layers=6,
         hidden_size=hidden_size,
         hidden_dropout=0.1,
         intermediate_size=4 * hidden_size,
         intermediate_activation="gelu",
         num_heads=num_attention_heads,
         size_per_head=int(hidden_size / num_attention_heads),
-        adapter_size=None,
-        shared_layer=False,
-        embedding_size=None,
     )
 
     mirrored_strategy = tf.distribute.MirroredStrategy()
     with mirrored_strategy.scope():
-        # model = common_transformer.AutoregressiveTransformer(
-        #     transformer_params,
-        #     output_size=output_size,
-        #     num_components=FLAGS.num_components,
-        # )
-        model = tf.keras.models.Sequential(
-            [
-                BertModelLayer.from_params(transformer_params),
-                tf.keras.layers.Dense(FLAGS.vocab_size, activation=None),
-            ]
+        model = common_transformer.AutoregressiveTransformer(
+            transformer_params,
+            output_size=output_size,
+            num_components=FLAGS.num_components,
         )
         model.compile(
-            # loss=model.nll_loss(global_batch_size=FLAGS.batch_size), optimizer="adam"
-            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-            optimizer="adam",
+            loss=tf.keras.losses.MeanSquaredError(),
+            # Adam config taken from "Attention is all you need."
+            optimizer=tf.keras.optimizers.Adam(
+                learning_rate=1e-3, beta_1=0.9, beta_2=0.98, epsilon=1e-9
+            ),
         )
 
     ds = get_train_ds()

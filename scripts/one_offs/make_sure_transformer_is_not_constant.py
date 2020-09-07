@@ -7,8 +7,7 @@ for x in encoded_rollouts.get_rollouts_ds(split="validation"):
 
 a = x["actions"][:, :3]
 o = x["observations"]
-# inputs = tf.concat([o, a], axis=-1)
-inputs = o
+inputs = tf.concat([o, a], axis=-1)
 inputs = tf.expand_dims(inputs, axis=0)
 
 model = saved_models.encoded_rollout_transformer()

@@ -97,7 +97,7 @@ def gen():
 def map_fn(x):
     o = x["observations"]
     a = x["actions"]
-    inputs = tf.concat([o[:-1], a[:-1, :3]], axis=0)
+    inputs = tf.concat([o[:-1], a[:-1, :3]], axis=-1)
     targets = o[1:] - o[:-1]
     return inputs, targets
 

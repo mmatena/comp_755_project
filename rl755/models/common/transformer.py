@@ -172,9 +172,11 @@ class AutoregressiveTransformer(tf.keras.Model):
         transformer_input_shape = list(input_shape[:-1]) + [hidden_size]
         self.transformer.build(transformer_input_shape)
 
-        final_layer_size = (
-            self.num_components + 2 * self.num_components * self.output_size
-        )
+        # final_layer_size = (
+        #     self.num_components + 2 * self.num_components * self.output_size
+        # )
+        final_layer_size = self.output_size
+        print("WARNING: NOT DOING MOG STUFF HERE!!!")
         # self.final_layer = tf.keras.layers.Dense(
         #     units=final_layer_size, activation=None
         # )

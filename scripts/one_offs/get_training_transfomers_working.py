@@ -49,14 +49,17 @@ class PosEmbeddings(tf.keras.layers.Layer):
         return inputs + self.embeddings
 
 
-layer = TransformerEncoderLayer.from_params(transformer_params, name="transformer")
-model = tf.keras.models.Sequential(
-    [
-        tf.keras.layers.Dense(hidden_size, activation=None),
-        PosEmbeddings(),
-        layer,
-        tf.keras.layers.Dense(input_size, activation=None),
-    ]
+# layer = TransformerEncoderLayer.from_params(transformer_params, name="transformer")
+# model = tf.keras.models.Sequential(
+#     [
+#         tf.keras.layers.Dense(hidden_size, activation=None),
+#         PosEmbeddings(),
+#         layer,
+#         tf.keras.layers.Dense(input_size, activation=None),
+#     ]
+# )
+model = common_transformer.AutoregressiveTransformer(
+    transformer_params, output_size=input_size, num_components=None
 )
 model.build([None, seqlen, input_size])
 
@@ -105,24 +108,36 @@ def _our_create_attention_mask(from_shape, input_mask, mask):
     return mask
 
 
-with mock.patch.object(
-    AttentionLayer,
-    "create_attention_mask",
-    functools.partial(_our_create_attention_mask, mask=_create_ar_mask(seqlen)),
-):
+model.compile(
+    loss=tf.keras.losses.MeanSquaredError(),
+    # optimizer="adam",
+    optimizer=tf.keras.optimizers.Adam(
+        learning_rate=1e-3, beta_1=0.9, beta_2=0.98, epsilon=1e-9
+    ),
+)
+model.fit(
+    ds,
+    epochs=1,
+    steps_per_epoch=train_steps,
+)
+# with mock.patch.object(
+#     AttentionLayer,
+#     "create_attention_mask",
+#     functools.partial(_our_create_attention_mask, mask=_create_ar_mask(seqlen)),
+# ):
 
-    model.compile(
-        loss=tf.keras.losses.MeanSquaredError(),
-        # optimizer="adam",
-        optimizer=tf.keras.optimizers.Adam(
-            learning_rate=1e-3, beta_1=0.9, beta_2=0.98, epsilon=1e-9
-        ),
-    )
-    model.fit(
-        ds,
-        epochs=1,
-        steps_per_epoch=train_steps,
-    )
+#     model.compile(
+#         loss=tf.keras.losses.MeanSquaredError(),
+#         # optimizer="adam",
+#         optimizer=tf.keras.optimizers.Adam(
+#             learning_rate=1e-3, beta_1=0.9, beta_2=0.98, epsilon=1e-9
+#         ),
+#     )
+#     model.fit(
+#         ds,
+#         epochs=1,
+#         steps_per_epoch=train_steps,
+#     )
 
 
 """

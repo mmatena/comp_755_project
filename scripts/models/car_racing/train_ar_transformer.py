@@ -92,7 +92,6 @@ def main(_):
         model = common_transformer.AutoregressiveTransformer(
             transformer_params,
             output_size=output_size,
-            num_components=FLAGS.num_components,
         )
         model.compile(
             loss=tf.keras.losses.MeanSquaredError(),

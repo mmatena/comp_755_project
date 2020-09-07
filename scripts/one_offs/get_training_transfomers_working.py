@@ -84,6 +84,12 @@ ds = ds.map(
     lambda x: (x["observations"][:-1], x["observations"][1:]),
     num_parallel_calls=tf.data.experimental.AUTOTUNE,
 )
+ds = ds.map(
+    lambda x: (
+        tf.reshape(x[0], [seqlen, input_size]),
+        tf.reshape(x[1], [seqlen, input_size]),
+    )
+)
 
 ds = ds.batch(32)
 

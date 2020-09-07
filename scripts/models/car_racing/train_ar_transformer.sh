@@ -10,10 +10,9 @@ PROJECT_DIR=~/projects/comp_755_project
 
 MODEL_DIR=/pine/scr/m/m/mmatena/mse_ar_transformer_train
 
-# TRAIN_STEPS=100000
-TRAIN_STEPS=2500
+TRAIN_STEPS=100000
 
-NUM_GPUS=1
+NUM_GPUS=4
 NUM_CORES=16
 MEMORY=16g
 TIME="2-"

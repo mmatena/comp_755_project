@@ -87,9 +87,6 @@ def main(_):
         size_per_head=int(hidden_size / num_attention_heads),
     )
 
-    ##################
-    # mirrored_strategy = tf.distribute.MirroredStrategy()
-    # with mirrored_strategy.scope():
     model = common_transformer.AutoregressiveTransformer(
         transformer_params,
         output_size=output_size,
@@ -101,7 +98,6 @@ def main(_):
             learning_rate=1e-3, beta_1=0.9, beta_2=0.98, epsilon=1e-9
         ),
     )
-    ##################
 
     ds = get_train_ds()
 

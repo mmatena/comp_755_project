@@ -61,7 +61,7 @@ class PosEmbeddings(tf.keras.layers.Layer):
 model = common_transformer.AutoregressiveTransformer(
     transformer_params, output_size=input_size, num_components=None
 )
-model.build([None, seqlen, input_size])
+# model.build([None, seqlen, input_size])
 
 
 def gen():

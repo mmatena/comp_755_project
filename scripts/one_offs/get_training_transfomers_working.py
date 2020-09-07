@@ -106,7 +106,7 @@ ds = ds.map(
 
 ds = ds.batch(32)
 
-train_steps = 4000
+train_steps = 2500
 ds = ds.take(train_steps)
 
 

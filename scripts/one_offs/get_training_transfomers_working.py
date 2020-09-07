@@ -18,7 +18,7 @@ from bert.attention import AttentionLayer
 
 from unittest import mock
 
-input_size = 32
+input_size = 32 + 3
 hidden_size = 256
 num_attention_heads = 4
 transformer_params = TransformerEncoderLayer.Params(
@@ -34,7 +34,7 @@ transformer_params = TransformerEncoderLayer.Params(
 
 seqlen = 32
 
-output_size = 32 + 3
+output_size = 32
 num_attention_heads = 4
 hidden_size = 256
 transformer_params = TransformerEncoderLayer.Params(

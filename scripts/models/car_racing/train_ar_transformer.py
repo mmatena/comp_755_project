@@ -111,7 +111,7 @@ def main(_):
 
         def __call__(self, step):
             step += 1.0
-            return self.hidden_size ** -0.5 * tf.math.min(
+            return self.hidden_size ** -0.5 * tf.math.minimum(
                 step ** -0.5, step * self.warmup_steps ** -1.5
             )
 

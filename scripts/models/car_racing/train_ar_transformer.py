@@ -120,7 +120,8 @@ def main(_):
         output_size=output_size,
     )
     model.compile(
-        loss=tf.keras.losses.MeanSquaredError(),
+        # loss=tf.keras.losses.MeanSquaredError(),
+        loss=tf.keras.losses.MeanAbsoluteError(),
         # Adam config taken from "Attention is all you need."
         optimizer=tf.keras.optimizers.Adam(
             learning_rate=LrSchedule(hidden_size=hidden_size, warmup_steps=4000),
@@ -128,6 +129,7 @@ def main(_):
             beta_2=0.98,
             epsilon=1e-9,
         ),
+        metrics=[tf.keras.metrics.MeanSquaredError()],
     )
 
     ds = get_train_ds()

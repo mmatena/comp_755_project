@@ -5,6 +5,7 @@ from absl import app
 from absl import flags
 
 import numpy as np
+from pyvirtualdisplay import Display
 import tensorflow as tf
 
 from rl755.data_gen import gym_rollouts
@@ -61,6 +62,11 @@ def get_score(flat_array, num_trials):
     )
     return np.mean([sum(r.reward_l) for r in rollouts])
 
+
+# It looks like OpenAI gym requires some sort of display, so we
+# have to fake one.
+display = Display(visible=0, size=(400, 300))
+display.start()
 
 # es = cma.CMAEvolutionStrategy(8 * [0], 0.5, {"popsize": 64})
 es = cma.CMAEvolutionStrategy(

@@ -36,10 +36,10 @@ def raw_rollout_vae_32ld():
 
 
 def _get_transformer_params():
-    num_attention_heads = 4
-    hidden_size = 256
+    num_attention_heads = 2
+    hidden_size = 64
     transformer_params = TransformerEncoderLayer.Params(
-        num_layers=6,
+        num_layers=3,
         hidden_size=hidden_size,
         hidden_dropout=0.1,
         intermediate_size=4 * hidden_size,

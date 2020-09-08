@@ -17,7 +17,7 @@ def fn(x):
 
 
 class LinearPolicy(object):
-    @classmethod
+    @staticmethod
     def from_flat_array(array, in_size, out_size):
         array = np.array(array)
         w, b = array[:-out_size], array[-out_size:]

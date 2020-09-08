@@ -65,6 +65,8 @@ pip install PyOpenGL PyOpenGL_accelerate
 pip install tensorflow-probability==0.9.0
 pip install cloudpickle==1.3.0
 
+pip install cma
+
 # For transformer
 pip install bert-for-tf2
 pip install mock

@@ -3,7 +3,6 @@ import functools
 import os
 
 from absl import app
-
 from absl import flags
 
 from bert import BertModelLayer

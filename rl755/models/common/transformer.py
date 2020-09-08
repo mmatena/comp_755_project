@@ -134,6 +134,14 @@ class AutoregressiveTransformer(tf.keras.Model):
         output = self.final_layer(output, training=training)
         return output
 
+    def get_last_representation_tensor(self, inputs, mask=None):
+        assert (
+            self.return_layer_outputs
+        ), "Must be configured to return all layer outputs."
+        _, layers_with_output = self(inputs, mask=mask, training=False)
+        layer = self.ar_transformer.transformer.encoder_layers[-1].self_attention_layer
+        return get_output_of_layer(layers_with_output, layer)[..., -1, :]
+
     def _get_mog_params(self, outputs):
         logits, outputs = (
             outputs[..., : self.num_components],

@@ -110,8 +110,7 @@ def main(_):
             self.warmup_steps = float(warmup_steps)
 
         def __call__(self, step):
-            step = float(step)
-            return self.hidden_size ** -0.5 * min(
+            return self.hidden_size ** -0.5 * tf.min(
                 step ** -0.5, step * self.warmup_steps ** -1.5
             )
 

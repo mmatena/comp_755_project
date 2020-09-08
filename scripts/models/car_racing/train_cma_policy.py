@@ -11,7 +11,7 @@ def fn(x):
     return np.sum((x - 5.0) ** 2)
 
 
-es = cma.CMAEvolutionStrategy(8 * [0], 0.5)
+es = cma.CMAEvolutionStrategy(8 * [0], 0.5, {"popsize": 64})
 for i in range(10):
     solutions = es.ask()
     fitlist = np.zeros(es.popsize)
@@ -20,7 +20,7 @@ for i in range(10):
         fitlist[i] = fn(solutions[i])
 
     es.tell(solutions, fitlist)
-    bestsol, bestfit = es.result()
+    print(es.result)
 
 # def main(_):
 #     es = cma.CMAEvolutionStrategy(8 * [0], 0.5)

@@ -19,7 +19,7 @@ for i in range(10):
     for i in range(es.popsize):
         fitlist[i] = fn(solutions[i])
 
-    es.tell(fitlist)
+    es.tell(solutions, fitlist)
     bestsol, bestfit = es.result()
 
 # def main(_):

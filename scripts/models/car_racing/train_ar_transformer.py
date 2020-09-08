@@ -92,7 +92,11 @@ def main(_):
     transformer_params = TransformerEncoderLayer.Params(
         num_layers=3,
         hidden_size=hidden_size,
-        hidden_dropout=0.1,
+        # hidden_dropout=0.1,
+        #
+        hidden_dropout=0.3,
+        attention_dropout=0.3,
+        #
         intermediate_size=4 * hidden_size,
         intermediate_activation="gelu",
         num_heads=num_attention_heads,

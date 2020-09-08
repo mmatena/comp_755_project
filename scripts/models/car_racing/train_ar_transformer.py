@@ -74,34 +74,34 @@ def main(_):
     print(f"Training on {len(gpus)} GPUS.")
 
     # TODO(mmatena): Make these settable or inferred from the data.
-    # output_size = 32
-    # num_attention_heads = 4
-    # hidden_size = 256
-    # transformer_params = TransformerEncoderLayer.Params(
-    #     num_layers=6,
-    #     hidden_size=hidden_size,
-    #     hidden_dropout=0.1,
-    #     intermediate_size=4 * hidden_size,
-    #     intermediate_activation="gelu",
-    #     num_heads=num_attention_heads,
-    #     size_per_head=int(hidden_size / num_attention_heads),
-    # )
     output_size = 32
-    num_attention_heads = 2
-    hidden_size = 64
+    num_attention_heads = 4
+    hidden_size = 256
     transformer_params = TransformerEncoderLayer.Params(
-        num_layers=3,
+        num_layers=6,
         hidden_size=hidden_size,
-        # hidden_dropout=0.1,
-        #
-        hidden_dropout=0.3,
-        attention_dropout=0.3,
-        #
+        hidden_dropout=0.1,
         intermediate_size=4 * hidden_size,
         intermediate_activation="gelu",
         num_heads=num_attention_heads,
         size_per_head=int(hidden_size / num_attention_heads),
     )
+    # output_size = 32
+    # num_attention_heads = 2
+    # hidden_size = 64
+    # transformer_params = TransformerEncoderLayer.Params(
+    #     num_layers=3,
+    #     hidden_size=hidden_size,
+    #     # hidden_dropout=0.1,
+    #     #
+    #     hidden_dropout=0.3,
+    #     attention_dropout=0.3,
+    #     #
+    #     intermediate_size=4 * hidden_size,
+    #     intermediate_activation="gelu",
+    #     num_heads=num_attention_heads,
+    #     size_per_head=int(hidden_size / num_attention_heads),
+    # )
 
     class LrSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
         def __init__(self, hidden_size, warmup_steps):

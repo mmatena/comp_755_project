@@ -53,6 +53,10 @@ class OpenAiGymService(rpyc.Service):
         _, reward, done, _ = self.env.step(action)
         return None, reward, done, None
 
+    def exposed_close(self):
+        if self.env:
+            self.env.close()
+
     # def exposed_get_score(self, env_name, num_trials, initialize, sample_action):
     #     rollouts = []
     #     for _ in range(num_trials):

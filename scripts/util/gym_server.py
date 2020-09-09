@@ -12,6 +12,8 @@ FLAGS = flags.FLAGS
 
 flags.DEFINE_integer("port", 18861, "The port to listen on.")
 
+IP_FILE = "/pine/scr/m/m/mmatena/tmp/gym_server_ip.txt"
+
 
 class OpenAiGymService(rpyc.Service):
     """Note that a new intance will be created for each connection."""
@@ -26,7 +28,7 @@ class OpenAiGymService(rpyc.Service):
         # (to finalize the service, if needed)
         pass
 
-    def exposed_get_score(env_name, policy, num_trials):
+    def exposed_get_score(self, env_name, policy, num_trials):
         rollouts = []
         gym_rollouts.serial_rollouts(
             env_name,
@@ -42,7 +44,7 @@ def main(_):
     import socket
 
     hostname = socket.gethostbyname(socket.gethostname())
-    with open("/pine/scr/m/m/mmatena/tmp/server_ips.txt", "w+") as f:
+    with open(IP_FILE, "w+") as f:
         f.write(hostname)
 
     # It looks like OpenAI gym requires some sort of display, so we

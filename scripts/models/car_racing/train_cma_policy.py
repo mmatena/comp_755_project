@@ -36,8 +36,13 @@ class LinearPolicy(object):
         return np.matmul(self.w, inputs) + self.b
 
 
+# TODO(mmatena): Make this cleaner.
+IP_FILE = "/pine/scr/m/m/mmatena/tmp/gym_server_ip.txt"
+with open(IP_FILE, "r") as f:
+    ip = f.contents()
+
 # TODO(mmatena): Make this configurable.
-gym_service = rpyc.connect("172.26.114.99", 18861).root
+gym_service = rpyc.connect(ip, 18861).root
 
 encoder = saved_models.raw_rollout_vae_32ld()
 sequence_model = saved_models.encoded_rollout_transformer()

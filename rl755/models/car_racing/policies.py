@@ -33,7 +33,7 @@ class CarRacingPolicy(gym_rollouts.Policy):
         self.encoded_obs = []
 
     def _ensure_sequence_length(self, x):
-        x = x[:, -self.max_seqlen :]
+        x = x[-self.max_seqlen :]
         diff = self.max_seqlen - x.shape[0]
         if diff:
             mask = tf.concat([tf.ones(x.shape[:1]), tf.zeros([diff])], axis=0)

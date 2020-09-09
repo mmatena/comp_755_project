@@ -39,7 +39,7 @@ class LinearPolicy(object):
 # TODO(mmatena): Make this cleaner.
 IP_FILE = "/pine/scr/m/m/mmatena/tmp/gym_server_ip.txt"
 with open(IP_FILE, "r") as f:
-    ip = f.contents()
+    ip = f.read()
 
 # TODO(mmatena): Make this configurable.
 gym_service = rpyc.connect(ip, 18861).root

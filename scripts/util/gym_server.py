@@ -3,6 +3,7 @@ from absl import flags
 
 import gym
 import numpy as np
+import pickle
 from pyvirtualdisplay import Display
 import rpyc
 from rpyc.utils.server import ThreadedServer
@@ -46,7 +47,7 @@ class OpenAiGymService(rpyc.Service):
 
     def exposed_render(self, *args, **kwargs):
         image = self.env.render(*args, **kwargs)
-        return image_to_tuples(image)
+        return pickle.dumps(image)
 
     def exposed_step(self, action):
         _, reward, done, _ = self.env.step(action)

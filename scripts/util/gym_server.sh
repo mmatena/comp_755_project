@@ -28,7 +28,7 @@ launch() {
     --ntasks=${NUM_CORES} \
     --time=8:30:00 \
     --mem=${MEMORY} \
-    --partition=general \
+    --partition=volta-gpu \
     --wrap="\"$(run_python)\"")
   eval $CMD
 }

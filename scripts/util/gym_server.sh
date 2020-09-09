@@ -29,6 +29,8 @@ launch() {
     --time=8:30:00 \
     --mem=${MEMORY} \
     --partition=volta-gpu \
+    --gres=gpu:1 \
+    --qos=gpu_access \
     --wrap="\"$(run_python)\"")
   eval $CMD
 }

@@ -19,6 +19,10 @@ IP_FILE = "/pine/scr/m/m/mmatena/tmp/gym_server_ip.txt"
 class OpenAiGymService(rpyc.Service):
     """Note that a new intance will be created for each connection."""
 
+    def __init__(self):
+        super().__init__()
+        self.env = None
+
     def on_connect(self, conn):
         # code that runs when a connection is created
         # (to init the service, if needed)
@@ -29,17 +33,30 @@ class OpenAiGymService(rpyc.Service):
         # (to finalize the service, if needed)
         pass
 
-    def exposed_get_score(self, env_name, num_trials, initialize, sample_action):
-        rollouts = []
-        for _ in range(num_trials):
-            r = gym_rollouts.single_rollout_cb(
-                gym.make(env_name),
-                max_steps=2000,
-                initialize=initialize,
-                sample_action=sample_action,
-            )
-            rollouts.append(r)
-        return np.mean([sum(r.reward_l) for r in rollouts])
+    def exposed_reset(self):
+        if self.env:
+            self.env.reset()
+
+    def exposed_make(self, env_name):
+        self.env = gym.make(env_name)
+
+    def exposed_render(self, *args, **kwargs):
+        return self.env.render(*args, **kwargs)
+
+    def exposed_step(self, action):
+        return self.env.step(action)
+
+    # def exposed_get_score(self, env_name, num_trials, initialize, sample_action):
+    #     rollouts = []
+    #     for _ in range(num_trials):
+    #         r = gym_rollouts.single_rollout_cb(
+    #             gym.make(env_name),
+    #             max_steps=2000,
+    #             initialize=initialize,
+    #             sample_action=sample_action,
+    #         )
+    #         rollouts.append(r)
+    #     return np.mean([sum(r.reward_l) for r in rollouts])
 
 
 def main(_):

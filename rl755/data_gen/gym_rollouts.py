@@ -103,33 +103,12 @@ def single_rollout(env, policy, max_steps):
     return rollout
 
 
-# TODO(mmatena): Reduce the code duplication.
-def single_rollout_cb(env, max_steps, initialize, sample_action):
-    """Runs a single rollout."""
-    env.reset()
-    initialize(env=env, max_steps=max_steps)
-
-    rollout = Rollout()
-    for step in range(max_steps):
-        # TODO(mmatena): Support environments without a "state_pixels" render mode.
-        obs = env.render("state_pixels")
-        action = sample_action(obs=obs, step=step, rollout=rollout)
-        _, reward, done, _ = env.step(action)
-
-        rollout.obs_l.append(obs)
-        rollout.action_l.append(action)
-        rollout.reward_l.append(reward)
-
-        if done:
-            rollout.done = True
-            break
-
-    return rollout
-
-
 def serial_rollouts(env_name, policy, max_steps, num_rollouts, process_rollout_fn):
     """Runs `num_rollouts` and applies `process_rollout_fn` to each generated Rollout object."""
-    env = gym.make(env_name)
+    if isinstance(env_name, str):
+        env = gym.make(env_name)
+    else:
+        env = env_name
     for _ in range(num_rollouts):
         rollout = single_rollout(env, policy=policy, max_steps=max_steps)
         process_rollout_fn(rollout)

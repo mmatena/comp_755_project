@@ -62,21 +62,22 @@ def get_score(flat_array, num_trials):
         policy=linear_policy,
         max_seqlen=max_seqlen,
     )
-    return gym_service.get_score(
-        "CarRacing-v0",
-        num_trials=num_trials,
-        initialize=policy.initialize,
-        sample_action=policy.sample_action,
-    )
-    # rollouts = []
-    # gym_rollouts.serial_rollouts(
-    #     "CarRacing-v0",
-    #     policy=policy,
-    #     max_steps=2000,
-    #     num_rollouts=num_trials,
-    #     process_rollout_fn=lambda r: rollouts.append(r),
+    # return gym_service.get_score(
+    #     gym_service,
+    #     num_trials=num_trials,
+    #     initialize=policy.initialize,
+    #     sample_action=policy.sample_action,
     # )
-    # return np.mean([sum(r.reward_l) for r in rollouts])
+    rollouts = []
+    gym_service.make("CarRacing-v0")
+    gym_rollouts.serial_rollouts(
+        gym_service,
+        policy=policy,
+        max_steps=2000,
+        num_rollouts=num_trials,
+        process_rollout_fn=lambda r: rollouts.append(r),
+    )
+    return np.mean([sum(r.reward_l) for r in rollouts])
 
 
 # It looks like OpenAI gym requires some sort of display, so we

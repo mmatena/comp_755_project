@@ -1,9 +1,11 @@
 from multiprocessing import connection
 import socket
 import sys
+import time
 
 hostname = socket.gethostbyname(socket.gethostname())
 print(f"HOSTNAME: {hostname}", file=sys.stderr)
+time.sleep(5)
 
 
 address = (hostname, 6000)  # family is deduced to be 'AF_INET'

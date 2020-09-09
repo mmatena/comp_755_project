@@ -139,7 +139,7 @@ class AutoregressiveTransformer(tf.keras.Model):
             self.return_layer_outputs
         ), "Must be configured to return all layer outputs."
         _, layers_with_output = self(inputs, mask=mask, training=False)
-        layer = self.ar_transformer.transformer.encoder_layers[-1].self_attention_layer
+        layer = self.transformer.encoder_layers[-1].self_attention_layer
         return get_output_of_layer(layers_with_output, layer)[..., -1, :]
 
     def _get_mog_params(self, outputs):

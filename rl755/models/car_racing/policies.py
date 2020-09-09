@@ -32,20 +32,13 @@ class CarRacingPolicy(gym_rollouts.Policy):
     def initialize(self, env, max_steps, **kwargs):
         self.encoded_obs = []
 
-    def _broadcast_across_samples(self, x):
-        x = tf.expand_dims(x, axis=0)
-        x = tf.broadcast_to(x, [self.num_samples] + x.shape[1:])
-        return x
-
     def _ensure_sequence_length(self, x):
         x = x[:, -self.max_seqlen :]
-        diff = self.max_seqlen - x.shape[1]
+        diff = self.max_seqlen - x.shape[0]
         if diff:
-            mask = tf.concat(
-                [tf.ones(x.shape[:2]), tf.zeros([x.shape[0], diff])], axis=1
-            )
-            padding = tf.zeros([x.shape[0], diff, x.shape[2]], dtype=tf.float32)
-            x = tf.concat([x, padding], axis=1)
+            mask = tf.concat([tf.ones(x.shape[:1]), tf.zeros([diff])], axis=0)
+            padding = tf.zeros([diff, x.shape[1]], dtype=tf.float32)
+            x = tf.concat([x, padding], axis=0)
             return x, mask
         else:
             return x, None
@@ -53,13 +46,12 @@ class CarRacingPolicy(gym_rollouts.Policy):
     def _create_inputs(self, rollout):
         # o[i], a[i],] => o[i+1] or o[i+1] - o[i]
         observations = self.encoded_obs[-self.max_seqlen :]
-        observations = self._broadcast_across_samples(observations)
-
         actions = rollout.actions[-self.max_seqlen :]
-        actions = self._broadcast_across_samples(actions)
-
         inputs = tf.concat([observations, actions], axis=-1)
-        return self._ensure_sequence_length(inputs)
+        inputs, mask = self._ensure_sequence_length(inputs)
+        inputs = tf.expand_dims(inputs, axis=0)
+        mask = tf.expand_dims(mask, axis=0) if mask else None
+        return inputs, mask
 
     def sample_action(self, obs, step, rollout, **kwargs):
         inputs, mask = self._create_inputs(rollout)
@@ -71,7 +63,7 @@ class CarRacingPolicy(gym_rollouts.Policy):
         enc_obs = self.encoder.encode_tensor(
             tf.expand_dims(obs, axis=0), training=False
         )
-        self.encoded_obs.append(enc_obs)
+        self.encoded_obs.append(enc_obs[0])
 
         policy_input = tf.concat([enc_obs, hidden_state], axis=-1)
 

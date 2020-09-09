@@ -38,8 +38,8 @@ class CarRacingPolicy(gym_rollouts.Policy):
         return x
 
     def _ensure_sequence_length(self, x):
-        x = x[:, -self.seqlen :]
-        diff = self.seqlen - x.shape[1]
+        x = x[:, -self.max_seqlen :]
+        diff = self.max_seqlen - x.shape[1]
         if diff:
             mask = tf.concat(
                 [tf.ones(x.shape[:2]), tf.zeros([x.shape[0], diff])], axis=1
@@ -52,10 +52,10 @@ class CarRacingPolicy(gym_rollouts.Policy):
 
     def _create_inputs(self, rollout):
         # o[i], a[i],] => o[i+1] or o[i+1] - o[i]
-        observations = tf.concat(self.encoded_obs[-self.seqlen :], axis=0)
+        observations = tf.concat(self.encoded_obs[-self.max_seqlen :], axis=0)
         observations = self._broadcast_across_samples(observations)
 
-        actions = tf.constant(rollout.actions[-self.seqlen :], dtype=tf.float32)
+        actions = tf.constant(rollout.actions[-self.max_seqlen :], dtype=tf.float32)
         actions = self._broadcast_across_samples(actions)
 
         inputs = tf.concat([observations, actions], axis=-1)

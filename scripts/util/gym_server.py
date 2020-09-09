@@ -41,7 +41,9 @@ class OpenAiGymService(rpyc.Service):
 def main(_):
     import socket
 
-    print(socket.gethostbyname(socket.gethostname()))
+    hostname = socket.gethostbyname(socket.gethostname())
+    with open("/pine/scr/m/m/mmatena/tmp/server_ips.txt", "w+") as f:
+        f.write(hostname)
 
     # It looks like OpenAI gym requires some sort of display, so we
     # have to fake one.

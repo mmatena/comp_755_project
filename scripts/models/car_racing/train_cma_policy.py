@@ -46,6 +46,7 @@ gym_service = rpyc.connect(ip, 18861, config={"allow_all_attrs": True}).root
 
 encoder = saved_models.raw_rollout_vae_32ld()
 sequence_model = saved_models.encoded_rollout_transformer()
+sequence_model.return_layer_outputs = True
 in_size = 256 + 32
 out_size = 3
 max_seqlen = 32

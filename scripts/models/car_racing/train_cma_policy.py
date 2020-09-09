@@ -6,6 +6,7 @@ from absl import flags
 
 import numpy as np
 from pyvirtualdisplay import Display
+import rpyc
 import tensorflow as tf
 
 from rl755.data_gen import gym_rollouts
@@ -35,6 +36,9 @@ class LinearPolicy(object):
         return np.matmul(self.w, inputs) + self.b
 
 
+# TODO(mmatena): Make this configurable.
+gym_service = rpyc.connect("localhost", 18861).root
+
 encoder = saved_models.raw_rollout_vae_32ld()
 sequence_model = saved_models.encoded_rollout_transformer()
 in_size = 256 + 32
@@ -52,15 +56,16 @@ def get_score(flat_array, num_trials):
         policy=linear_policy,
         max_seqlen=max_seqlen,
     )
-    rollouts = []
-    gym_rollouts.serial_rollouts(
-        "CarRacing-v0",
-        policy=policy,
-        max_steps=2000,
-        num_rollouts=num_trials,
-        process_rollout_fn=lambda r: rollouts.append(r),
-    )
-    return np.mean([sum(r.reward_l) for r in rollouts])
+    return gym_service.get_score("CarRacing-v0", policy=policy, num_trials=num_trials)
+    # rollouts = []
+    # gym_rollouts.serial_rollouts(
+    #     "CarRacing-v0",
+    #     policy=policy,
+    #     max_steps=2000,
+    #     num_rollouts=num_trials,
+    #     process_rollout_fn=lambda r: rollouts.append(r),
+    # )
+    # return np.mean([sum(r.reward_l) for r in rollouts])
 
 
 # It looks like OpenAI gym requires some sort of display, so we

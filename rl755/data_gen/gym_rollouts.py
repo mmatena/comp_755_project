@@ -2,6 +2,7 @@
 import gym
 from noise import pnoise1
 import numpy as np
+import pickle
 import ray
 
 from rl755.common.misc import evenly_partition
@@ -89,6 +90,9 @@ def single_rollout(env, policy, max_steps):
     for step in range(max_steps):
         # TODO(mmatena): Support environments without a "state_pixels" render mode.
         obs = env.render("state_pixels")
+        # This might happen if we are running on a remote gym server using rpc.
+        if isinstance(obs, bytes):
+            obs = pickle.loads(obs)
         action = policy.sample_action(obs=obs.tolist(), step=step, rollout=rollout)
         _, reward, done, _ = env.step(action)
 

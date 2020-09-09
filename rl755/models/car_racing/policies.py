@@ -8,6 +8,7 @@ Here is the information about a 3-d action vector:
 Values below/above the range are clipped to the min/max of the range, respectively.
 
 """
+import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 
@@ -47,10 +48,6 @@ class CarRacingPolicy(gym_rollouts.Policy):
         # o[i], a[i],] => o[i+1] or o[i+1] - o[i]
         observations = self.encoded_obs[-self.max_seqlen :]
         actions = rollout.action_l[-self.max_seqlen :]
-        if not observations:
-            observations = [[]]
-        if not actions:
-            actions = [[]]
         inputs = tf.concat([observations, actions], axis=-1)
         inputs, mask = self._ensure_sequence_length(inputs)
         inputs = tf.expand_dims(inputs, axis=0)
@@ -58,6 +55,9 @@ class CarRacingPolicy(gym_rollouts.Policy):
         return inputs, mask
 
     def sample_action(self, obs, step, rollout, **kwargs):
+        # TODO(mmatena): Handle this case better.
+        if step == 0:
+            return self.policy.sample_action(np.zeros([1, 256 + 32]))
         inputs, mask = self._create_inputs(rollout)
         # TODO(mmatena): This could be potentially be made hugely more efficient by reusing computations.
         hidden_state = self.sequence_model.get_last_representation_tensor(

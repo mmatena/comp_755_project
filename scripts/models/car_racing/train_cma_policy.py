@@ -33,7 +33,8 @@ class LinearPolicy(object):
     def sample_action(self, inputs):
         if isinstance(inputs, tf.Tensor):
             inputs = inputs.numpy()
-        return np.matmul(self.w, inputs) + self.b
+        action = np.matmul(self.w, inputs) + self.b
+        return action.tolist()
 
 
 # TODO(mmatena): Make this cleaner.

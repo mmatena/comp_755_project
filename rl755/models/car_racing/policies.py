@@ -55,9 +55,7 @@ class CarRacingPolicy(gym_rollouts.Policy):
         return inputs, mask
 
     def sample_action(self, obs, step, rollout, **kwargs):
-        enc_obs = self.encoder.encode_tensor(
-            tf.expand_dims(obs, axis=0), training=False
-        )
+        enc_obs = self.encoder.encode_tensor(tf.expand_dims(obs, axis=0))
         # TODO(mmatena): Handle this case better.
         if step == 0:
             self.encoded_obs.append(enc_obs[0])

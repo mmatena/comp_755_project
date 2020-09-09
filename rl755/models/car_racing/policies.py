@@ -45,9 +45,12 @@ class CarRacingPolicy(gym_rollouts.Policy):
 
     def _create_inputs(self, rollout):
         # o[i], a[i],] => o[i+1] or o[i+1] - o[i]
-        print(rollout)
         observations = self.encoded_obs[-self.max_seqlen :]
         actions = rollout.action_l[-self.max_seqlen :]
+        if not observations:
+            observations = [[]]
+        if not actions:
+            actions = [[]]
         inputs = tf.concat([observations, actions], axis=-1)
         inputs, mask = self._ensure_sequence_length(inputs)
         inputs = tf.expand_dims(inputs, axis=0)

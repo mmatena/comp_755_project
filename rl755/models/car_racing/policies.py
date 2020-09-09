@@ -52,10 +52,10 @@ class CarRacingPolicy(gym_rollouts.Policy):
 
     def _create_inputs(self, rollout):
         # o[i], a[i],] => o[i+1] or o[i+1] - o[i]
-        observations = tf.concat(self.encoded_obs[-self.max_seqlen :], axis=0)
+        observations = self.encoded_obs[-self.max_seqlen :]
         observations = self._broadcast_across_samples(observations)
 
-        actions = tf.constant(rollout.actions[-self.max_seqlen :], dtype=tf.float32)
+        actions = rollout.actions[-self.max_seqlen :]
         actions = self._broadcast_across_samples(actions)
 
         inputs = tf.concat([observations, actions], axis=-1)

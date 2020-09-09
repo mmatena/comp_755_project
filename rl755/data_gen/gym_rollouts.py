@@ -89,7 +89,7 @@ def single_rollout(env, policy, max_steps):
     for step in range(max_steps):
         # TODO(mmatena): Support environments without a "state_pixels" render mode.
         obs = env.render("state_pixels")
-        action = policy.sample_action(obs=obs, step=step, rollout=rollout)
+        action = policy.sample_action(obs=obs.tolist(), step=step, rollout=rollout)
         _, reward, done, _ = env.step(action)
 
         rollout.obs_l.append(obs)

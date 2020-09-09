@@ -75,7 +75,11 @@ def main(_):
     t = ThreadedServer(
         OpenAiGymService,
         port=FLAGS.port,
-        protocol_config={"allow_public_attrs": True, "allow_all_attrs": True},
+        protocol_config={
+            "allow_public_attrs": True,
+            "allow_all_attrs": True,
+            "allow_pickle": True,
+        },
     )
     t.start()
 

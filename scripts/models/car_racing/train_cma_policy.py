@@ -35,7 +35,7 @@ class LinearPolicy(object):
             inputs = inputs.numpy()
         action = np.matmul(self.w, inputs) + self.b
         action = np.reshape(action, [3])
-        return action.tolist()
+        return tuple(action.tolist())
 
 
 # TODO(mmatena): Make this cleaner.

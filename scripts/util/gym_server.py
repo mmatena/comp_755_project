@@ -16,6 +16,10 @@ flags.DEFINE_integer("port", 18861, "The port to listen on.")
 IP_FILE = "/pine/scr/m/m/mmatena/tmp/gym_server_ip.txt"
 
 
+def image_to_tuples(image):
+    return tuple(tuple(tuple(b for b in a)) for a in image)
+
+
 class OpenAiGymService(rpyc.Service):
     """Note that a new intance will be created for each connection."""
 
@@ -41,7 +45,8 @@ class OpenAiGymService(rpyc.Service):
         self.env = gym.make(env_name)
 
     def exposed_render(self, *args, **kwargs):
-        return self.env.render(*args, **kwargs)
+        image = self.env.render(*args, **kwargs)
+        return image_to_tuples(image)
 
     def exposed_step(self, action):
         _, reward, done, _ = self.env.step(action)

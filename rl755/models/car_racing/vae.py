@@ -79,6 +79,7 @@ class Vae(tf.keras.Model):
         mean, prevar = tf.split(self.encoder(x), num_or_size_splits=2, axis=-1)
         return tfd.MultivariateNormalDiag(loc=mean, scale_diag=tf.nn.softplus(prevar))
 
+    @tf.function
     def encode_tensor(self, x):
         return self.encode(x).mean()
 

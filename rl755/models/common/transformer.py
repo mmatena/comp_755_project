@@ -134,6 +134,7 @@ class AutoregressiveTransformer(tf.keras.Model):
         output = self.final_layer(output, training=training)
         return output
 
+    @tf.function
     def get_last_representation_tensor(self, inputs, mask=None):
         assert (
             self.return_layer_outputs

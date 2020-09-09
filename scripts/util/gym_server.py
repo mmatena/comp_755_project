@@ -44,7 +44,6 @@ class OpenAiGymService(rpyc.Service):
         return self.env.render(*args, **kwargs)
 
     def exposed_step(self, action):
-        # I can't pickle some stuff I'm not using, so just return stuff I'm using.
         _, reward, done, _ = self.env.step(action)
         return None, reward, done, None
 

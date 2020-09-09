@@ -34,6 +34,7 @@ class LinearPolicy(object):
         if isinstance(inputs, tf.Tensor):
             inputs = inputs.numpy()
         action = np.matmul(self.w, inputs) + self.b
+        action = np.reshape([3])
         return action.tolist()
 
 

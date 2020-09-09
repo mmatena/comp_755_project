@@ -1,6 +1,7 @@
 from absl import app
 from absl import flags
 
+import gym
 import numpy as np
 from pyvirtualdisplay import Display
 import rpyc
@@ -28,15 +29,16 @@ class OpenAiGymService(rpyc.Service):
         # (to finalize the service, if needed)
         pass
 
-    def exposed_get_score(self, env_name, policy, num_trials):
+    def exposed_get_score(self, env_name, num_trials, initialize, sample_action):
         rollouts = []
-        gym_rollouts.serial_rollouts(
-            env_name,
-            policy=policy,
-            max_steps=2000,
-            num_rollouts=num_trials,
-            process_rollout_fn=lambda r: rollouts.append(r),
-        )
+        for _ in range(num_trials):
+            r = gym_rollouts.single_rollout_cb(
+                gym.make(env_name),
+                max_steps=2000,
+                initialize=initialize,
+                sample_action=sample_action,
+            )
+            rollouts.append(r)
         return np.mean([sum(r.reward_l) for r in rollouts])
 
 

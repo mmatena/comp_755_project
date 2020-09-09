@@ -61,7 +61,12 @@ def get_score(flat_array, num_trials):
         policy=linear_policy,
         max_seqlen=max_seqlen,
     )
-    return gym_service.get_score("CarRacing-v0", policy=policy, num_trials=num_trials)
+    return gym_service.get_score(
+        "CarRacing-v0",
+        num_trials=num_trials,
+        initialize=policy.initialize,
+        sample_action=policy.sample_action,
+    )
     # rollouts = []
     # gym_rollouts.serial_rollouts(
     #     "CarRacing-v0",

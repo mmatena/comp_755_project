@@ -13,6 +13,7 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 
 from rl755.data_gen import gym_rollouts
+import time
 
 tfd = tfp.distributions
 
@@ -56,8 +57,13 @@ class CarRacingPolicy(gym_rollouts.Policy):
 
     def sample_action(self, obs, step, rollout, **kwargs):
         print(f"Step: {step}")
+        start = time.time()
+
         obs = tf.cast(obs, tf.float32) / 255.0
-        print(obs)
+
+        end = time.time()
+        print(f"Time: {end - start} s")
+
         enc_obs = self.encoder.encode_tensor(tf.expand_dims(obs, axis=0))
         # TODO(mmatena): Handle this case better.
         if step == 0:

@@ -54,7 +54,11 @@ def main(_):
     display = Display(visible=0, size=(400, 300))
     display.start()
 
-    t = ThreadedServer(OpenAiGymService, port=FLAGS.port)
+    t = ThreadedServer(
+        OpenAiGymService,
+        port=FLAGS.port,
+        protocol_config={"allow_public_attrs": True, "allow_all_attrs": True},
+    )
     t.start()
 
 

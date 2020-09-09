@@ -39,6 +39,10 @@ class OpenAiGymService(rpyc.Service):
 
 
 def main(_):
+    import socket
+
+    print(socket.gethostbyname(socket.gethostname()))
+
     # It looks like OpenAI gym requires some sort of display, so we
     # have to fake one.
     display = Display(visible=0, size=(400, 300))

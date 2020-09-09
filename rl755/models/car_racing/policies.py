@@ -56,8 +56,8 @@ class CarRacingPolicy(gym_rollouts.Policy):
 
     def sample_action(self, obs, step, rollout, **kwargs):
         print(f"Step: {step}")
-        print(obs)
         obs = tf.cast(obs, tf.float32) / 255.0
+        print(obs)
         enc_obs = self.encoder.encode_tensor(tf.expand_dims(obs, axis=0))
         # TODO(mmatena): Handle this case better.
         if step == 0:

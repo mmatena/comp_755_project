@@ -55,8 +55,12 @@ class CarRacingPolicy(gym_rollouts.Policy):
         return inputs, mask
 
     def sample_action(self, obs, step, rollout, **kwargs):
+        enc_obs = self.encoder.encode_tensor(
+            tf.expand_dims(obs, axis=0), training=False
+        )
         # TODO(mmatena): Handle this case better.
         if step == 0:
+            self.encoded_obs.append(enc_obs[0])
             return self.policy.sample_action(np.zeros([256 + 32]))
         inputs, mask = self._create_inputs(rollout)
         # TODO(mmatena): This could be potentially be made hugely more efficient by reusing computations.
@@ -64,9 +68,6 @@ class CarRacingPolicy(gym_rollouts.Policy):
             inputs, mask=mask
         )
 
-        enc_obs = self.encoder.encode_tensor(
-            tf.expand_dims(obs, axis=0), training=False
-        )
         self.encoded_obs.append(enc_obs[0])
 
         policy_input = tf.concat([enc_obs[0], hidden_state[0]], axis=-1)

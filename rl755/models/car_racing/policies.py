@@ -54,7 +54,7 @@ class CarRacingPolicy(gym_rollouts.Policy):
         inputs = tf.concat([observations, actions], axis=-1)
         inputs, mask = self._ensure_sequence_length(inputs)
         inputs = tf.expand_dims(inputs, axis=0)
-        mask = tf.expand_dims(mask, axis=0) if mask else None
+        mask = tf.expand_dims(mask, axis=0) if mask is not None else None
         return inputs, mask
 
     def sample_action(self, obs, step, rollout, **kwargs):

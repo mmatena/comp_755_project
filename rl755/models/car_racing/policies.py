@@ -57,7 +57,7 @@ class CarRacingPolicy(gym_rollouts.Policy):
     def sample_action(self, obs, step, rollout, **kwargs):
         # TODO(mmatena): Handle this case better.
         if step == 0:
-            return self.policy.sample_action(np.zeros([1, 256 + 32]))
+            return self.policy.sample_action(np.zeros([256 + 32]))
         inputs, mask = self._create_inputs(rollout)
         # TODO(mmatena): This could be potentially be made hugely more efficient by reusing computations.
         hidden_state = self.sequence_model.get_last_representation_tensor(
@@ -69,7 +69,7 @@ class CarRacingPolicy(gym_rollouts.Policy):
         )
         self.encoded_obs.append(enc_obs[0])
 
-        policy_input = tf.concat([enc_obs, hidden_state], axis=-1)
+        policy_input = tf.concat([enc_obs[0], hidden_state[0]], axis=-1)
 
         action = self.policy.sample_action(policy_input)
 

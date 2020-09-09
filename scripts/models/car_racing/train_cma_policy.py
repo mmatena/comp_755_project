@@ -37,7 +37,7 @@ class LinearPolicy(object):
 
 
 # TODO(mmatena): Make this configurable.
-gym_service = rpyc.connect("localhost", 18861).root
+gym_service = rpyc.connect("172.26.114.99", 18861).root
 
 encoder = saved_models.raw_rollout_vae_32ld()
 sequence_model = saved_models.encoded_rollout_transformer()

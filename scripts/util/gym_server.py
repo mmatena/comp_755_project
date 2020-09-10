@@ -1,6 +1,7 @@
 import collections
 import enum
 import multiprocessing
+import os
 import pickle
 import time
 
@@ -85,7 +86,6 @@ class GymEnvironments(multiprocessing.Process):
         import gym
         import pyglet
         from pyvirtualdisplay import Display
-        import os
 
         self.display = Display(visible=0, size=(400, 300), backend="xvfb")
         self.display.start()
@@ -99,6 +99,7 @@ class GymEnvironments(multiprocessing.Process):
             env.close()
 
     def _step(self, actions):
+        print(os.environ["DISPLAY"])
         # actions.shape = [num_environments, action_dim]
         assert len(actions) == len(self.envs)
         ret = []

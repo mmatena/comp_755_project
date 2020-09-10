@@ -6,6 +6,7 @@ from absl import flags
 import cma
 import numpy as np
 from pyvirtualdisplay import Display
+import ray
 import rpyc
 import tensorflow as tf
 
@@ -54,6 +55,7 @@ out_size = 3
 max_seqlen = 32
 
 
+@ray.remote
 def get_score(flat_array, num_trials):
     linear_policy = LinearPolicy.from_flat_array(
         flat_array, in_size=in_size, out_size=out_size
@@ -89,6 +91,8 @@ def get_score(flat_array, num_trials):
 display = Display(visible=0, size=(400, 300))
 display.start()
 
+ray.init()
+
 # es = cma.CMAEvolutionStrategy(8 * [0], 0.5, {"popsize": 64})
 es = cma.CMAEvolutionStrategy(
     (in_size * out_size + out_size) * [0], 0.5, {"popsize": 2}
@@ -96,31 +100,17 @@ es = cma.CMAEvolutionStrategy(
 for i in range(2):
     start = time.time()
     solutions = es.ask()
-    fitlist = np.zeros(es.popsize)
+    # fitlist = np.zeros(es.popsize)
+    # for i in range(es.popsize):
+    #     fitlist[i] = get_score(solutions[i], num_trials=2)
 
+    fitlist = []
     for i in range(es.popsize):
-        fitlist[i] = get_score(solutions[i], num_trials=2)
+        fitlist.append(get_score.remote(solutions[i], num_trials=2))
+    fitlist = ray.get(fitlist)
 
     es.tell(solutions, fitlist)
     print(f"CMA step time: {time.time() - start} s")
-print(es.result)
+# print(es.result)
 
-# def main(_):
-#     es = cma.CMAEvolutionStrategy(8 * [0], 0.5)
-#     for i in range(10):
-#         solutions = es.ask()
-#         fitlist = np.zeros(es.popsize)
-
-#         for i in range(es.popsize):
-#             fitlist[i] = fn(solutions[i])
-
-#         es.tell(fitlist)
-#         bestsol, bestfit = es.result()
-
-
-# if __name__ == "__main__":
-#     app.run(main)
-
-# help(cma.fmin)
-# help(cma.CMAEvolutionStrategy)
-# help(cma.CMAOptions)
+# CMA step time: 21 + 27 s

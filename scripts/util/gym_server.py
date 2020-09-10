@@ -78,7 +78,7 @@ class GymEnvironments(multiprocessing.Process):
         self.num_environments = num_environments
         self.env_name = env_name
 
-    def _create_envs(self, gym):
+    def _create_envs(self):
         self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
         for env in self.envs:
             env.reset()
@@ -122,11 +122,7 @@ class GymEnvironments(multiprocessing.Process):
             env.reset()
 
     def run(self):
-        # TODO(mmatena): Handle closing environments.
-        # import pyglet
-        # import gym
-
-        self._create_envs(gym)
+        self._create_envs()
         while True:
             msg = self.in_queue.get()
             if msg.type == MessageType.KILL:

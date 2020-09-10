@@ -85,7 +85,7 @@ class GymEnvironments(multiprocessing.Process):
         import pyglet
         from pyvirtualdisplay import Display
 
-        self.display = Display(visible=0, size=(400, 300), backend="xvfb")
+        self.display = Display(visible=0, size=(40, 30), backend="xvfb")
         self.display.start()
 
         self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]

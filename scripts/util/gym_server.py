@@ -7,10 +7,10 @@ import time
 from absl import app
 from absl import flags
 
-import gym
+# import gym
 import numpy as np
 
-from pyvirtualdisplay import Display
+# from pyvirtualdisplay import Display
 import rpyc
 from rpyc.utils.server import ThreadedServer
 
@@ -80,6 +80,9 @@ class GymEnvironments(multiprocessing.Process):
         self.env_name = env_name
 
     def _create_envs(self):
+        import gym
+        from pyvirtualdisplay import Display
+
         self.display = Display(visible=0, size=(400, 300))
         self.display.start()
         self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]

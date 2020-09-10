@@ -162,8 +162,7 @@ class OpenAiGymService(rpyc.Service):
             env.in_queue.put_nowait(InMessage(type=MessageType.RENDER, data=wtr))
         ret = self.num_processes * [None]
         for _ in self.envs:
-            msg = self.render_queue.get(True, 2)
-            # msg = self.render_queue.get()
+            msg = self.render_queue.get()
             print(msg)
             ret[msg.index] = msg.data
         return pickle.dumps(ret)

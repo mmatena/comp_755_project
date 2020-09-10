@@ -80,6 +80,8 @@ class GymEnvironments(multiprocessing.Process):
         self.env_name = env_name
 
     def _create_envs(self):
+        self.display = Display(visible=0, size=(400, 300))
+        self.display.start()
         self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
         for env in self.envs:
             env.reset()
@@ -224,8 +226,8 @@ class OpenAiGymService(rpyc.Service):
 
 # It looks like OpenAI gym requires some sort of display, so we
 # have to fake one.
-display = Display(visible=0, size=(400, 300))
-display.start()
+# display = Display(visible=0, size=(400, 300))
+# display.start()
 
 
 def main(_):

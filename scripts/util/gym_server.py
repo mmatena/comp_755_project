@@ -87,6 +87,16 @@ class GymEnvironments(multiprocessing.Process):
 
         rendering.Viewer(240, 240)
         gl.glViewport(0, 0, 240, 240)
+        score_label = pyglet.text.Label(
+            "0000",
+            font_size=36,
+            x=20,
+            y=240 * 2.5 / 40.00,
+            anchor_x="left",
+            anchor_y="center",
+            color=(255, 255, 255, 255),
+        )
+        score_label.draw()
 
         ret = []
         for should_render, env in zip(whether_to_renders, self.envs):

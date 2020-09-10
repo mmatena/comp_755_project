@@ -91,6 +91,10 @@ max_seqlen = 32
 
 
 def get_score(flat_array):
+    conn = rpyc.connect(ip, 18861, config={"allow_all_attrs": True})
+    conn._config["sync_request_timeout"] = None
+    gym_service = conn.root
+
     linear_policy = LinearPolicy.from_flat_array(
         flat_array, in_size=in_size, out_size=out_size
     )

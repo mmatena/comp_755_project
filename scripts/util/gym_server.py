@@ -81,6 +81,7 @@ class GymEnvironments(multiprocessing.Process):
 
     def _create_envs(self):
         import gym
+        import pyglet
         from pyvirtualdisplay import Display
 
         self.display = Display(visible=0, size=(400, 300))
@@ -108,8 +109,6 @@ class GymEnvironments(multiprocessing.Process):
         self.step_info_queue.put(OutMessage(index=self.index, data=ret))
 
     def _render(self, whether_to_renders):
-        print("SLEEPING FOR 1s")
-        time.sleep(1)
         assert len(whether_to_renders) == len(self.envs)
         ret = []
         for should_render, env in zip(whether_to_renders, self.envs):

@@ -65,6 +65,12 @@ class MessageType(enum.Enum):
 #         finally:
 #             sys.stdin = _stdin
 
+if True:
+    from pyvirtualdisplay import Display
+
+    display = Display(visible=0, size=(400, 300), backend="xvfb")
+    display.start()
+
 
 class GymEnvironments(multiprocessing.Process):
     """A single process that runs multiple gym environments."""

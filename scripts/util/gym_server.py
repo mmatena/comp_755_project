@@ -96,9 +96,7 @@ class GymEnvironments(multiprocessing.Process):
             env.reset()
 
     def run(self):
-        self.display = Display(visible=0, size=(400, 300))
-        self.display.start()
-        # TODO(mmatena): Handle resetting and closing environments.
+        # TODO(mmatena): Handle closing environments.
         while True:
             msg = self.in_queue.get()
             if msg.type == MessageType.KILL:
@@ -164,7 +162,8 @@ class OpenAiGymService(rpyc.Service):
             env.in_queue.put_nowait(InMessage(type=MessageType.RENDER, data=wtr))
         ret = self.num_processes * [None]
         for _ in self.envs:
-            msg = self.render_queue.get()
+            msg = self.render_queue.get(True, 2)
+            # msg = self.render_queue.get()
             print(msg)
             ret[msg.index] = msg.data
         return pickle.dumps(ret)

@@ -86,6 +86,7 @@ class GymEnvironments(multiprocessing.Process):
         from pyglet import gl
 
         rendering.Viewer(240, 240)
+        gl.glViewport(0, 0, 240, 240)
 
         ret = []
         for should_render, env in zip(whether_to_renders, self.envs):

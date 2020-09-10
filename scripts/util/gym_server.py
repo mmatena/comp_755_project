@@ -87,11 +87,10 @@ class GymEnvironments(multiprocessing.Process):
         from pyvirtualdisplay import Display
 
         self.display = Display(visible=0, size=(400, 300), backend="xvfb")
-        # self.display.start()
-        with self.display:
-            self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
-            for env in self.envs:
-                env.reset()
+        self.display.start()
+        self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
+        for env in self.envs:
+            env.reset()
 
     def _kill(self):
         for env in self.envs:
@@ -133,8 +132,7 @@ class GymEnvironments(multiprocessing.Process):
                 self._kill()
                 return
             elif msg.type == MessageType.STEP:
-                with self.display:
-                    self._step(msg.data)
+                self._step(msg.data)
             elif msg.type == MessageType.RENDER:
                 self._render(msg.data)
             elif msg.type == MessageType.RESET:

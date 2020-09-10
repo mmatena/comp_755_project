@@ -44,6 +44,26 @@ class MessageType(enum.Enum):
     RESET = 4
 
 
+if True:
+    import sys
+    import pdb
+
+
+class ForkedPdb(pdb.Pdb):
+    """A Pdb subclass that may be used
+    from a forked multiprocessing child
+
+    """
+
+    def interaction(self, *args, **kwargs):
+        _stdin = sys.stdin
+        try:
+            sys.stdin = open("/dev/stdin")
+            pdb.Pdb.interaction(self, *args, **kwargs)
+        finally:
+            sys.stdin = _stdin
+
+
 class GymEnvironments(multiprocessing.Process):
     """A single process that runs multiple gym environments."""
 
@@ -85,6 +105,7 @@ class GymEnvironments(multiprocessing.Process):
         for should_render, env in zip(whether_to_renders, self.envs):
             if should_render:
                 print("A")
+                ForkedPdb().set_trace()
                 ret.append(env.render("state_pixels"))
                 print(ret[-1])
             else:

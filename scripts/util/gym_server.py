@@ -81,22 +81,22 @@ class GymEnvironments(multiprocessing.Process):
 
     def _render(self, whether_to_renders):
         assert len(whether_to_renders) == len(self.envs)
-        from gym.envs.classic_control import rendering
-        import pyglet
-        from pyglet import gl
+        # from gym.envs.classic_control import rendering
+        # import pyglet
+        # from pyglet import gl
 
-        rendering.Viewer(240, 240)
-        gl.glViewport(0, 0, 240, 240)
-        score_label = pyglet.text.Label(
-            "0000",
-            font_size=36,
-            x=20,
-            y=240 * 2.5 / 40.00,
-            anchor_x="left",
-            anchor_y="center",
-            color=(255, 255, 255, 255),
-        )
-        score_label.draw()
+        # rendering.Viewer(240, 240)
+        # gl.glViewport(0, 0, 240, 240)
+        # score_label = pyglet.text.Label(
+        #     "0000",
+        #     font_size=36,
+        #     x=20,
+        #     y=240 * 2.5 / 40.00,
+        #     anchor_x="left",
+        #     anchor_y="center",
+        #     color=(255, 255, 255, 255),
+        # )
+        # score_label.draw()
 
         ret = []
         for should_render, env in zip(whether_to_renders, self.envs):
@@ -236,6 +236,11 @@ def main(_):
     # # have to fake one.
     # display = Display(visible=0, size=(400, 300))
     # display.start()
+
+    s = OpenAiGymService()
+    s.exposed_make("CarRacing-v0", 1)
+    r = s.exposed_render(pickle.dumps(1 * [True]))
+    print(r)
 
     if True:
         return

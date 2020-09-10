@@ -86,7 +86,7 @@ class GymEnvironments(multiprocessing.Process):
         import pyglet
         from pyvirtualdisplay import Display
 
-        # self.display = Display(visible=0, size=(400, 300), backend="xvfb")
+        self.display = Display(visible=0, size=(400, 300), backend="xvfb")
         # self.display.start()
 
         self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
@@ -133,7 +133,8 @@ class GymEnvironments(multiprocessing.Process):
                 self._kill()
                 return
             elif msg.type == MessageType.STEP:
-                self._step(msg.data)
+                with self.display:
+                    self._step(msg.data)
             elif msg.type == MessageType.RENDER:
                 self._render(msg.data)
             elif msg.type == MessageType.RESET:

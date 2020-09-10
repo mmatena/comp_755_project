@@ -102,17 +102,11 @@ class GymEnvironments(multiprocessing.Process):
         self.step_info_queue.put(OutMessage(index=self.index, data=ret))
 
     def _render(self, whether_to_renders):
-        import pyglet
-
-        # reload(pyglet)
         assert len(whether_to_renders) == len(self.envs)
         ret = []
         for should_render, env in zip(whether_to_renders, self.envs):
             if should_render:
-                print("A")
-                # ForkedPdb().set_trace()
                 ret.append(env.render("state_pixels"))
-                print(ret[-1])
             else:
                 ret.append(None)
         self.render_queue.put(OutMessage(index=self.index, data=ret))

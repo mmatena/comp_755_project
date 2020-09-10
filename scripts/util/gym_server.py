@@ -6,7 +6,7 @@ import pickle
 from absl import app
 from absl import flags
 
-# import gym
+import gym
 import numpy as np
 
 from pyvirtualdisplay import Display
@@ -123,8 +123,8 @@ class GymEnvironments(multiprocessing.Process):
 
     def run(self):
         # TODO(mmatena): Handle closing environments.
-        import pyglet
-        import gym
+        # import pyglet
+        # import gym
 
         self._create_envs(gym)
         while True:

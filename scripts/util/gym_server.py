@@ -204,6 +204,9 @@ def main(_):
     display = Display(visible=0, size=(400, 300))
     display.start()
 
+    if True:
+        return
+
     t = ThreadedServer(
         OpenAiGymService,
         port=FLAGS.port,

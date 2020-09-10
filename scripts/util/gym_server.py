@@ -6,10 +6,10 @@ import pickle
 from absl import app
 from absl import flags
 
-# import gym
+import gym
 import numpy as np
 
-# from pyvirtualdisplay import Display
+from pyvirtualdisplay import Display
 import rpyc
 from rpyc.utils.server import ThreadedServer
 
@@ -51,11 +51,8 @@ class GymEnvironments(multiprocessing.Process):
         self, index, num_environments, env_name, in_queue, step_info_queue, render_queue
     ):
         super().__init__()
-        import gym
-        from pyvirtualdisplay import Display
-
-        self.display = Display(visible=0, size=(400, 300))
-        self.display.start()
+        # self.display = Display(visible=0, size=(400, 300))
+        # self.display.start()
         self.index = index
         self.in_queue = in_queue
         self.step_info_queue = step_info_queue
@@ -214,8 +211,8 @@ def main(_):
 
     # It looks like OpenAI gym requires some sort of display, so we
     # have to fake one.
-    # display = Display(visible=0, size=(400, 300))
-    # display.start()
+    display = Display(visible=0, size=(400, 300))
+    display.start()
 
     if True:
         return

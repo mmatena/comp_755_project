@@ -86,7 +86,7 @@ class GymEnvironments(multiprocessing.Process):
             #
             #
             env.viewer = 7
-            env.render = 8
+            env.car = 8
             print(env.viewer)
             #
             #

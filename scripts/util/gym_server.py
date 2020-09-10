@@ -65,12 +65,6 @@ class MessageType(enum.Enum):
 #         finally:
 #             sys.stdin = _stdin
 
-if True:
-    from pyvirtualdisplay import Display
-
-    display = Display(visible=0, size=(400, 300), backend="xvfb")
-    display.start()
-
 
 class GymEnvironments(multiprocessing.Process):
     """A single process that runs multiple gym environments."""
@@ -90,7 +84,8 @@ class GymEnvironments(multiprocessing.Process):
     def _create_envs(self):
         import gym
         import pyglet
-        from pyvirtualdisplay import Display
+
+        # from pyvirtualdisplay import Display
 
         # self.display = Display(visible=0, size=(400, 300), backend="xvfb")
         # self.display.start()
@@ -245,11 +240,15 @@ class OpenAiGymService(rpyc.Service):
 
 
 def main(_):
-    import socket
+    # import socket
 
-    hostname = socket.gethostbyname(socket.gethostname())
-    with open(IP_FILE, "w+") as f:
-        f.write(hostname)
+    # hostname = socket.gethostbyname(socket.gethostname())
+    # with open(IP_FILE, "w+") as f:
+    #     f.write(hostname)
+    from pyvirtualdisplay import Display
+
+    display = Display(visible=0, size=(400, 300), backend="xvfb")
+    display.start()
 
     # # It looks like OpenAI gym requires some sort of display, so we
     # # have to fake one.

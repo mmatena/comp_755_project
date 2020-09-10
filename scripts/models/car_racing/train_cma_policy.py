@@ -47,7 +47,10 @@ with open(IP_FILE, "r") as f:
     ip = f.read()
 
 # TODO(mmatena): Make this configurable.
-gym_service = rpyc.connect(ip, 18861, config={"allow_all_attrs": True}).root
+conn = rpyc.connect(ip, 18861, config={"allow_all_attrs": True})
+conn._config["sync_request_timeout"] = None
+gym_service = conn.root
+
 
 encoder = saved_models.raw_rollout_vae_32ld()
 sequence_model = saved_models.encoded_rollout_transformer()

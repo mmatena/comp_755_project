@@ -20,8 +20,11 @@ export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 # I copied the module to here since we can't access the original one in singularity.
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/package_hacks/gcc/9.1.0/lib64
 
+# run_singularity() {
+#   echo singularity shell --nv -B /pine -B /proj $SIMG_PATH/$SIMG_NAME 
+# }
 run_singularity() {
-  echo singularity shell --nv -B /pine -B /proj $SIMG_PATH/$SIMG_NAME 
+  echo ""
 }
 
 launch() {
@@ -36,6 +39,7 @@ launch() {
     --qos=gpu_access \
     --pty \
     $(run_singularity))
+
   eval $CMD
 }
 

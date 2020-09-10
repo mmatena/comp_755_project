@@ -82,7 +82,6 @@ class GymEnvironments(multiprocessing.Process):
         self.env_name = env_name
 
     def _create_envs(self):
-        import xvfbwrapper
         import gym
         import pyglet
         from pyvirtualdisplay import Display

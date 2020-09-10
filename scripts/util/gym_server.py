@@ -81,6 +81,10 @@ class GymEnvironments(multiprocessing.Process):
 
     def _render(self, whether_to_renders):
         assert len(whether_to_renders) == len(self.envs)
+        from gym.envs.classic_control import rendering
+
+        rendering.Viewer(240, 240)
+
         ret = []
         for should_render, env in zip(whether_to_renders, self.envs):
             if should_render:

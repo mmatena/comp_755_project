@@ -1,9 +1,7 @@
 """Learns a simple policy using CMA."""
-import cma
-
 from absl import app
 from absl import flags
-
+import cma
 import numpy as np
 from pyvirtualdisplay import Display
 import rpyc

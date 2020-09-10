@@ -50,6 +50,8 @@ class GymEnvironments(multiprocessing.Process):
         self, index, num_environments, env_name, in_queue, step_info_queue, render_queue
     ):
         super().__init__()
+        self.display = Display(visible=0, size=(400, 300))
+        self.display.start()
         self.index = index
         self.in_queue = in_queue
         self.step_info_queue = step_info_queue

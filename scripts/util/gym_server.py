@@ -88,10 +88,10 @@ class GymEnvironments(multiprocessing.Process):
 
         self.display = Display(visible=0, size=(400, 300), backend="xvfb")
         # self.display.start()
-
-        self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
-        for env in self.envs:
-            env.reset()
+        with self.display:
+            self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
+            for env in self.envs:
+                env.reset()
 
     def _kill(self):
         for env in self.envs:
@@ -126,8 +126,7 @@ class GymEnvironments(multiprocessing.Process):
             env.reset()
 
     def run(self):
-        with self.display:
-            self._create_envs()
+        self._create_envs()
         while True:
             msg = self.in_queue.get()
             if msg.type == MessageType.KILL:

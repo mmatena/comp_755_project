@@ -85,7 +85,7 @@ class GymEnvironments(multiprocessing.Process):
         for should_render, env in zip(whether_to_renders, self.envs):
             #
             #
-            env.render_road = None
+            env.viewer = 7
             #
             #
             if should_render:

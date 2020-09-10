@@ -142,6 +142,8 @@ class OpenAiGymService(rpyc.Service):
             )
             for index, size in enumerate(partitions)
         ]
+        for env in self.envs:
+            env.start()
 
     def exposed_render(self, whether_to_renders):
         whether_to_renders = pickle.loads(whether_to_renders)
@@ -154,6 +156,7 @@ class OpenAiGymService(rpyc.Service):
         ret = self.num_processes * [None]
         for _ in self.envs:
             msg = self.render_queue.get()
+            print(msg)
             ret[msg.index] = msg.data
         return pickle.dumps(ret)
 

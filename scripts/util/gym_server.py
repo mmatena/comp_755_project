@@ -6,7 +6,7 @@ import pickle
 from absl import app
 from absl import flags
 
-import gym
+# import gym
 import numpy as np
 
 from pyvirtualdisplay import Display
@@ -72,6 +72,7 @@ class GymEnvironments(multiprocessing.Process):
     ):
         super().__init__()
         import pyglet
+        import gym
 
         # self.display = Display(visible=0, size=(400, 300))
         # self.display.start()

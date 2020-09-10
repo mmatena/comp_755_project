@@ -85,7 +85,7 @@ class GymEnvironments(multiprocessing.Process):
         import pyglet
         from pyvirtualdisplay import Display
 
-        self.display = Display(visible=0, size=(40, 30), backend="xvfb")
+        self.display = Display(visible=0, size=(400, 300), backend="xvfb")
         self.display.start()
 
         self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
@@ -112,6 +112,8 @@ class GymEnvironments(multiprocessing.Process):
 
     def _render(self, whether_to_renders):
         assert len(whether_to_renders) == len(self.envs)
+        print("SLEEPING")
+        time.sleep(1)
         ret = []
         for should_render, env in zip(whether_to_renders, self.envs):
             if should_render:
@@ -255,10 +257,10 @@ def main(_):
     # s.exposed_render(pickle.dumps(FACTOR * FLAGS.processes * [True]))
     # s.exposed_render(pickle.dumps(FACTOR * FLAGS.processes * [True]))
     # s.exposed_render(pickle.dumps(FACTOR * FLAGS.processes * [True]))
-    # s.exposed_step(pickle.dumps(FACTOR * FLAGS.processes * [[1, 1.0, 1]]))
-    # s.exposed_step(pickle.dumps(FACTOR * FLAGS.processes * [[1, 1.0, 1]]))
-    start = time.time()
     s.exposed_step(pickle.dumps(FACTOR * FLAGS.processes * [[1, 1.0, 1]]))
+    s.exposed_step(pickle.dumps(FACTOR * FLAGS.processes * [[1, 1.0, 1]]))
+    start = time.time()
+    s.exposed_step(pickle.dumps(FACTOR * FLAGS.processes * [None]))
     print(time.time() - start)
 
     if True:

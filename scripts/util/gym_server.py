@@ -86,6 +86,7 @@ class GymEnvironments(multiprocessing.Process):
             #
             #
             env.viewer = 7
+            print(env.viewer)
             #
             #
             if should_render:

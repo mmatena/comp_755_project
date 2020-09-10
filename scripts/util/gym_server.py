@@ -47,7 +47,10 @@ class MessageType(enum.Enum):
 
 
 if True:
+    start = time.time()
     import gym
+
+    print(time.time() - start)
 
     # import sys
     # import pdb

@@ -113,7 +113,9 @@ class GymEnvironments(multiprocessing.Process):
         ret = []
         for should_render, env in zip(whether_to_renders, self.envs):
             if should_render:
+                print("A")
                 ret.append(env.render("state_pixels"))
+                print("B")
             else:
                 ret.append(None)
         self.render_queue.put(OutMessage(index=self.index, data=ret))
@@ -251,7 +253,7 @@ def main(_):
     s.exposed_make("CarRacing-v0", FACTOR * FLAGS.processes)
     start = time.time()
     s.exposed_render(pickle.dumps(FACTOR * FLAGS.processes * [True]))
-    s.exposed_step(pickle.dumps(FACTOR * FLAGS.processes * [[1, 1.0, 1]]))
+    # s.exposed_step(pickle.dumps(FACTOR * FLAGS.processes * [[1, 1.0, 1]]))
     end = time.time()
     print(end - start)
 

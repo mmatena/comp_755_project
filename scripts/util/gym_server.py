@@ -253,6 +253,8 @@ def main(_):
     s = OpenAiGymService()
     s.exposed_make("CarRacing-v0", FACTOR * FLAGS.processes)
     s.exposed_render(pickle.dumps(FACTOR * FLAGS.processes * [True]))
+    s.exposed_render(pickle.dumps(FACTOR * FLAGS.processes * [True]))
+    s.exposed_render(pickle.dumps(FACTOR * FLAGS.processes * [True]))
     # s.exposed_step(pickle.dumps(FACTOR * FLAGS.processes * [[1, 1.0, 1]]))
 
     if True:

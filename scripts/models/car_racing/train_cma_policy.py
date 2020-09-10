@@ -118,7 +118,7 @@ for i in range(2):
     solutions = es.ask()
 
     num_trials = 2
-    args = functools.reduce(list.__add__, [num_trials * s for s in solutions])
+    args = functools.reduce(list.__add__, [num_trials * [s] for s in solutions])
 
     # fitlist = np.zeros(es.popsize)
     # for i in range(es.popsize):

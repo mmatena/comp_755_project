@@ -1,5 +1,4 @@
 import pickle
-import time
 
 from absl import app
 from absl import flags
@@ -48,15 +47,11 @@ class OpenAiGymService(rpyc.Service):
         self.env = gym.make(env_name)
 
     def exposed_render(self, *args, **kwargs):
-        start = time.time()
         image = self.env.render(*args, **kwargs)
-        print(f"Render time: {time.time() - start} s")
         return pickle.dumps(image)
 
     def exposed_step(self, action):
-        start = time.time()
         _, reward, done, _ = self.env.step(action)
-        print(f"Step time: {time.time() - start} s")
         return None, reward, done, None
 
     def exposed_close(self):

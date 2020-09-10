@@ -1,4 +1,6 @@
 """Learns a simple policy using CMA."""
+import time
+
 from absl import app
 from absl import flags
 import cma
@@ -70,10 +72,12 @@ def get_score(flat_array, num_trials):
     # )
     rollouts = []
     gym_service.make("CarRacing-v0")
+    print("Increase MAX STEPS!!!!!")
     gym_rollouts.serial_rollouts(
         gym_service,
         policy=policy,
-        max_steps=2000,
+        # max_steps=2000,
+        max_steps=100,
         num_rollouts=num_trials,
         process_rollout_fn=lambda r: rollouts.append(r),
     )
@@ -90,6 +94,7 @@ es = cma.CMAEvolutionStrategy(
     (in_size * out_size + out_size) * [0], 0.5, {"popsize": 2}
 )
 for i in range(2):
+    start = time.time()
     solutions = es.ask()
     fitlist = np.zeros(es.popsize)
 
@@ -97,6 +102,7 @@ for i in range(2):
         fitlist[i] = get_score(solutions[i], num_trials=2)
 
     es.tell(solutions, fitlist)
+    print(f"CMA step time: {time.time() - start} s")
 print(es.result)
 
 # def main(_):

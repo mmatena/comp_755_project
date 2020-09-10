@@ -91,21 +91,21 @@ def single_rollout(env, policy, max_steps):
     rollout = Rollout()
     for step in range(max_steps):
         # TODO(mmatena): Support environments without a "state_pixels" render mode.
-        start = time.time()
+        # start = time.time()
         obs = env.render("state_pixels")
-        print(f"Render time: {time.time() - start} s")
+        # print(f"Render time: {time.time() - start} s")
 
         # This might happen if we are running on a remote gym server using rpc.
         if isinstance(obs, bytes):
             obs = pickle.loads(obs)
 
-        start = time.time()
+        # start = time.time()
         action = policy.sample_action(obs=obs.tolist(), step=step, rollout=rollout)
-        print(f"Sample action time: {time.time() - start} s")
+        # print(f"Sample action time: {time.time() - start} s")
 
-        start = time.time()
+        # start = time.time()
         _, reward, done, _ = env.step(action)
-        print(f"Step time: {time.time() - start} s")
+        # print(f"Env step time: {time.time() - start} s")
 
         rollout.obs_l.append(obs)
         rollout.action_l.append(action)

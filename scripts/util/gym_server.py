@@ -246,7 +246,7 @@ def main(_):
     # display = Display(visible=0, size=(400, 300))
     # display.start()
 
-    FACTOR = 8
+    FACTOR = 1
     s = OpenAiGymService()
     s.exposed_make("CarRacing-v0", FACTOR * FLAGS.processes)
     start = time.time()

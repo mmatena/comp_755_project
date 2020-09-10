@@ -1,4 +1,6 @@
 """Learns a simple policy using CMA."""
+import functools
+import multiprocessing
 import time
 
 from absl import app
@@ -6,10 +8,10 @@ from absl import flags
 import cma
 import numpy as np
 from pyvirtualdisplay import Display
-import ray
 import rpyc
 import tensorflow as tf
 
+from rl755.common import misc
 from rl755.data_gen import gym_rollouts
 from rl755.models.car_racing import policies
 from rl755.models.car_racing import saved_models
@@ -55,7 +57,37 @@ out_size = 3
 max_seqlen = 32
 
 
-def get_score(flat_array, num_trials):
+# def get_score(flat_array, num_trials):
+#     linear_policy = LinearPolicy.from_flat_array(
+#         flat_array, in_size=in_size, out_size=out_size
+#     )
+#     policy = policies.CarRacingPolicy(
+#         encoder=encoder,
+#         sequence_model=sequence_model,
+#         policy=linear_policy,
+#         max_seqlen=max_seqlen,
+#     )
+#     # return gym_service.get_score(
+#     #     gym_service,
+#     #     num_trials=num_trials,
+#     #     initialize=policy.initialize,
+#     #     sample_action=policy.sample_action,
+#     # )
+#     rollouts = []
+#     gym_service.make("CarRacing-v0")
+#     print("Increase MAX STEPS!!!!!")
+#     gym_rollouts.serial_rollouts(
+#         gym_service,
+#         policy=policy,
+#         # max_steps=2000,
+#         max_steps=100,
+#         num_rollouts=num_trials,
+#         process_rollout_fn=lambda r: rollouts.append(r),
+#     )
+#     return np.mean([sum(r.reward_l) for r in rollouts])
+
+
+def get_score(flat_array):
     linear_policy = LinearPolicy.from_flat_array(
         flat_array, in_size=in_size, out_size=out_size
     )
@@ -65,24 +97,9 @@ def get_score(flat_array, num_trials):
         policy=linear_policy,
         max_seqlen=max_seqlen,
     )
-    # return gym_service.get_score(
-    #     gym_service,
-    #     num_trials=num_trials,
-    #     initialize=policy.initialize,
-    #     sample_action=policy.sample_action,
-    # )
-    rollouts = []
     gym_service.make("CarRacing-v0")
     print("Increase MAX STEPS!!!!!")
-    gym_rollouts.serial_rollouts(
-        gym_service,
-        policy=policy,
-        # max_steps=2000,
-        max_steps=100,
-        num_rollouts=num_trials,
-        process_rollout_fn=lambda r: rollouts.append(r),
-    )
-    return np.mean([sum(r.reward_l) for r in rollouts])
+    return gym_rollouts.single_rollout(gym_service, policy, max_steps=100)
 
 
 # It looks like OpenAI gym requires some sort of display, so we
@@ -90,7 +107,7 @@ def get_score(flat_array, num_trials):
 display = Display(visible=0, size=(400, 300))
 display.start()
 
-ray.init(address="localhost:6379")
+# ray.init(address="localhost:6379")
 
 # es = cma.CMAEvolutionStrategy(8 * [0], 0.5, {"popsize": 64})
 es = cma.CMAEvolutionStrategy(
@@ -99,16 +116,21 @@ es = cma.CMAEvolutionStrategy(
 for i in range(2):
     start = time.time()
     solutions = es.ask()
+
+    num_trials = 2
+    args = functools.reduce(list.__add__, [num_trials * s for s in solutions])
+
     # fitlist = np.zeros(es.popsize)
     # for i in range(es.popsize):
     #     fitlist[i] = get_score(solutions[i], num_trials=2)
-    get_score_ = ray.remote(get_score)
-    fitlist = []
-    for i in range(es.popsize):
-        fitlist.append(get_score_.remote(solutions[i], num_trials=2))
-    fitlist = ray.get(fitlist)
+    processes = 6
+    with multiprocessing.Pool(processes=processes) as pool:
+        scores = pool.map(get_score, args)
+    scores = misc.divide_chunks(scores, num_trials)
+    fitlist = [sum(s) for s in scores]
 
     es.tell(solutions, fitlist)
+
     print(f"CMA step time: {time.time() - start} s")
 # print(es.result)
 

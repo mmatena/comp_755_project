@@ -113,9 +113,7 @@ class GymEnvironments(multiprocessing.Process):
         ret = []
         for should_render, env in zip(whether_to_renders, self.envs):
             if should_render:
-                print("A")
                 ret.append(env.render("state_pixels"))
-                print("B")
             else:
                 ret.append(None)
         self.render_queue.put(OutMessage(index=self.index, data=ret))
@@ -190,9 +188,12 @@ class OpenAiGymService(rpyc.Service):
         for wtr, env in zip(whether_to_renders, self.envs):
             env.in_queue.put_nowait(InMessage(type=MessageType.RENDER, data=wtr))
         ret = self.num_processes * [None]
+
+        start = time.time()
         for _ in self.envs:
             msg = self.render_queue.get()
             ret[msg.index] = msg.data
+        print(time.time() - start)
         return pickle.dumps(ret)
 
     def exposed_step(self, actions):
@@ -251,11 +252,8 @@ def main(_):
     FACTOR = 1
     s = OpenAiGymService()
     s.exposed_make("CarRacing-v0", FACTOR * FLAGS.processes)
-    start = time.time()
     s.exposed_render(pickle.dumps(FACTOR * FLAGS.processes * [True]))
     # s.exposed_step(pickle.dumps(FACTOR * FLAGS.processes * [[1, 1.0, 1]]))
-    end = time.time()
-    print(end - start)
 
     if True:
         return

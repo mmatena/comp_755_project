@@ -46,14 +46,9 @@ class MessageType(enum.Enum):
     RESET = 4
 
 
-if True:
-    start = time.time()
-    import gym
-
-    print(time.time() - start)
-
-    # import sys
-    # import pdb
+# if True:
+#     # import sys
+#     # import pdb
 
 
 # class ForkedPdb(pdb.Pdb):
@@ -87,12 +82,9 @@ class GymEnvironments(multiprocessing.Process):
         self.env_name = env_name
 
     def _create_envs(self):
-        start = time.time()
-        # import gym
+        import gym
         import pyglet
         from pyvirtualdisplay import Display
-
-        print(time.time() - start)
 
         self.display = Display(visible=0, size=(400, 300), backend="xvfb")
         self.display.start()

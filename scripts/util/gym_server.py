@@ -59,7 +59,7 @@ class GymEnvironments(multiprocessing.Process):
         self.render_queue = render_queue
         self.envs = [gym.make(env_name) for _ in range(num_environments)]
         for env in self.envs:
-            print(env.reset())
+            env.reset()
 
     def _kill(self):
         for env in self.envs:
@@ -202,6 +202,12 @@ class OpenAiGymService(rpyc.Service):
     #         self.env.close()
 
 
+# It looks like OpenAI gym requires some sort of display, so we
+# have to fake one.
+display = Display(visible=0, size=(400, 300))
+display.start()
+
+
 def main(_):
     import socket
 
@@ -209,10 +215,10 @@ def main(_):
     with open(IP_FILE, "w+") as f:
         f.write(hostname)
 
-    # It looks like OpenAI gym requires some sort of display, so we
-    # have to fake one.
-    display = Display(visible=0, size=(400, 300))
-    display.start()
+    # # It looks like OpenAI gym requires some sort of display, so we
+    # # have to fake one.
+    # display = Display(visible=0, size=(400, 300))
+    # display.start()
 
     if True:
         return

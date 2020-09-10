@@ -55,7 +55,6 @@ out_size = 3
 max_seqlen = 32
 
 
-@ray.remote
 def get_score(flat_array, num_trials):
     linear_policy = LinearPolicy.from_flat_array(
         flat_array, in_size=in_size, out_size=out_size
@@ -91,7 +90,7 @@ def get_score(flat_array, num_trials):
 display = Display(visible=0, size=(400, 300))
 display.start()
 
-ray.init(object_store_memory=15000000000)
+ray.init()
 
 # es = cma.CMAEvolutionStrategy(8 * [0], 0.5, {"popsize": 64})
 es = cma.CMAEvolutionStrategy(
@@ -103,10 +102,10 @@ for i in range(2):
     # fitlist = np.zeros(es.popsize)
     # for i in range(es.popsize):
     #     fitlist[i] = get_score(solutions[i], num_trials=2)
-
+    get_score_ = ray.remote(get_score)
     fitlist = []
     for i in range(es.popsize):
-        fitlist.append(get_score.remote(solutions[i], num_trials=2))
+        fitlist.append(get_score_.remote(solutions[i], num_trials=2))
     fitlist = ray.get(fitlist)
 
     es.tell(solutions, fitlist)

@@ -1,3 +1,6 @@
+import collections
+import enum
+import multiprocessing
 import pickle
 
 from absl import app
@@ -9,17 +12,97 @@ from pyvirtualdisplay import Display
 import rpyc
 from rpyc.utils.server import ThreadedServer
 
+from rl755.common import misc
 from rl755.data_gen import gym_rollouts
 
 FLAGS = flags.FLAGS
 
+flags.DEFINE_integer(
+    "processes", None, "The number of processes to use for each connection."
+)
 flags.DEFINE_integer("port", 18861, "The port to listen on.")
+
+flags.mark_flag_as_required("processes")
 
 IP_FILE = "/pine/scr/m/m/mmatena/tmp/gym_server_ip.txt"
 
 
-def image_to_tuples(image):
-    return tuple(tuple(tuple(b for b in a)) for a in image)
+# Information to be returned after we do a step.
+StepInfo = collections.namedtuple("StepInfo", ["reward", "done"])
+
+# Structure used to pass data into a GymEnvironments process.
+InMessage = collections.namedtuple("InMessage", ["type", "data"])
+
+OutMessage = collections.namedtuple("OutMessage", ["index", "data"])
+
+
+class MessageType(enum.Enum):
+    KILL = 1
+    STEP = 2
+    RENDER = 3
+    RESET = 4
+
+
+class GymEnvironments(multiprocessing.Process):
+    """A single process that runs multiple gym environments."""
+
+    def __init__(
+        self, index, num_environments, env_name, in_queue, step_info_queue, render_queue
+    ):
+        super().__init__()
+        self.index = index
+        self.in_queue = in_queue
+        self.step_info_queue = step_info_queue
+        self.render_queue = render_queue
+        self.envs = [gym.make(env_name) for _ in range(num_environments)]
+
+    def _kill(self):
+        for env in self.envs:
+            env.close()
+
+    def _step(self, actions):
+        # actions.shape = [num_environments, action_dim]
+        assert actions.shape[0] == len(self.envs)
+        ret = []
+        for action, env in zip(actions, self.envs):
+            # None as actions means do nothing, can we used when one env
+            # is finished but others aren't.
+            if action is None:
+                ret.append(None)
+                continue
+            _, reward, done, _ = env.step(action)
+            ret.append(StepInfo(reward=reward, done=done))
+        self.step_info_queue.put(OutMessage(index=self.index, data=ret))
+
+    def _render(self, whether_to_renders):
+        assert len(whether_to_renders) == len(self.envs)
+        ret = []
+        for should_render, env in zip(whether_to_renders, self.envs):
+            if should_render:
+                ret.append(env.render("state_pixels"))
+            else:
+                ret.append(None)
+        self.render_queue.put(OutMessage(index=self.index, data=ret))
+
+    def _reset(self):
+        for env in self.envs:
+            env.reset()
+
+    def run(self):
+        # TODO(mmatena): Handle resetting and closing environments.
+        while True:
+            msg = self.in_queue.get()
+            if msg.type == MessageType.KILL:
+                self._kill()
+                return
+            elif msg.type == MessageType.STEP:
+                self._step(msg.data)
+            elif msg.type == MessageType.RENDER:
+                self._render(msg.data)
+            elif msg.type == MessageType.RESET:
+                self._reset()
+            else:
+                raise ValueError(f"Invalid message type: {msg.type}")
 
 
 class OpenAiGymService(rpyc.Service):
@@ -27,7 +110,10 @@ class OpenAiGymService(rpyc.Service):
 
     def __init__(self):
         super().__init__()
-        self.env = None
+        self.envs = None
+        self.step_info_queue = multiprocessing.Queue()
+        self.render_queue = multiprocessing.Queue()
+        self.num_processes = FLAGS.processes
 
     def on_connect(self, conn):
         # code that runs when a connection is created
@@ -43,20 +129,67 @@ class OpenAiGymService(rpyc.Service):
         if self.env:
             self.env.reset()
 
-    def exposed_make(self, env_name):
-        self.env = gym.make(env_name)
+    def exposed_make(self, env_name, num_environments):
+        partitions = misc.evenly_partition(num_environments, self.num_processes)
+        self.envs = [
+            GymEnvironments(
+                index=index,
+                num_environments=size,
+                env_name=env_name,
+                in_queue=multiprocessing.Queue(),
+                step_info_queue=self.step_info_queue,
+                render_queue=self.render_queue,
+            )
+            for index, size in enumerate(partitions)
+        ]
 
-    def exposed_render(self, *args, **kwargs):
-        image = self.env.render(*args, **kwargs)
-        return pickle.dumps(image)
+    def exposed_render(self, whether_to_renders):
+        whether_to_renders = pickle.loads(whether_to_renders)
+        whether_to_renders = misc.evenly_partition(
+            whether_to_renders, self.num_processes
+        )
+        assert len(whether_to_renders) == len(self.envs)
+        for wtr, env in zip(whether_to_renders, self.envs):
+            env.in_queue.put_nowait(InMessage(type=MessageType.RENDER, data=wtr))
+        ret = self.num_processes * [None]
+        for _ in self.envs:
+            msg = self.render_queue.get()
+            ret[msg.index] = msg.data
+        return pickle.dumps(ret)
 
-    def exposed_step(self, action):
-        _, reward, done, _ = self.env.step(action)
-        return None, reward, done, None
+    def exposed_step(self, actions):
+        actions = pickle.loads(actions)
+        actions = misc.evenly_partition(actions, self.num_processes)
+        assert len(actions) == len(self.envs)
+        for action, env in zip(actions, self.envs):
+            env.in_queue.put_nowait(InMessage(type=MessageType.STEP, data=action))
+        ret = self.num_processes * [None]
+        for _ in self.envs:
+            msg = self.step_info_queue.get()
+            ret[msg.index] = msg.data
+        return pickle.dumps(ret)
 
     def exposed_close(self):
-        if self.env:
-            self.env.close()
+        raise ValueError("TODO")
+
+    # def exposed_reset(self):
+    #     if self.env:
+    #         self.env.reset()
+
+    # def exposed_make(self, env_name):
+    #     self.env = gym.make(env_name)
+
+    # def exposed_render(self, *args, **kwargs):
+    #     image = self.env.render(*args, **kwargs)
+    #     return pickle.dumps(image)
+
+    # def exposed_step(self, action):
+    #     _, reward, done, _ = self.env.step(action)
+    #     return None, reward, done, None
+
+    # def exposed_close(self):
+    #     if self.env:
+    #         self.env.close()
 
 
 def main(_):

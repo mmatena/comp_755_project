@@ -126,7 +126,8 @@ class GymEnvironments(multiprocessing.Process):
             env.reset()
 
     def run(self):
-        self._create_envs()
+        with self.display:
+            self._create_envs()
         while True:
             msg = self.in_queue.get()
             if msg.type == MessageType.KILL:

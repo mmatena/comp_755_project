@@ -67,7 +67,7 @@ class GymEnvironments(multiprocessing.Process):
 
     def _step(self, actions):
         # actions.shape = [num_environments, action_dim]
-        assert actions.shape[0] == len(self.envs)
+        assert len(actions) == len(self.envs)
         ret = []
         for action, env in zip(actions, self.envs):
             # None as actions means do nothing, can we used when one env

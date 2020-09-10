@@ -46,10 +46,10 @@ IP_FILE = "/pine/scr/m/m/mmatena/tmp/gym_server_ip.txt"
 with open(IP_FILE, "r") as f:
     ip = f.read()
 
-# # TODO(mmatena): Make this configurable.
-# conn = rpyc.connect(ip, 18861, config={"allow_all_attrs": True})
-# conn._config["sync_request_timeout"] = None
-# gym_service = conn.root
+# TODO(mmatena): Make this configurable.
+conn = rpyc.connect(ip, 18861, config={"allow_all_attrs": True})
+conn._config["sync_request_timeout"] = None
+gym_service = conn.root
 
 
 encoder = saved_models.raw_rollout_vae_32ld()
@@ -91,9 +91,9 @@ max_seqlen = 32
 
 
 def get_score(flat_array):
-    conn = rpyc.connect(ip, 18861, config={"allow_all_attrs": True})
-    conn._config["sync_request_timeout"] = None
-    gym_service = conn.root
+    # conn = rpyc.connect(ip, 18861, config={"allow_all_attrs": True})
+    # conn._config["sync_request_timeout"] = None
+    # gym_service = conn.root
 
     linear_policy = LinearPolicy.from_flat_array(
         flat_array, in_size=in_size, out_size=out_size

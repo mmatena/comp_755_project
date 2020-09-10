@@ -2,6 +2,7 @@ import collections
 import enum
 import multiprocessing
 import pickle
+import time
 
 from absl import app
 from absl import flags
@@ -239,11 +240,14 @@ def main(_):
     # display = Display(visible=0, size=(400, 300))
     # display.start()
 
+    FACTOR = 4
     s = OpenAiGymService()
-    s.exposed_make("CarRacing-v0", 4 * FLAGS.processes)
-    s.exposed_render(pickle.dumps(4 * FLAGS.processes * [True]))
-    s.exposed_step(pickle.dumps(4 * FLAGS.processes * [[1, 1.0, 1]]))
-    # print(r)
+    s.exposed_make("CarRacing-v0", FACTOR * FLAGS.processes)
+    start = time.time()
+    s.exposed_render(pickle.dumps(FACTOR * FLAGS.processes * [True]))
+    s.exposed_step(pickle.dumps(FACTOR * FLAGS.processes * [[1, 1.0, 1]]))
+    end = time.time()
+    print(end - start)
 
     if True:
         return

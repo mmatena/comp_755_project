@@ -90,7 +90,7 @@ def get_score(flat_array, num_trials):
 display = Display(visible=0, size=(400, 300))
 display.start()
 
-ray.init()
+ray.init(redis_address="localhost:6379")
 
 # es = cma.CMAEvolutionStrategy(8 * [0], 0.5, {"popsize": 64})
 es = cma.CMAEvolutionStrategy(

@@ -1,9 +1,11 @@
+import time
+import pickle
+
 from absl import app
 from absl import flags
 
 import gym
 import numpy as np
-import pickle
 from pyvirtualdisplay import Display
 import rpyc
 from rpyc.utils.server import ThreadedServer
@@ -46,28 +48,20 @@ class OpenAiGymService(rpyc.Service):
         self.env = gym.make(env_name)
 
     def exposed_render(self, *args, **kwargs):
+        start = time.time()
         image = self.env.render(*args, **kwargs)
+        print(f"Render time: {time.time() - start} s")
         return pickle.dumps(image)
 
     def exposed_step(self, action):
+        start = time.time()
         _, reward, done, _ = self.env.step(action)
+        print(f"Step time: {time.time() - start} s")
         return None, reward, done, None
 
     def exposed_close(self):
         if self.env:
             self.env.close()
-
-    # def exposed_get_score(self, env_name, num_trials, initialize, sample_action):
-    #     rollouts = []
-    #     for _ in range(num_trials):
-    #         r = gym_rollouts.single_rollout_cb(
-    #             gym.make(env_name),
-    #             max_steps=2000,
-    #             initialize=initialize,
-    #             sample_action=sample_action,
-    #         )
-    #         rollouts.append(r)
-    #     return np.mean([sum(r.reward_l) for r in rollouts])
 
 
 def main(_):

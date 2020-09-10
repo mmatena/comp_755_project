@@ -189,11 +189,11 @@ class OpenAiGymService(rpyc.Service):
             env.in_queue.put_nowait(InMessage(type=MessageType.RENDER, data=wtr))
         ret = self.num_processes * [None]
 
-        start = time.time()
         for _ in self.envs:
+            start = time.time()
             msg = self.render_queue.get()
+            print(time.time() - start)
             ret[msg.index] = msg.data
-        print(time.time() - start)
         return pickle.dumps(ret)
 
     def exposed_step(self, actions):

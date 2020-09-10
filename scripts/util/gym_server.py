@@ -83,13 +83,6 @@ class GymEnvironments(multiprocessing.Process):
         assert len(whether_to_renders) == len(self.envs)
         ret = []
         for should_render, env in zip(whether_to_renders, self.envs):
-            #
-            #
-            env.viewer = 7
-            env.car = 8
-            print(env.viewer)
-            #
-            #
             if should_render:
                 print("A")
                 ret.append(env.render("state_pixels"))
@@ -229,7 +222,8 @@ def main(_):
 
     s = OpenAiGymService()
     s.exposed_make("CarRacing-v0", 1)
-    r = s.exposed_render(pickle.dumps(1 * [True]))
+    # r = s.exposed_render(pickle.dumps(1 * [True]))
+    r = s.exposed_action(pickle.dumps([[1, 1.0, 1]]))
     print(r)
 
     if True:

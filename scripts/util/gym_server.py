@@ -96,6 +96,8 @@ class GymEnvironments(multiprocessing.Process):
             env.reset()
 
     def run(self):
+        self.display = Display(visible=0, size=(400, 300))
+        self.display.start()
         # TODO(mmatena): Handle resetting and closing environments.
         while True:
             msg = self.in_queue.get()

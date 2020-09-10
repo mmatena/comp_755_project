@@ -82,6 +82,8 @@ class GymEnvironments(multiprocessing.Process):
     def _render(self, whether_to_renders):
         assert len(whether_to_renders) == len(self.envs)
         from gym.envs.classic_control import rendering
+        import pyglet
+        from pyglet import gl
 
         rendering.Viewer(240, 240)
 

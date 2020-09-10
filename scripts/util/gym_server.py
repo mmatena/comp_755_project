@@ -80,10 +80,10 @@ class GymEnvironments(multiprocessing.Process):
         assert len(whether_to_renders) == len(self.envs)
         ret = []
         for should_render, env in zip(whether_to_renders, self.envs):
-            if should_render:
-                ret.append(env.render("state_pixels"))
-            else:
-                ret.append(None)
+            # if should_render:
+            ret.append(env.render("state_pixels"))
+            # else:
+            # ret.append(None)
         self.render_queue.put(OutMessage(index=self.index, data=ret))
 
     def _reset(self):

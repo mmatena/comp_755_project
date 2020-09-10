@@ -97,9 +97,6 @@ class GymEnvironments(multiprocessing.Process):
             env.close()
 
     def _step(self, actions):
-        print("SLEEPING")
-        time.sleep(1)
-
         # actions.shape = [num_environments, action_dim]
         assert len(actions) == len(self.envs)
         ret = []
@@ -261,7 +258,7 @@ def main(_):
     s.exposed_step(pickle.dumps(FACTOR * FLAGS.processes * [[1, 1.0, 1]]))
     s.exposed_step(pickle.dumps(FACTOR * FLAGS.processes * [[1, 1.0, 1]]))
     start = time.time()
-    s.exposed_step(pickle.dumps(FACTOR * FLAGS.processes * [None]))
+    s.exposed_step(pickle.dumps(FACTOR * FLAGS.processes * [[1, 1.0, 1]]))
     print(time.time() - start)
 
     if True:

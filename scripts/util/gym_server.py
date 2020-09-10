@@ -15,7 +15,8 @@ import rpyc
 from rpyc.utils.server import ThreadedServer
 
 from rl755.common import misc
-from rl755.data_gen import gym_rollouts
+
+# from rl755.data_gen import gym_rollouts
 
 FLAGS = flags.FLAGS
 
@@ -263,6 +264,10 @@ def main(_):
     s.exposed_step(pickle.dumps(FACTOR * FLAGS.processes * [[1, 1.0, 1]]))
     s.exposed_step(pickle.dumps(FACTOR * FLAGS.processes * [[1, 1.0, 1]]))
     print(time.time() - start)
+
+    # 2: 0.14, 0.14, 0.14
+    # 4: 0.26
+    # 16: 1.096
 
     if True:
         return

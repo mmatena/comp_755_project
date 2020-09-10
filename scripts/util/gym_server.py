@@ -71,6 +71,8 @@ class GymEnvironments(multiprocessing.Process):
         self, index, num_environments, env_name, in_queue, step_info_queue, render_queue
     ):
         super().__init__()
+        import pyglet
+
         # self.display = Display(visible=0, size=(400, 300))
         # self.display.start()
         self.index = index
@@ -105,7 +107,7 @@ class GymEnvironments(multiprocessing.Process):
         for should_render, env in zip(whether_to_renders, self.envs):
             if should_render:
                 print("A")
-                ForkedPdb().set_trace()
+                # ForkedPdb().set_trace()
                 ret.append(env.render("state_pixels"))
                 print(ret[-1])
             else:

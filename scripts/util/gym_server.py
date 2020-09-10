@@ -189,7 +189,6 @@ class OpenAiGymService(rpyc.Service):
         ret = self.num_processes * [None]
         for _ in self.envs:
             msg = self.render_queue.get()
-            print(msg)
             ret[msg.index] = msg.data
         return pickle.dumps(ret)
 

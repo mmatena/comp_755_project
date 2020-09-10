@@ -72,6 +72,11 @@ class GymEnvironments(multiprocessing.Process):
         self, index, num_environments, env_name, in_queue, step_info_queue, render_queue
     ):
         super().__init__()
+        from pyvirtualdisplay import Display
+
+        self.display = Display(visible=0, size=(400, 300))
+        self.display.start()
+
         self.index = index
         self.in_queue = in_queue
         self.step_info_queue = step_info_queue
@@ -82,10 +87,7 @@ class GymEnvironments(multiprocessing.Process):
     def _create_envs(self):
         import gym
         import pyglet
-        from pyvirtualdisplay import Display
 
-        self.display = Display(visible=0, size=(400, 300))
-        self.display.start()
         self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
         for env in self.envs:
             env.reset()

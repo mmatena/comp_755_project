@@ -28,9 +28,9 @@ launch() {
   # Not too sure why I have to do it like this, but just running the command
   # causes it fail to launch.
   CMD=$(echo srun \
-    --ntasks=4 \
+    --ntasks=12 \
     --time=2:30:00 \
-    --mem=6g \
+    --mem=16g \
     --partition=volta-gpu \
     --gres=gpu:1 \
     --qos=gpu_access \

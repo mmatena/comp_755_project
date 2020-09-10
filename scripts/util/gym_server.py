@@ -82,14 +82,17 @@ class GymEnvironments(multiprocessing.Process):
         self.env_name = env_name
 
     def _create_envs(self):
+        start = time.time()
         import gym
         import pyglet
         from pyvirtualdisplay import Display
 
+        print(time.time() - start)
+
         self.display = Display(visible=0, size=(400, 300), backend="xvfb")
         self.display.start()
 
-        self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
+        self.envs = [gym.make(self.d) for _ in range(self.num_environments)]
         for env in self.envs:
             env.reset()
 

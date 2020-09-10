@@ -59,7 +59,7 @@ class GymEnvironments(multiprocessing.Process):
         self.render_queue = render_queue
         self.envs = [gym.make(env_name) for _ in range(num_environments)]
         for env in self.envs:
-            env.reset()
+            print(env.reset())
 
     def _kill(self):
         for env in self.envs:
@@ -162,8 +162,7 @@ class OpenAiGymService(rpyc.Service):
             env.in_queue.put_nowait(InMessage(type=MessageType.RENDER, data=wtr))
         ret = self.num_processes * [None]
         for _ in self.envs:
-            # msg = self.render_queue.get()
-            msg = self.render_queue.get(True, 1)
+            msg = self.render_queue.get()
             print(msg)
             ret[msg.index] = msg.data
         return pickle.dumps(ret)

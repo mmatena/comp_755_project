@@ -71,16 +71,15 @@ class GymEnvironments(multiprocessing.Process):
         self, index, num_environments, env_name, in_queue, step_info_queue, render_queue
     ):
         super().__init__()
-        import pyglet
-        import gym
-
-        # self.display = Display(visible=0, size=(400, 300))
-        # self.display.start()
         self.index = index
         self.in_queue = in_queue
         self.step_info_queue = step_info_queue
         self.render_queue = render_queue
-        self.envs = [gym.make(env_name) for _ in range(num_environments)]
+        self.num_environments = num_environments
+        self.env_name = env_name
+
+    def _create_envs(self, gym):
+        self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
         for env in self.envs:
             env.reset()
 
@@ -103,6 +102,9 @@ class GymEnvironments(multiprocessing.Process):
         self.step_info_queue.put(OutMessage(index=self.index, data=ret))
 
     def _render(self, whether_to_renders):
+        import pyglet
+
+        # reload(pyglet)
         assert len(whether_to_renders) == len(self.envs)
         ret = []
         for should_render, env in zip(whether_to_renders, self.envs):
@@ -121,6 +123,10 @@ class GymEnvironments(multiprocessing.Process):
 
     def run(self):
         # TODO(mmatena): Handle closing environments.
+        import pyglet
+        import gym
+
+        self._create_envs(gym)
         while True:
             msg = self.in_queue.get()
             if msg.type == MessageType.KILL:

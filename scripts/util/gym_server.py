@@ -97,6 +97,9 @@ class GymEnvironments(multiprocessing.Process):
             env.close()
 
     def _step(self, actions):
+        print("SLEEPING")
+        time.sleep(1)
+
         # actions.shape = [num_environments, action_dim]
         assert len(actions) == len(self.envs)
         ret = []
@@ -112,8 +115,6 @@ class GymEnvironments(multiprocessing.Process):
 
     def _render(self, whether_to_renders):
         assert len(whether_to_renders) == len(self.envs)
-        print("SLEEPING")
-        time.sleep(1)
         ret = []
         for should_render, env in zip(whether_to_renders, self.envs):
             if should_render:

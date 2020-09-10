@@ -84,8 +84,7 @@ class GymEnvironments(multiprocessing.Process):
     def _create_envs(self):
         import gym
         import pyglet
-
-        # from pyvirtualdisplay import Display
+        from pyvirtualdisplay import Display
 
         # self.display = Display(visible=0, size=(400, 300), backend="xvfb")
         # self.display.start()
@@ -245,10 +244,6 @@ def main(_):
     # hostname = socket.gethostbyname(socket.gethostname())
     # with open(IP_FILE, "w+") as f:
     #     f.write(hostname)
-    from pyvirtualdisplay import Display
-
-    display = Display(visible=0, size=(400, 300), backend="xvfb")
-    display.start()
 
     # # It looks like OpenAI gym requires some sort of display, so we
     # # have to fake one.

@@ -223,7 +223,7 @@ def main(_):
     s = OpenAiGymService()
     s.exposed_make("CarRacing-v0", 1)
     # r = s.exposed_render(pickle.dumps(1 * [True]))
-    r = s.exposed_action(pickle.dumps([[1, 1.0, 1]]))
+    r = s.exposed_step(pickle.dumps([[1, 1.0, 1]]))
     print(r)
 
     if True:

@@ -190,9 +190,7 @@ class OpenAiGymService(rpyc.Service):
         ret = self.num_processes * [None]
 
         for _ in self.envs:
-            start = time.time()
             msg = self.render_queue.get()
-            print(time.time() - start)
             ret[msg.index] = msg.data
         return pickle.dumps(ret)
 
@@ -254,7 +252,9 @@ def main(_):
     s.exposed_make("CarRacing-v0", FACTOR * FLAGS.processes)
     s.exposed_render(pickle.dumps(FACTOR * FLAGS.processes * [True]))
     s.exposed_render(pickle.dumps(FACTOR * FLAGS.processes * [True]))
+    start = time.time()
     s.exposed_render(pickle.dumps(FACTOR * FLAGS.processes * [True]))
+    print(time.time() - start)
     # s.exposed_step(pickle.dumps(FACTOR * FLAGS.processes * [[1, 1.0, 1]]))
 
     if True:

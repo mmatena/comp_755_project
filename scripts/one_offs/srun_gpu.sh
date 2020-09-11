@@ -30,15 +30,15 @@ run_singularity() {
 launch() {
   # Not too sure why I have to do it like this, but just running the command
   # causes it fail to launch.
-  CMD=$(echo srun \
-    --ntasks=12 \
-    --time=2:30:00 \
-    --mem=16g \
-    --partition=volta-gpu \
-    --gres=gpu:1 \
-    --qos=gpu_access \
-    --pty \
-    $(run_singularity))
+  # CMD=$(echo srun \
+  #   --ntasks=12 \
+  #   --time=2:30:00 \
+  #   --mem=16g \
+  #   --partition=volta-gpu \
+  #   --gres=gpu:1 \
+  #   --qos=gpu_access \
+  #   --pty \
+  #   $(run_singularity))
   # CMD=$(echo srun \
   #   --ntasks=12 \
   #   --time=2:30:00 \
@@ -46,6 +46,13 @@ launch() {
   #   --partition=general \
   #   --pty \
   #   $(run_singularity))
+  CMD=$(echo srun \
+    --ntasks=1 \
+    --time=2:30:00 \
+    --mem=4g \
+    --partition=general \
+    --pty \
+    $(run_singularity))
   eval $CMD
 }
 

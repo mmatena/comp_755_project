@@ -5,7 +5,7 @@ import numpy as np
 import gym
 import time
 from pyvirtualdisplay import Display
-from rl755.data_gen.car_racing import gym_rollouts
+from rl755.data_gen import gym_rollouts
 
 display = Display(visible=0, size=(400, 300), backend="xvfb")
 display.start()

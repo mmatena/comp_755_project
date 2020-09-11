@@ -4,6 +4,10 @@ import cloudpickle
 import numpy as np
 import gym
 import time
+from pyvirtualdisplay import Display
+
+display = Display(visible=0, size=(400, 300), backend="xvfb")
+display.start()
 
 
 class CloudpickleWrapper(object):

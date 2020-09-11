@@ -18,6 +18,8 @@ ray.init(
     temp_dir="/pine/scr/m/m/mmatena/tmp",
     memory=int(1.2e9),
     object_store_memory=int(1e9),
+    gpu=0,
+    cpu=2,
 )
 
 policy = gym_rollouts.HastingsRandomPolicy(time_scale=200, magnitude_scale=1.7)

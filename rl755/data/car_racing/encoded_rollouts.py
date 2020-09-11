@@ -4,14 +4,16 @@ Most of the encoding was done by the VAE at
 `rl755.models.car_racing.saved_models.raw_rollout_vae_32ld`.
 """
 import functools
+import config
 
 import tensorflow as tf
 
 from rl755.data.car_racing import processing
 
+
 # mmatena: I forgot the tfrecord suffix when writing the files.
 TFRECORDS_PATTERN = (
-    "/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/"
+    config.dataset_dir + "/car_racing/" +
     "encoded_rollouts/{split}/encoded_rollouts*"
 )
 

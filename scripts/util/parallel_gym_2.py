@@ -12,8 +12,10 @@ display = Display(visible=0, size=(400, 300), backend="xvfb")
 display.start()
 
 # See https://github.com/modin-project/modin/issues/468#issuecomment-486313223
-# for why we need to set the plasma_directory.
-ray.init(plasma_directory="/pine/scr/m/m/mmatena/tmp")
+# for why we need to set the plasma_directory and/or temp_dir.
+ray.init(
+    plasma_directory="/pine/scr/m/m/mmatena/tmp", temp_dir="/pine/scr/m/m/mmatena/tmp"
+)
 
 policy = gym_rollouts.HastingsRandomPolicy(time_scale=200, magnitude_scale=1.7)
 start = time.time()

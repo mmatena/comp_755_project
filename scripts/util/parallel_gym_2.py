@@ -14,7 +14,10 @@ display.start()
 # See https://github.com/modin-project/modin/issues/468#issuecomment-486313223
 # for why we need to set the plasma_directory and/or temp_dir.
 ray.init(
-    plasma_directory="/pine/scr/m/m/mmatena/tmp", temp_dir="/pine/scr/m/m/mmatena/tmp"
+    plasma_directory="/pine/scr/m/m/mmatena/tmp",
+    temp_dir="/pine/scr/m/m/mmatena/tmp",
+    memory=int(1.2e9),
+    object_store_memory=int(1e9),
 )
 
 policy = gym_rollouts.HastingsRandomPolicy(time_scale=200, magnitude_scale=1.7)

@@ -47,7 +47,7 @@ launch() {
   #   --pty \
   #   $(run_singularity))
   CMD=$(echo srun \
-    --ntasks=1 \
+    --ntasks=2 \
     --time=2:30:00 \
     --mem=4g \
     --partition=general \
@@ -55,6 +55,8 @@ launch() {
     $(run_singularity))
   eval $CMD
 }
+# 1: 0.13
+
 
 # Run the command to actually launch the job.
 launch

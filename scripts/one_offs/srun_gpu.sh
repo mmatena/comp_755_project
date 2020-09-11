@@ -33,7 +33,7 @@ launch() {
   CMD=$(echo srun \
     --ntasks=6 \
     --time=2:30:00 \
-    --mem=16g \
+    --mem=10g \
     --partition=volta-gpu \
     --gres=gpu:1 \
     --qos=gpu_access \

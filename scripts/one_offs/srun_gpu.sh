@@ -30,15 +30,15 @@ run_singularity() {
 launch() {
   # Not too sure why I have to do it like this, but just running the comman
   # causes it fail to launch.
-  CMD=$(echo srun \
-    --ntasks=4 \
-    --time=2:30:00 \
-    --mem=4g \
-    --partition=volta-gpu \
-    --gres=gpu:1 \
-    --qos=gpu_access \
-    --pty \
-    $(run_singularity))
+  # CMD=$(echo srun \
+  #   --ntasks=4 \
+  #   --time=2:30:00 \
+  #   --mem=4g \
+  #   --partition=volta-gpu \
+  #   --gres=gpu:1 \
+  #   --qos=gpu_access \
+  #   --pty \
+  #   $(run_singularity))
   # CMD=$(echo srun \
   #   --ntasks=12 \
   #   --time=2:30:00 \
@@ -46,13 +46,13 @@ launch() {
   #   --partition=general \
   #   --pty \
   #   $(run_singularity))
-  # CMD=$(echo srun \
-  #   --ntasks=4 \
-  #   --time=2:30:00 \
-  #   --mem=4g \
-  #   --partition=general \
-  #   --pty \
-  #   $(run_singularity))
+  CMD=$(echo srun \
+    --ntasks=4 \
+    --time=2:30:00 \
+    --mem=4g \
+    --partition=general \
+    --pty \
+    $(run_singularity))
   eval $CMD
 }
 # 1: 0.13

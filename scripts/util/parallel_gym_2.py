@@ -6,9 +6,12 @@ import gym
 import time
 from pyvirtualdisplay import Display
 from rl755.data_gen import gym_rollouts
+import ray
 
 display = Display(visible=0, size=(400, 300), backend="xvfb")
 display.start()
+
+ray.init()
 
 policy = gym_rollouts.HastingsRandomPolicy(time_scale=200, magnitude_scale=1.7)
 start = time.time()

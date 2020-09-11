@@ -106,6 +106,7 @@ def make_mp_envs(env_id, num_env, start_idx=0):
     def make_env():
         def fn():
             env = gym.make(env_id)
+            env.reset()
             return env
 
         return fn

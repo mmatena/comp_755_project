@@ -47,7 +47,7 @@ launch() {
   #   --pty \
   #   $(run_singularity))
   CMD=$(echo srun \
-    --ntasks=10 \
+    --ntasks=4 \
     --time=2:30:00 \
     --mem=4g \
     --partition=general \

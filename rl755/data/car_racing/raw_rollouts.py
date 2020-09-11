@@ -6,7 +6,7 @@ import config
 from rl755.data.car_racing import processing
 
 TFRECORDS_PATTERN = (
-    config.dataset_dir +
+    config.dataset_dir + "/car_racing/" + 
     "raw_rollouts/{split}/raw_rollouts.tfrecord*"
 )
 

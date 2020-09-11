@@ -17,7 +17,8 @@ export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 # LD_EXPORT_CMD="export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/package_hacks/gcc/9.1.0/lib64"
 
 run_python() {
-  echo "python $PROJECT_DIR/scripts/util/gym_server.py"
+  # echo "python $PROJECT_DIR/scripts/util/gym_server.py"
+  echo "python $PROJECT_DIR/scripts/util/parallel_gym_2.py"
 }
 
 

@@ -115,7 +115,7 @@ def make_mp_envs(env_id, num_env, start_idx=0):
 
 num_env = 1
 env = make_mp_envs("CarRacing-v0", num_env=num_env)
-env.reset()
+# env.reset()
 env.step(np.zeros([num_env, 3]))
 env.step(np.zeros([num_env, 3]))
 start = time.time()

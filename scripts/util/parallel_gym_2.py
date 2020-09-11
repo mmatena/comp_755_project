@@ -118,7 +118,7 @@ def make_mp_envs(env_id, num_env, start_idx=0):
     return SubprocVecEnv([make_env() for i in range(num_env)])
 
 
-num_env = 1
+num_env = 2
 env = make_mp_envs("CarRacing-v0", num_env=num_env)
 # env.reset()
 env.step(np.zeros([num_env, 3]))

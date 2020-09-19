@@ -102,17 +102,17 @@ def main(_):
     #     size_per_head=int(hidden_size / num_attention_heads),
     # )
 
-    class LrSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
-        def __init__(self, hidden_size, warmup_steps):
-            super().__init__()
-            self.hidden_size = float(hidden_size)
-            self.warmup_steps = float(warmup_steps)
+    # class LrSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
+    #     def __init__(self, hidden_size, warmup_steps):
+    #         super().__init__()
+    #         self.hidden_size = float(hidden_size)
+    #         self.warmup_steps = float(warmup_steps)
 
-        def __call__(self, step):
-            step += 1.0
-            return self.hidden_size ** -0.5 * tf.math.minimum(
-                step ** -0.5, step * self.warmup_steps ** -1.5
-            )
+    #     def __call__(self, step):
+    #         step += 1.0
+    #         return self.hidden_size ** -0.5 * tf.math.minimum(
+    #             step ** -0.5, step * self.warmup_steps ** -1.5
+    #         )
 
     model = common_transformer.AutoregressiveTransformer(
         transformer_params,
@@ -123,7 +123,8 @@ def main(_):
         loss=tf.keras.losses.MeanAbsoluteError(),
         # Adam config taken from "Attention is all you need."
         optimizer=tf.keras.optimizers.Adam(
-            learning_rate=LrSchedule(hidden_size=hidden_size, warmup_steps=4000),
+            # learning_rate=LrSchedule(hidden_size=hidden_size, warmup_steps=4000),
+            learning_rate=1e-4,
             beta_1=0.9,
             beta_2=0.98,
             epsilon=1e-9,

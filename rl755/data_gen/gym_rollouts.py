@@ -1,7 +1,10 @@
 """Script for generating many rollouts of a given policy."""
+import time
+
 import gym
 from noise import pnoise1
 import numpy as np
+import pickle
 import ray
 
 from rl755.common.misc import evenly_partition
@@ -88,9 +91,21 @@ def single_rollout(env, policy, max_steps):
     rollout = Rollout()
     for step in range(max_steps):
         # TODO(mmatena): Support environments without a "state_pixels" render mode.
+        # start = time.time()
         obs = env.render("state_pixels")
-        action = policy.sample_action(obs=obs, step=step, rollout=rollout)
+        # print(f"Render time: {time.time() - start} s")
+
+        # This might happen if we are running on a remote gym server using rpc.
+        if isinstance(obs, bytes):
+            obs = pickle.loads(obs)
+
+        # start = time.time()
+        action = policy.sample_action(obs=obs.tolist(), step=step, rollout=rollout)
+        # print(f"Sample action time: {time.time() - start} s")
+
+        # start = time.time()
         _, reward, done, _ = env.step(action)
+        # print(f"Env step time: {time.time() - start} s")
 
         rollout.obs_l.append(obs)
         rollout.action_l.append(action)
@@ -105,7 +120,10 @@ def single_rollout(env, policy, max_steps):
 
 def serial_rollouts(env_name, policy, max_steps, num_rollouts, process_rollout_fn):
     """Runs `num_rollouts` and applies `process_rollout_fn` to each generated Rollout object."""
-    env = gym.make(env_name)
+    if isinstance(env_name, str):
+        env = gym.make(env_name)
+    else:
+        env = env_name
     for _ in range(num_rollouts):
         rollout = single_rollout(env, policy=policy, max_steps=max_steps)
         process_rollout_fn(rollout)

@@ -1,9 +1,11 @@
 """Trains an autoregressive transformer on windows of data."""
-import functools.partial
+import functools
 import os
 
 from absl import app
 from absl import flags
+
+from bert import BertModelLayer
 from bert.transformer import TransformerEncoderLayer
 import tensorflow as tf
 
@@ -27,12 +29,18 @@ flags.DEFINE_integer(
 flags.DEFINE_integer(
     "sequence_length", 32, "Size of windows to train on.", lower_bound=1
 )
-flags.DEFINE_integer(
-    "ignore_loss_prefix_size",
-    4,
-    "Ignore losses on the first few tokens.",
-    lower_bound=0,
-)
+# flags.DEFINE_integer(
+#     "ignore_loss_prefix_size",
+#     4,
+#     "Ignore losses on the first few tokens.",
+#     lower_bound=0,
+# )
+# flags.DEFINE_integer(
+#     "num_components",
+#     5,
+#     "Number of components in the Guassian mixture model.",
+#     lower_bound=1,
+# )
 
 flags.mark_flag_as_required("model_dir")
 flags.mark_flag_as_required("train_steps")
@@ -43,7 +51,10 @@ def get_train_ds():
     ds = encoded_rollouts.random_rollout_slices(slice_size=FLAGS.sequence_length + 1)
     ds = ds.map(
         functools.partial(
-            transformer.to_ar_inputs_and_targets, sequence_length=FLAGS.sequence_length
+            transformer.to_ar_inputs_and_targets,
+            sequence_length=FLAGS.sequence_length,
+            action_size=3,
+            sample=True,
         ),
         num_parallel_calls=tf.data.experimental.AUTOTUNE,
     )
@@ -56,15 +67,17 @@ def get_train_ds():
 def main(_):
     model_dir = FLAGS.model_dir
 
-    file_writer = tf.summary.create_file_writer(model_dir)
-    file_writer.set_as_default()
+    gpus = tf.config.experimental.list_physical_devices("GPU")
+    for gpu in gpus:
+        tf.config.experimental.set_memory_growth(gpu, True)
+    print(f"Training on {len(gpus)} GPUS.")
 
-    # TODO(mmatena): Make these settable or inferred from the data. These correspond to BERT Base
-    output_size = 32 + 1  # latent_dim + reward_dim
-    num_attention_heads = 12
-    hidden_size = 768
+    # TODO(mmatena): Make these settable or inferred from the data.
+    output_size = 32
+    num_attention_heads = 4
+    hidden_size = 256
     transformer_params = TransformerEncoderLayer.Params(
-        num_layers=12,
+        num_layers=6,
         hidden_size=hidden_size,
         hidden_dropout=0.1,
         intermediate_size=4 * hidden_size,
@@ -72,8 +85,51 @@ def main(_):
         num_heads=num_attention_heads,
         size_per_head=int(hidden_size / num_attention_heads),
     )
+    # output_size = 32
+    # num_attention_heads = 2
+    # hidden_size = 64
+    # transformer_params = TransformerEncoderLayer.Params(
+    #     num_layers=3,
+    #     hidden_size=hidden_size,
+    #     # hidden_dropout=0.1,
+    #     #
+    #     hidden_dropout=0.3,
+    #     attention_dropout=0.3,
+    #     #
+    #     intermediate_size=4 * hidden_size,
+    #     intermediate_activation="gelu",
+    #     num_heads=num_attention_heads,
+    #     size_per_head=int(hidden_size / num_attention_heads),
+    # )
+
+    # class LrSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
+    #     def __init__(self, hidden_size, warmup_steps):
+    #         super().__init__()
+    #         self.hidden_size = float(hidden_size)
+    #         self.warmup_steps = float(warmup_steps)
+
+    #     def __call__(self, step):
+    #         step += 1.0
+    #         return self.hidden_size ** -0.5 * tf.math.minimum(
+    #             step ** -0.5, step * self.warmup_steps ** -1.5
+    #         )
+
     model = common_transformer.AutoregressiveTransformer(
-        transformer_params, output_size=output_size
+        transformer_params,
+        output_size=output_size,
+    )
+    model.compile(
+        # loss=tf.keras.losses.MeanSquaredError(),
+        loss=tf.keras.losses.MeanAbsoluteError(),
+        # Adam config taken from "Attention is all you need."
+        optimizer=tf.keras.optimizers.Adam(
+            # learning_rate=LrSchedule(hidden_size=hidden_size, warmup_steps=4000),
+            learning_rate=1e-4,
+            beta_1=0.9,
+            beta_2=0.98,
+            epsilon=1e-9,
+        ),
+        metrics=[tf.keras.metrics.MeanSquaredError()],
     )
 
     ds = get_train_ds()
@@ -84,19 +140,12 @@ def main(_):
         save_weights_only=True,
         save_best_only=False,
     )
-    tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=model_dir)
-
-    loss_fn = transformer.ignore_prefix_loss(
-        tf.keras.losses.MeanSquaredError(), prefix_size=FLAGS.ignore_loss_prefix_size
-    )
-
-    model.compile(loss=loss_fn, optimizer="adam")
 
     model.fit(
         ds,
         epochs=1,
         steps_per_epoch=FLAGS.train_steps,
-        callbacks=[model_checkpoint_cb, tensorboard_cb],
+        callbacks=[model_checkpoint_cb],
     )
 
 

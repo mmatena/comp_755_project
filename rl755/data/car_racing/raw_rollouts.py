@@ -75,6 +75,7 @@ def get_raw_rollouts_ds(process_observations=True, split="train"):
         num_parallel_calls=tf.data.experimental.AUTOTUNE,
     )
     ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
+    ds = ds.repeat()
     return ds.map(
         functools.partial(parse_fn, process_observations=process_observations),
         num_parallel_calls=tf.data.experimental.AUTOTUNE,

@@ -1,17 +1,10 @@
 """Car racing specific transformer code."""
+import numpy as np
 import tensorflow as tf
 
 from rl755.models.common import transformer as common_transformer
-
-
-# TODO(mmatena): Put some special stuff here.
-class AutoregressiveFwdOr(common_transformer.AutoregressiveTransformer):
-    pass
-
-    # def predict_next(self, rollout, action):
-    #     # TODO(mmatena): Return maybe change the inputs here.
-    #     # TODO(mmatena): Return next state, next reward
-    #     pass
+from scipy.stats import norm
+from tensorflow.python.ops import math_ops
 
 
 def ignore_prefix_loss(loss_fn, prefix_size):
@@ -38,45 +31,49 @@ def ignore_prefix_loss(loss_fn, prefix_size):
     return fn
 
 
-def to_ar_inputs_and_targets(x, sequence_length, latent_size=32, action_size=4):
+def to_ar_inputs_and_targets(
+    x, sequence_length, latent_size=32, action_size=3, sample=False
+):
     """Given a slice of a rollout, convert it to inputs and targets for autoregressive modelling.
 
     We do it like this:
-        o[i], a[i], r[i-1] => o[i+1], r[i]
-    The goal is to predict the next observation and reward given the action taken and the previous states
-    and rewards.
+        o[i], a[i] => o[i+1] - o[i]
+    The goal is to predict the change in observation given the action taken and the previous states
+    and actions.
     """
     # TODO(mmatena): Make sure this is correct!
-    r = tf.expand_dims(x["rewards"], axis=-1)
-    a = x["actions"]
+    a = x["actions"][:, :action_size]
     o = x["observations"]
+    # TODO(mmatena): This might mess up training for some reason.
+    # if sample:
+    #     o += x["observation_std_devs"] * tf.random.normal(shape=tf.shape(o))
     inputs = tf.concat(
-        [o[:-1], a[:-1], tf.concat([[[0.0]], r[:-2]], axis=0)],
+        [o[:-1], a[:-1]],
         axis=-1,
     )
-    targets = tf.concat([o[1:], r[:-1]], axis=-1)
-    inputs = tf.reshape(inputs, [sequence_length, latent_size + action_size + 1])
-    targets = tf.reshape(targets, [sequence_length, latent_size + 1])
+    targets = o[1:] - o[:-1]
+    inputs = tf.reshape(inputs, [sequence_length, latent_size + action_size])
+    targets = tf.reshape(targets, [sequence_length, latent_size])
     return inputs, targets
 
 
-def observation_only_metric(metric_fn, latent_size=32, prefix_size=0):
-    """Computes a metric only on the observations."""
+# def observation_only_metric(metric_fn, latent_size=32, prefix_size=0):
+#     """Computes a metric only on the observations."""
 
-    def fn(y_true, y_pred):
-        y_true = y_true[:, prefix_size:, :latent_size]
-        y_pred = y_pred[:, prefix_size:, :latent_size]
-        return metric_fn(y_true, y_pred)
+#     def fn(y_true, y_pred):
+#         y_true = y_true[:, prefix_size:, :latent_size]
+#         y_pred = y_pred[:, prefix_size:, :latent_size]
+#         return metric_fn(y_true, y_pred)
 
-    return fn
+#     return fn
 
 
-def reward_only_metric(metric_fn, prefix_size=0):
-    """Computes a metric only on the rewards."""
+# def reward_only_metric(metric_fn, prefix_size=0):
+#     """Computes a metric only on the rewards."""
 
-    def fn(y_true, y_pred):
-        y_true = y_true[:, prefix_size:, -1:]
-        y_pred = y_pred[:, prefix_size:, -1:]
-        return metric_fn(y_true, y_pred)
+#     def fn(y_true, y_pred):
+#         y_true = y_true[:, prefix_size:, -1:]
+#         y_pred = y_pred[:, prefix_size:, -1:]
+#         return metric_fn(y_true, y_pred)
 
-    return fn
+#     return fn

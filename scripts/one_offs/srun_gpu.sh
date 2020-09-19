@@ -20,24 +20,44 @@ export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 # I copied the module to here since we can't access the original one in singularity.
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/package_hacks/gcc/9.1.0/lib64
 
+# run_singularity() {
+#   echo singularity shell --nv -B /pine -B /proj $SIMG_PATH/$SIMG_NAME 
+# }
 run_singularity() {
-  echo singularity shell --nv -B /pine -B /proj $SIMG_PATH/$SIMG_NAME 
+  echo sh -i
 }
 
 launch() {
-  # Not too sure why I have to do it like this, but just running the command
+  # Not too sure why I have to do it like this, but just running the comman
   # causes it fail to launch.
+  # CMD=$(echo srun \
+  #   --ntasks=4 \
+  #   --time=2:30:00 \
+  #   --mem=4g \
+  #   --partition=volta-gpu \
+  #   --gres=gpu:1 \
+  #   --qos=gpu_access \
+  #   --pty \
+  #   $(run_singularity))
+  # CMD=$(echo srun \
+  #   --ntasks=12 \
+  #   --time=2:30:00 \
+  #   --mem=16g \
+  #   --partition=general \
+  #   --pty \
+  #   $(run_singularity))
   CMD=$(echo srun \
-    --ntasks=12 \
+    --ntasks=4 \
     --time=2:30:00 \
-    --mem=12g \
-    --partition=volta-gpu \
-    --gres=gpu:1 \
-    --qos=gpu_access \
+    --mem=4g \
+    --partition=general \
     --pty \
     $(run_singularity))
   eval $CMD
 }
+# 1: 0.13
+# 2: 0.064
+
 
 # Run the command to actually launch the job.
 launch

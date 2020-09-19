@@ -9,10 +9,15 @@ import functools
 
 from bert.attention import AttentionLayer
 from bert.transformer import TransformerEncoderLayer
-from unittest import mock
+import numpy as np
 import tensorflow as tf
+import tensorflow_probability as tfp
+from unittest import mock
 
 from rl755.models.car_racing.knn import KnnLookupLayer
+from rl755.models.common.layers import MixtureOfGaussiansLayer
+
+tfd = tfp.distributions
 
 LayerWithOutput = collections.namedtuple("LayerWithOutput", ["layer", "output"])
 
@@ -48,27 +53,46 @@ def _get_our_layer_call(array):
 
 class AutoregressiveTransformer(tf.keras.Model):
     def __init__(
-        self, transformer_params, output_size, return_layer_outputs=False, **kwargs
+        self,
+        transformer_params,
+        output_size,
+        num_components=None,
+        return_layer_outputs=False,
+        **kwargs
     ):
         # TODO(mmatena): Add docs
         super().__init__(**kwargs)
+        assert num_components is None, "TODO(mmatena): Support mix of gaussians output."
         self.transformer_params = transformer_params
         self.output_size = output_size
+        self.num_components = num_components
         self.return_layer_outputs = return_layer_outputs
 
     def build(self, input_shape):
         hidden_size = self.transformer_params.hidden_size
-        self.initial_layer = tf.keras.layers.TimeDistributed(
-            tf.keras.layers.Dense(units=hidden_size, activation=None)
+
+        # TODO(mmatena): Use relative attention instead.
+        self.pos_embeddings = self.add_weight(
+            shape=[input_shape[-2], hidden_size],
+            initializer="random_normal",
+            trainable=True,
         )
+
+        self.initial_layer = tf.keras.layers.Dense(units=hidden_size, activation=None)
         self.initial_layer.build(input_shape)
+
         self.transformer = TransformerEncoderLayer.from_params(
             self.transformer_params, name="transformer"
         )
         transformer_input_shape = list(input_shape[:-1]) + [hidden_size]
         self.transformer.build(transformer_input_shape)
-        self.final_layer = tf.keras.layers.TimeDistributed(
-            tf.keras.layers.Dense(units=self.output_size, activation=None)
+
+        # final_layer_size = (
+        #     self.num_components + 2 * self.num_components * self.output_size
+        # )
+        final_layer_size = self.output_size
+        self.final_layer = tf.keras.layers.Dense(
+            units=final_layer_size, activation=None
         )
         self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
         super().build(input_shape)
@@ -96,6 +120,7 @@ class AutoregressiveTransformer(tf.keras.Model):
             mask *= ar_mask
 
         inputs = self.initial_layer(inputs, training=training)
+        inputs += self.pos_embeddings
         # Have to do this hack as the mask in the original transformer just represents non-padded
         # regions of the input. We need a different shape of the input mask to make the transformer
         # autoregressive. The function `_our_create_attention_mask` justs passes through our mask
@@ -108,6 +133,64 @@ class AutoregressiveTransformer(tf.keras.Model):
             output = self.transformer(inputs, mask=orig_mask, training=training)
         output = self.final_layer(output, training=training)
         return output
+
+    @tf.function
+    def get_last_representation_tensor(self, inputs, mask=None):
+        assert (
+            self.return_layer_outputs
+        ), "Must be configured to return all layer outputs."
+        _, layers_with_output = self(inputs, mask=mask, training=False)
+        layer = self.transformer.encoder_layers[-1].self_attention_layer
+        return get_output_of_layer(layers_with_output, layer)[..., -1, :]
+
+    def _get_mog_params(self, outputs):
+        logits, outputs = (
+            outputs[..., : self.num_components],
+            outputs[..., self.num_components :],
+        )
+        locs, scales = tf.split(outputs, num_or_size_splits=2, axis=-1)
+        locs = tf.split(
+            locs,
+            num_or_size_splits=self.num_components * [self.output_size],
+            axis=-1,
+        )
+        scales = tf.split(
+            tf.nn.softplus(scales),
+            num_or_size_splits=self.num_components * [self.output_size],
+            axis=-1,
+        )
+        return logits, locs, scales
+
+    def _get_gauss_components(self, outputs):
+        locs, scales = self._get_gauss_params(outputs)
+        return [
+            tfd.MultivariateNormalDiag(loc=loc, scale_diag=scale)
+            for loc, scale in zip(locs, scales)
+        ]
+
+    def get_mix_of_gauss(self, outputs):
+        logits, locs, scales = self._get_mog_params(outputs)
+        return tfd.Mixture(
+            cat=tfd.Categorical(logits=logits),
+            components=[
+                tfd.MultivariateNormalDiag(loc=loc, scale_diag=scale)
+                for loc, scale in zip(locs, scales)
+            ],
+        )
+
+    def nll_loss(self, global_batch_size=None):
+        def nll_loss(y_true, y_pred):
+            y_pred = self.get_mix_of_gauss(y_pred)
+            loss = -y_pred.log_prob(y_true)
+            if not global_batch_size:
+                loss = tf.reduce_mean(loss)
+            else:
+                loss = tf.nn.compute_average_loss(
+                    loss, global_batch_size=global_batch_size
+                )
+            return loss
+
+        return nll_loss
 
 
 # TODO(mmatena): Reduce code duplication here.

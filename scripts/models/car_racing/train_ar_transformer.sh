@@ -8,14 +8,17 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-MODEL_DIR=/pine/scr/m/m/mmatena/test_ar_transformer_train
+MODEL_DIR=/pine/scr/m/m/mmatena/mse_ar_transformer_train
 
-TRAIN_STEPS=100000
+# TRAIN_STEPS=100000
+# TRAIN_STEPS=40000
+TRAIN_STEPS=25000
 
+# NUM_GPUS=4
 NUM_GPUS=1
-NUM_CORES=8
-MEMORY=8g
-TIME="8:30:00"
+NUM_CORES=16
+MEMORY=16g
+TIME="2-"
 #############################################################
 
 
@@ -25,13 +28,17 @@ SIMG_NAME=tensorflow2.1.0-py3-cuda10.1-ubuntu18.04.simg
 
 module add python/3.6.6
 module add tensorflow_py3/2.1.0
+module add gcc/9.1.0
 
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/package_hacks/gcc/9.1.0/lib64
+# I copied the module to here since we can't access the original one in singularity.
 
 run_python() {
-  echo python $PROJECT_DIR/scripts/models/car_racing/train_ar_transformer.py \
-    --model_dir=$MODEL_DIR \
-    --train_steps=$TRAIN_STEPS
+  echo "python $PROJECT_DIR/scripts/models/car_racing/train_ar_transformer.py \
+      --model_dir=$MODEL_DIR \
+      --train_steps=$TRAIN_STEPS \
+      --batch_size=128"
 }
 
 

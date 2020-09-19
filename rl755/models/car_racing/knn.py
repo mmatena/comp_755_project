@@ -2,10 +2,10 @@
 See https://arxiv.org/pdf/1911.00172.pdf for more details.
 """
 import numpy as np
-import scann
 import tensorflow as tf
 
 from rl755.common import structs
+
 
 # TODO(mmatena): Change when we have something permanent.
 TFRECORDS_PATTERN = "/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/encoded_knn/knn_data.tfrecord*"
@@ -41,6 +41,10 @@ def _get_knn_np(num_points=None):
 
 
 def _create_searcher(array, k):
+    # TODO(mmatena): I can't figure out how to do the LD_LIBRARY and launch python
+    # in one command without not giving python access to the GPUS for some reason.
+    import scann  # noqa: E402
+
     size = array.shape[0]
     # TODO(mmatena): Most of these value are copied from a demo. Look into them more.
     return (

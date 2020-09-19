@@ -1,11 +1,12 @@
 """Datasets that come from raw rollouts."""
 import functools
 import tensorflow as tf
+import config
 
 from rl755.data.car_racing import processing
 
 TFRECORDS_PATTERN = (
-    "/pine/scr/m/m/mmatena/comp_755_project/data/car_racing/"
+    config.dataset_dir + "/car_racing/" + 
     "raw_rollouts/{split}/raw_rollouts.tfrecord*"
 )
 

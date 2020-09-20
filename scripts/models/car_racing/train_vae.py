@@ -23,7 +23,10 @@ flags.DEFINE_integer(
     "batch_size", 256, "The number of images in each batch.", lower_bound=1
 )
 flags.DEFINE_integer(
-    "latent_size", 32, "The dimensionality of the latent variable.", lower_bound=1
+    "representation_size",
+    32,
+    "The dimensionality of the latent variable.",
+    lower_bound=1,
 )
 
 
@@ -38,7 +41,7 @@ def main(_):
     file_writer = tf.summary.create_file_writer(model_dir)
     file_writer.set_as_default()
 
-    ds = raw_rollouts.random_rollout_observations(obs_per_rollout=100)
+    ds = raw_rollouts.random_rollout_observations(obs_sampled_per_rollout=100)
     ds = processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
 
     model_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
@@ -49,7 +52,7 @@ def main(_):
     )
     tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=model_dir)
 
-    vae = Vae(latent_dim=FLAGS.latent_size, beta=FLAGS.beta)
+    vae = Vae(representation_size=FLAGS.representation_size, beta=FLAGS.beta)
     vae.compile(optimizer="adam")
 
     vae.fit(

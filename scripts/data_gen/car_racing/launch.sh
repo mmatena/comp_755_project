@@ -37,7 +37,9 @@ run_python() {
     --num_rollouts=$NUM_ROLLOUTS \
     --parallelism=$PARALLELISM \
     --max_steps=$MAX_STEPS \
-    --out_dir=$DATA_DIR
+    --out_dir=$DATA_DIR \
+    --environment=CAR_RACING \
+    --policy=HastingsRandomPolicy
 }
 
 

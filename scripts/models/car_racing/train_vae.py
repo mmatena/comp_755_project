@@ -5,7 +5,7 @@ from absl import app
 from absl import flags
 import tensorflow as tf
 
-from rl755.data.car_racing import processing
+from rl755.data.common import processing
 from rl755.data.car_racing import raw_rollouts
 from rl755.models.car_racing.vae import Vae
 

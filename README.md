@@ -44,7 +44,7 @@ Here is an overview:
 
 In the following subsections I'll go over instructions on how to perform each step.
 
-### Collecting random policy rollouts
+### 1. Collecting random policy rollouts
 
 #### Generating pickled rollouts
 To generate rollouts with a random policy, use
@@ -105,7 +105,7 @@ If most of your files are corrupted though, then something probably went wrong a
 #### Adding access to the rollouts in the code
 Once you have generated the dataset, we now add a way to access it as a [`tf.data.Dataset`](https://www.tensorflow.org/api_docs/python/tf/data/Dataset).
 
-You should create `rl755/data/$environment/raw_rollouts.py` file.
+You should create a `rl755/data/$environment/raw_rollouts.py` file.
 See [`rl755/data/car_racing/raw_rollouts.py`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/car_racing/raw_rollouts.py) for an example.
 The next step, learning representations of observations, will require a function named `random_rollout_observations` within this file.
 Please see the next section for more details.
@@ -115,9 +115,11 @@ It might make sense just to put the common code in a shared directory sometime i
 If you get to this point, feel free to reach out to mmatena for help.
 
 
-### Learning representations of observations
+### 2. Learning representations of observations
 The goal of this step is to learn a function that takes raw observations
 and maps them to representations with "nice" structure and a much lower dimensionality.
+
+#### Training the model
 
 You can use the [`scripts/models/train_obs_encoder.py`](https://github.com/mmatena/comp_755_project/blob/master/scripts/models/train_obs_encoder.py) script to learn such a model.
 You should train your model on the `volta-gpu` or `gpu` longleaf partitions.
@@ -141,7 +143,111 @@ The script takes the following flags:
 
 **Note: I actually haven't used this script before. I used the [`scripts/models/car_racing/train_vae.py`](https://github.com/mmatena/comp_755_project/blob/master/scripts/models/car_racing/train_vae.py) script to train a VAE for car racing. I'll try actually running this soon.**
 
-### Create a dataset of rollouts with encoded observations
+#### Adding access to the model in the code
+Once you have trained a model, we'll now need a way to access it in our code as an [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/encoder/common.py), which extends the [`tf.keras.Model`](https://www.tensorflow.org/api_docs/python/tf/keras/Model) class.
+
+You should create a `rl755/models/$environment/saved_models.py` file.
+See [`rl755/models/car_racing/saved_models.py`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/car_racing/saved_models.py) for an example.
+
+All you need to do is add a function to that file that returns your model with its weights loaded.
+The next step requires that the function can be called with no arguments.
+Note that you can still have arguments with default values if you so desire.
+Please add to the doc string of the function some information about how the model was trained.
+
+To actually create the model, you create an instance of your model class with the same
+parameters as used during training.
+You then call [`model.load_weights(checkpoint_path)`](https://www.tensorflow.org/api_docs/python/tf/keras/Model#load_weights)
+to actually load your weights. 
+
+Sometimes you might need to build your model first.
+To do this, either call the `model.build(input_shape)` method or call your model some dummy input `model(tf.zeros(input_shape))`
+after constructing it but before loading the weights.
+I've noticed that the latter method appears to work more often.
+The batch dimension, which will be the first dimension, can be an arbitrary.
+You can set it to `None` if using `model.build` or 1 if calling the model.
+
+### 3. Create a dataset of rollouts with encoded observations
+Once you have learned an encoder for your observations, you really should create a new dataset
+where you take your raw rollouts and replace the observations within them with your encoded
+versions.
+This is mainly for computational purposes since we do not need to recompute encodings during downstream
+processing and the (typically much) smaller encoded observations lead to more efficient operations.
+
+You can use the [`scripts/data_gen/encode_raw_rollouts.py`](https://github.com/mmatena/comp_755_project/blob/master/scripts/data_gen/encode_raw_rollouts.py) script to learn such a model.
+You should use the `volta-gpu` or `gpu` longleaf partitions for this step.
+
+There are a few requirements in order to use this script:
+- You must have a function that can be called with no arguments in the `rl755/models/$environment/saved_models.py` file that
+returns an object extending [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/encoder/common.py).
+The returned model must have its weights loaded.
+The `compute_full_representation` method will be used to generate the encoded observations. Please see the documentation of the method in [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/encoder/common.py) for more details.
+- You'll need a `rl755/data/$environment/raw_rollouts.py` file. **Note: I'll probably change the interface a bit, so I won't go into more details about the requirements of the file here.**
+
+The script takes the following flags:
+- `--environment` The name of the [`Environment`](https://github.com/mmatena/comp_755_project/blob/master/rl755/environments.py) enum from which the rollouts come from. For example, `CAR_RACING`.
+- `--model` The name of the function returning your encoder model with its weights loaded. It will be accessed in a manner equivalent to `model = rl755.models.$environment.saved_models.$model()`.
+- `--split` A string representing the dataset split to use. Note that this will not affect where the data is written but only from where it is read. You need to explicitly include the split within the `--out_dir` flag in order to write it to split-dependent directory.
+- `--out_dir` The name of the directory where the sharded `.tfrecord` file will be written.
+- `--out_name` Name given to the generated `.tfrecord` files. A complete file name will look something like `$out_name.tfrecord-00003-of-00074`.
+- `--num_sub_shards` The number of output file shards to generate from this specific instance of this script. This does *not* represent the total number of shards across all instances of this script, which will equal `num_outer_shards * num_sub_shards`. You should aim for each shard containing between 100-200 MB of data.
+- `--num_outer_shards` See below section.
+- `--outer_shard_index` See below section.
+- `--gpu_index` See below section.
+
+Since individual raw rollouts can take up a lot of memory, I'd recommend setting a relatively high memory allocation for your SLURM jobs, especially if you are running multiple instances of this script within a single SLURM job.
+
+#### Running in parallel
+Encoding 10000 rollouts can take a long time, so I've added support for splitting up the work across
+multiple GPUs and multiple SLURM jobs.
+I'll try to explain how this works.
+
+Recall that we store the raw rollouts as a sharded `.tfrecord` file, which basically means
+that it is made up of multiple files in the file system.
+We use the `--num_outer_shards` flag in the script to partition those files into groups of
+roughly equal sizes. It's OK if the value of this flag doesn't divide the number of input shards.
+
+We then run this script exactly once per partition.
+We specify which partition we are running on by the `--outer_shard_index` flag.
+It is safe to run these scripts concurrently.
+
+When we allocate resources for a slurm job, we can choose multiple GPUs: up to 4 on `volta-gpu` and up to 8 on `gpu`.
+It is possible to launch multiple concurrent instances of this script within a single SLURM job.
+The `--gpu_index` lets us split the GPUs among the instances running in a single SLURM job.
+
+The [`scripts/data_gen/car_racing/encode_raw_rollouts.sh`](https://github.com/mmatena/comp_755_project/blob/master/scripts/data_gen/car_racing/encode_raw_rollouts.sh) script provides an example of how to do this (with a slightly different version of the Python script.)
+*Note: I'll try to make this script into something general we can call. That should reduce the need to think about the specifics of parallelism.*
+
+Let's go through a concrete example for clarity.
+Say our raw rollouts dataset consists of 120 shards.
+If we want to process it with a parallelism factor of 12, then we would need to launch 12 instances of this script
+and set the `--num_outer_shards=12` flag on all of them.
+We need to set the `--outer_shard_index` to a different value on each instance, namely `0,1,2,...,11`.
+Suppose we are running on the `volta-gpu` partition, which means that we can only access 4 GPUs per SLURM job.
+In order to actually have a parallelism factor of 12, we'd need to have `12/4 = 3` SLURM jobs running at once with each
+running 4 instances of this script.
+Let's call these job-A, job-B, and job-C and have them process outer shards 0-3, 4-7, and 8-11, respectively.
+Within each of these jobs, we'd launch 4 instances of this script with the `--gpu_index` flag set to a different value on each
+instance, namely `0,1,2,3`.
+
+#### Removing corrupted shards
+Again, sometimes you get shards that are corrupted. Do the same thing as mentioned in a previous section. If most of your shards are corrupted, then something probably went wrong and you should look into it.
+
+####  Adding access to the encoded rollouts in the code
+Once you have generated the dataset, we now add a way to access it as a [`tf.data.Dataset`](https://www.tensorflow.org/api_docs/python/tf/data/Dataset).
+
+You should create a `rl755/data/$environment/encoded_rollouts.py` file or use the existing one if it is present.
+See [`rl755/data/car_racing/encoded_rollouts.py`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/car_racing/encoded_rollouts.py) for an example.
+
+To do this for a different environment or encoder, there are only a few things you might need to change.
+It might make sense just to put the common code in a shared directory sometime in the future.
+If you get to this point, feel free to reach out to mmatena for help.
+
+**Note: The existing way of doing stuff will probably require a bit of refactoring to handle different encoders. This part might change a bit soon.**
+
+### 4. Train a sequential model on encoded rollouts
+TODO
+
+### 5. Learn a policy with the world model
 TODO
 
 

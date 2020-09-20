@@ -10,7 +10,7 @@ from bert.transformer import TransformerEncoderLayer
 import tensorflow as tf
 
 from rl755.data.car_racing import encoded_rollouts
-from rl755.data.car_racing import processing
+from rl755.data.common import processing
 from rl755.models.car_racing import transformer
 from rl755.models.common import transformer as common_transformer
 
@@ -72,6 +72,8 @@ def main(_):
         tf.config.experimental.set_memory_growth(gpu, True)
     print(f"Training on {len(gpus)} GPUS.")
 
+    ds = get_train_ds()
+
     # TODO(mmatena): Make these settable or inferred from the data.
     output_size = 32
     num_attention_heads = 4
@@ -113,33 +115,32 @@ def main(_):
     #         return self.hidden_size ** -0.5 * tf.math.minimum(
     #             step ** -0.5, step * self.warmup_steps ** -1.5
     #         )
+    mirrored_strategy = tf.distribute.MirroredStrategy()
+    with mirrored_strategy.scope():
+        model = common_transformer.AutoregressiveTransformer(
+            transformer_params,
+            output_size=output_size,
+        )
+        model.compile(
+            # loss=tf.keras.losses.MeanSquaredError(),
+            loss=tf.keras.losses.MeanAbsoluteError(),
+            # Adam config taken from "Attention is all you need."
+            optimizer=tf.keras.optimizers.Adam(
+                # learning_rate=LrSchedule(hidden_size=hidden_size, warmup_steps=4000),
+                learning_rate=1e-4,
+                beta_1=0.9,
+                beta_2=0.98,
+                epsilon=1e-9,
+            ),
+            metrics=[tf.keras.metrics.MeanSquaredError()],
+        )
 
-    model = common_transformer.AutoregressiveTransformer(
-        transformer_params,
-        output_size=output_size,
-    )
-    model.compile(
-        # loss=tf.keras.losses.MeanSquaredError(),
-        loss=tf.keras.losses.MeanAbsoluteError(),
-        # Adam config taken from "Attention is all you need."
-        optimizer=tf.keras.optimizers.Adam(
-            # learning_rate=LrSchedule(hidden_size=hidden_size, warmup_steps=4000),
-            learning_rate=1e-4,
-            beta_1=0.9,
-            beta_2=0.98,
-            epsilon=1e-9,
-        ),
-        metrics=[tf.keras.metrics.MeanSquaredError()],
-    )
-
-    ds = get_train_ds()
-
-    model_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
-        filepath=os.path.join(model_dir, "model.hdf5"),
-        save_freq=1000,
-        save_weights_only=True,
-        save_best_only=False,
-    )
+        model_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
+            filepath=os.path.join(model_dir, "model.hdf5"),
+            save_freq=1000,
+            save_weights_only=True,
+            save_best_only=False,
+        )
 
     model.fit(
         ds,

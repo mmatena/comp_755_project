@@ -106,11 +106,11 @@ If most of your files are corrupted though, then something probably went wrong a
 Once you have generated the dataset, we now add a way to access it as a [`tf.data.Dataset`](https://www.tensorflow.org/api_docs/python/tf/data/Dataset).
 
 You should create a `rl755/data/$environment/raw_rollouts.py` file and add a class
-extending [`rl755.data.common.rollout_datasets.RawImageRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datsets.py) to it.
+extending [`rl755.data.common.rollout_datasets.RawImageRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datasets.py) to it.
 The next step will depend on you naming the class `RawRollouts`.
 You'll need to implement the `_environment(self)` and `_tfrecords_pattern(self)` methods.
 
-You can look at the source file of [`RawImageRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datsets.py) for more details.
+You can look at the source file of [`RawImageRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datasets.py) for more details.
 See [`rl755/data/car_racing/raw_rollouts.py`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/car_racing/raw_rollouts.py) for an example.
 
 <!-- 
@@ -135,8 +135,8 @@ You should train your model on the `volta-gpu` or `gpu` longleaf partitions.
 This script currently does not have support for multi-GPU training.
 
 There are a couple of requirements in order to use this script:
-- You must define a model class that extends the [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/encoder/common.py) class and implements its abstract methods. Please see the class definition for more details.
-- You'll need to have a file `rl755/data/$environment/raw_rollouts.py` containing a class named `RawRollouts` that implements the [`RawImageRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datsets.py) abstract class.
+- You must define a model class that extends the [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/common/encoder.py) class and implements its abstract methods. Please see the class definition for more details.
+- You'll need to have a file `rl755/data/$environment/raw_rollouts.py` containing a class named `RawRollouts` that implements the [`RawImageRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datasets.py) abstract class.
 
 <!-- `random_rollout_observations` that takes a kwarg `obs_sampled_per_rollout`. The dataset should be comprised of individual raw observations from the collected rollouts.
 The `obs_sampled_per_rollout` argument is explained later in this section. -->
@@ -145,7 +145,7 @@ The script takes the following flags:
 - `--model_dir` The directory where we save model checkpoints and tensorboard logs.
 - `--train_steps` The number of batches to train for.
 - `--environment` The name of the [`Environment`](https://github.com/mmatena/comp_755_project/blob/master/rl755/environments.py) enum from which the rollouts come from. For example, `CAR_RACING`.
-- `--model` The name of the model to train. The model will be accessed in a manner equivalent to `model = rl55.models.$environment.policies.$model(obs_sampled_per_rollout=<>)`. Note that this flag can contain periods to allow access to more deeply nested classes/functions. For example, `vae.Vae` would be valid. The model must subclass [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/encoder/common.py) or be a function returning an instance of such a class.
+- `--model` The name of the model to train. The model will be accessed in a manner equivalent to `model = rl55.models.$environment.policies.$model(obs_sampled_per_rollout=<>)`. Note that this flag can contain periods to allow access to more deeply nested classes/functions. For example, `vae.Vae` would be valid. The model must subclass [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/common/encoder.py) or be a function returning an instance of such a class.
 - `--batch_size` The number of raw observations in each mini batch.
 - `--representation_size` A positive integer representing the dimensionality of encoded representation. It will be passed as a kwarg to the model.
 - `--save_every_n_steps` Save a checkpoint every this number of training steps. Note that we are saving the weights only. The checkpoint file names will be formatted as `model-{checkpoint_number:03d}.hdf5`. The train loss will also only be logged to tensorboard every this number of training steps due to how keras works.
@@ -155,7 +155,7 @@ The script takes the following flags:
 **Note: I actually haven't used this script before. I used the [`scripts/models/car_racing/train_vae.py`](https://github.com/mmatena/comp_755_project/blob/master/scripts/models/car_racing/train_vae.py) script to train a VAE for car racing. I'll try actually running this soon.**
 
 #### Adding access to the model in the code
-Once you have trained a model, we'll now need a way to access it in our code as an [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/encoder/common.py), which extends the [`tf.keras.Model`](https://www.tensorflow.org/api_docs/python/tf/keras/Model) class.
+Once you have trained a model, we'll now need a way to access it in our code as an [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/common/encoder.py), which extends the [`tf.keras.Model`](https://www.tensorflow.org/api_docs/python/tf/keras/Model) class.
 
 You should create a `rl755/models/$environment/saved_models.py` file.
 See [`rl755/models/car_racing/saved_models.py`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/car_racing/saved_models.py) for an example.
@@ -189,10 +189,10 @@ You should use the `volta-gpu` or `gpu` longleaf partitions for this step.
 
 There are a few requirements in order to use this script:
 - You must have a function that can be called with no arguments in the `rl755/models/$environment/saved_models.py` file that
-returns an object extending [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/encoder/common.py).
+returns an object extending [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/common/encoder.py).
 The returned model must have its weights loaded.
-The `compute_full_representation` method will be used to generate the encoded observations. Please see the documentation of the method in [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/encoder/common.py) for more details. **Note: The [`structs.latent_image_rollout_to_tfrecord`](https://github.com/mmatena/comp_755_project/blob/master/rl755/common/structs.py#L98) hasn't been updated yet to support some new features. I'll update it soon.**
-- You'll need a `rl755/data/$environment/raw_rollouts.py` file containing a class named `RawRollouts` that implements the [`RawImageRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datsets.py) abstract class.
+The `compute_full_representation` method will be used to generate the encoded observations. Please see the documentation of the method in [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/common/encoder.py) for more details. **Note: The [`structs.latent_image_rollout_to_tfrecord`](https://github.com/mmatena/comp_755_project/blob/master/rl755/common/structs.py#L98) hasn't been updated yet to support some new features. I'll update it soon.**
+- You'll need a `rl755/data/$environment/raw_rollouts.py` file containing a class named `RawRollouts` that implements the [`RawImageRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datasets.py) abstract class.
 
 The script takes the following flags:
 - `--environment` The name of the [`Environment`](https://github.com/mmatena/comp_755_project/blob/master/rl755/environments.py) enum from which the rollouts come from. For example, `CAR_RACING`.
@@ -247,10 +247,10 @@ Again, sometimes you get shards that are corrupted. Do the same thing as mention
 Once you have generated the dataset, we now add a way to access it as a [`tf.data.Dataset`](https://www.tensorflow.org/api_docs/python/tf/data/Dataset).
 
 You should create a `rl755/data/$environment/encoded_rollouts.py` file or use the existing one if it is present.
-Add a class extending [`rl755.data.common.rollout_datasets.EncodedRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datsets.py) to it.
+Add a class extending [`rl755.data.common.rollout_datasets.EncodedRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datasets.py) to it.
 You'll need to implement the `_environment(self)`, `_tfrecords_pattern(self)`, and `representation_size(self)` methods.
 
-You can look at the source file of [`EncodedRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datsets.py) for more details.
+You can look at the source file of [`EncodedRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datasets.py) for more details.
 See [`rl755/data/car_racing/encoded_rollouts.py`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/car_racing/encoded_rollouts.py) for an example.
 <!-- 
 To do this for a different environment or encoder, there are only a few things you might need to change.

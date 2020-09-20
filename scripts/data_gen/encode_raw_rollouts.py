@@ -67,25 +67,21 @@ def get_environment():
     return _ENV_NAME_TO_ENV[FLAGS.environment]
 
 
-def get_raw_rollouts_module():
+def get_raw_rollouts_builder():
     env = get_environment()
-    return getattr(data_module, env.folder_name).raw_rollouts
+    return getattr(data_module, env.folder_name).raw_rollouts.RawRollouts()
 
 
 def get_dataset_files():
-    raw_rollouts = get_raw_rollouts_module()
-    files = (
-        tf.io.matching_files(raw_rollouts.TFRECORDS_PATTERN.format(split=FLAGS.split))
-        .numpy()
-        .tolist()
-    )
+    raw_rollouts = get_raw_rollouts_builder()
+    files = raw_rollouts.get_tfrecord_files(split=FLAGS.split).numpy().tolist()
     # Ensure a consistent order so that each file is processed exactly once.
     files.sort()
     return files
 
 
 def get_dataset(outer_shard_index, num_outer_shards, num_sub_shards):
-    raw_rollouts = get_raw_rollouts_module()
+    raw_rollouts = get_raw_rollouts_builder()
     files = get_dataset_files()
     files = misc.evenly_partition(files, num_outer_shards)[outer_shard_index]
 
@@ -96,7 +92,7 @@ def get_dataset(outer_shard_index, num_outer_shards, num_sub_shards):
         deterministic=False,
     )
     ds = ds.map(
-        functools.partial(raw_rollouts.parse_fn, process_observations=True),
+        functools.partial(raw_rollouts.parse_tfrecord, process_observations=True),
         num_parallel_calls=tf.data.experimental.AUTOTUNE,
     )
     return ds

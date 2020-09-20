@@ -49,3 +49,11 @@ class Environments(Enum):
     @property
     def folder_name(self):
         return self.value.folder_name
+
+    @property
+    def observation_shape(self):
+        return self.value.observation_shape
+
+    @property
+    def action_shape(self):
+        return self.value.action_shape

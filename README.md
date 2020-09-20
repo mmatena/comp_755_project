@@ -105,6 +105,15 @@ If most of your files are corrupted though, then something probably went wrong a
 #### Adding access to the rollouts in the code
 Once you have generated the dataset, we now add a way to access it as a [`tf.data.Dataset`](https://www.tensorflow.org/api_docs/python/tf/data/Dataset).
 
+You should create a `rl755/data/$environment/raw_rollouts.py` file and add a class
+extending [`rl755.data.common.rollout_datasets.RawImageRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datsets.py) to it.
+The next step will depend on you naming the class `RawRollouts`.
+You'll need to implement the `_environment(self)` and `_tfrecords_pattern(self)` methods.
+
+You can look at the source file of [`RawImageRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datsets.py) for more details.
+See [`rl755/data/car_racing/raw_rollouts.py`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/car_racing/raw_rollouts.py) for an example.
+
+<!-- 
 You should create a `rl755/data/$environment/raw_rollouts.py` file.
 See [`rl755/data/car_racing/raw_rollouts.py`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/car_racing/raw_rollouts.py) for an example.
 The next step, learning representations of observations, will require a function named `random_rollout_observations` within this file.
@@ -113,7 +122,7 @@ Please see the next section for more details.
 To do this for a different environment, there are only a few things you might need to change.
 It might make sense just to put the common code in a shared directory sometime in the future.
 If you get to this point, feel free to reach out to mmatena for help.
-
+ -->
 
 ### 2. Learning representations of observations
 The goal of this step is to learn a function that takes raw observations
@@ -127,8 +136,10 @@ This script currently does not have support for multi-GPU training.
 
 There are a couple of requirements in order to use this script:
 - You must define a model class that extends the [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/encoder/common.py) class and implements its abstract methods. Please see the class definition for more details.
-- You'll need to have a file `rl755/data/$environment/raw_rollouts.py` with a method `random_rollout_observations` that takes a kwarg `obs_sampled_per_rollout`. The dataset should be comprised of individual raw observations from the collected rollouts.
-The `obs_sampled_per_rollout` argument is explained later in this section.
+- You'll need to have a file `rl755/data/$environment/raw_rollouts.py` containing a class named `RawRollouts` that implements the [`RawImageRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datsets.py) abstract class.
+
+<!-- `random_rollout_observations` that takes a kwarg `obs_sampled_per_rollout`. The dataset should be comprised of individual raw observations from the collected rollouts.
+The `obs_sampled_per_rollout` argument is explained later in this section. -->
 
 The script takes the following flags:
 - `--model_dir` The directory where we save model checkpoints and tensorboard logs.
@@ -180,8 +191,8 @@ There are a few requirements in order to use this script:
 - You must have a function that can be called with no arguments in the `rl755/models/$environment/saved_models.py` file that
 returns an object extending [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/encoder/common.py).
 The returned model must have its weights loaded.
-The `compute_full_representation` method will be used to generate the encoded observations. Please see the documentation of the method in [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/encoder/common.py) for more details.
-- You'll need a `rl755/data/$environment/raw_rollouts.py` file. **Note: I'll probably change the interface a bit, so I won't go into more details about the requirements of the file here.**
+The `compute_full_representation` method will be used to generate the encoded observations. Please see the documentation of the method in [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/encoder/common.py) for more details. **Note: The [`structs.latent_image_rollout_to_tfrecord`](https://github.com/mmatena/comp_755_project/blob/master/rl755/common/structs.py#L98) hasn't been updated yet to support some new features. I'll update it soon.**
+- You'll need a `rl755/data/$environment/raw_rollouts.py` file containing a class named `RawRollouts` that implements the [`RawImageRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datsets.py) abstract class.
 
 The script takes the following flags:
 - `--environment` The name of the [`Environment`](https://github.com/mmatena/comp_755_project/blob/master/rl755/environments.py) enum from which the rollouts come from. For example, `CAR_RACING`.
@@ -236,14 +247,18 @@ Again, sometimes you get shards that are corrupted. Do the same thing as mention
 Once you have generated the dataset, we now add a way to access it as a [`tf.data.Dataset`](https://www.tensorflow.org/api_docs/python/tf/data/Dataset).
 
 You should create a `rl755/data/$environment/encoded_rollouts.py` file or use the existing one if it is present.
-See [`rl755/data/car_racing/encoded_rollouts.py`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/car_racing/encoded_rollouts.py) for an example.
+Add a class extending [`rl755.data.common.rollout_datasets.EncodedRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datsets.py) to it.
+You'll need to implement the `_environment(self)`, `_tfrecords_pattern(self)`, and `representation_size(self)` methods.
 
+You can look at the source file of [`EncodedRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datsets.py) for more details.
+See [`rl755/data/car_racing/encoded_rollouts.py`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/car_racing/encoded_rollouts.py) for an example.
+<!-- 
 To do this for a different environment or encoder, there are only a few things you might need to change.
 It might make sense just to put the common code in a shared directory sometime in the future.
 If you get to this point, feel free to reach out to mmatena for help.
 
 **Note: The existing way of doing stuff will probably require a bit of refactoring to handle different encoders. This part might change a bit soon.**
-
+ -->
 ### 4. Train a sequential model on encoded rollouts
 TODO
 

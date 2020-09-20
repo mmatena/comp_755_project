@@ -76,7 +76,7 @@ def get_model(environment):
 
 def get_train_dataset(environment):
     m = getattr(data_module, environment.folder_name)
-    ds = m.random_rollout_observations(
+    ds = m.RawRollouts().random_rollout_observations(
         obs_sampled_per_rollout=FLAGS.obs_sampled_per_rollout
     )
     return processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)

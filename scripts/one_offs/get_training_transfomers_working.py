@@ -10,7 +10,7 @@ from bert.transformer import TransformerEncoderLayer
 import tensorflow as tf
 
 from rl755.data.car_racing import encoded_rollouts
-from rl755.data.car_racing import processing
+from rl755.data.common import processing
 from rl755.models.car_racing import transformer
 from rl755.models.common import transformer as common_transformer
 

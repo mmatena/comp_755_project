@@ -3,7 +3,7 @@ import functools
 import tensorflow as tf
 import config
 
-from rl755.data.car_racing import processing
+from rl755.data.common import processing
 
 TFRECORDS_PATTERN = (
     config.dataset_dir + "/car_racing/" + "raw_rollouts/{split}/raw_rollouts.tfrecord*"

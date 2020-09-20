@@ -7,9 +7,8 @@ import tensorflow as tf
 
 from rl755 import models
 from rl755 import data as data_module
-from rl755.data.car_racing import processing
+from rl755.data.common import processing
 from rl755.environments import Environments
-from rl755.models.car_racing.vae import Vae
 
 _ENV_NAME_TO_ENV = Environments.__members__
 

@@ -1,4 +1,4 @@
-"""Common processing functions for car racing datasets."""
+"""Common dataset processing functions."""
 import tensorflow as tf
 
 

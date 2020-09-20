@@ -8,13 +8,12 @@ import config
 
 import tensorflow as tf
 
-from rl755.data.car_racing import processing
+from rl755.data.common import processing
 
 
 # mmatena: I forgot the tfrecord suffix when writing the files.
 TFRECORDS_PATTERN = (
-    config.dataset_dir + "/car_racing/" +
-    "encoded_rollouts/{split}/encoded_rollouts*"
+    config.dataset_dir + "/car_racing/" + "encoded_rollouts/{split}/encoded_rollouts*"
 )
 
 

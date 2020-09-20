@@ -2,7 +2,6 @@
 import time
 
 import gym
-from noise import pnoise1
 import numpy as np
 import pickle
 import ray
@@ -42,33 +41,6 @@ class Policy(object):
             A action compatible with the `env.step(action)` method.
         """
         raise NotImplementedError()
-
-
-class HastingsRandomPolicy(Policy):
-    """The random policy that Hastings Greer was using.
-
-    Currently only supports the CarRacing-v0 environment.
-    """
-
-    def __init__(self, time_scale=200, magnitude_scale=1.7):
-        self._time_scale = time_scale
-        self._magnitude_scale = magnitude_scale
-
-    def initialize(self, env, max_steps, **kwargs):
-        del env, kwargs
-        start = np.random.random(4) * 10000
-        out = []
-        for i in range(2000):
-            action = [
-                self._magnitude_scale * pnoise1(i / self._time_scale + start_i, 5)
-                for start_i in start
-            ]
-            out.append(action)
-        self._actions = np.array(out)
-
-    def sample_action(self, obs, step, **kwargs):
-        del obs, kwargs
-        return self._actions[step]
 
 
 def single_rollout(env, policy, max_steps):

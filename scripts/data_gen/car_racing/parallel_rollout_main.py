@@ -10,11 +10,14 @@ from absl import flags
 import ray
 from pyvirtualdisplay import Display
 
+from rl755 import models
 from rl755.data_gen import gym_rollouts
+from rl755.environments import Environments
+
+_ENV_NAME_TO_ENV = Environments.__members__
 
 FLAGS = flags.FLAGS
 
-# TODO(mmatena): Probably add some way to specify a policy.
 flags.DEFINE_integer(
     "num_rollouts",
     None,
@@ -28,11 +31,26 @@ flags.DEFINE_integer(
     "max_steps", None, "The maximum number of steps in each rollout.", lower_bound=1
 )
 flags.DEFINE_string("out_dir", None, "The directory to write the pickled rollouts to.")
+flags.DEFINE_enum(
+    "environment",
+    None,
+    _ENV_NAME_TO_ENV.keys(),
+    "Which environment (aka task) to do rollouts on.",
+)
+flags.DEFINE_string(
+    "policy",
+    None,
+    "The name of the policy to use. Should be accessable via rl755.models.$env.policies.$policy."
+    "It should subclass rl755.data_gen.gym_rollouts.Policy or be a function returning such an object."
+    "It will be called with no arguments.",
+)
 
 flags.mark_flag_as_required("num_rollouts")
 flags.mark_flag_as_required("parallelism")
 flags.mark_flag_as_required("max_steps")
 flags.mark_flag_as_required("out_dir")
+flags.mark_flag_as_required("environment")
+flags.mark_flag_as_required("policy")
 
 
 def pickle_rollout(rollout, out_dir):
@@ -43,6 +61,15 @@ def pickle_rollout(rollout, out_dir):
     os.close(fd)
 
 
+def get_environment():
+    return _ENV_NAME_TO_ENV[FLAGS.environment]
+
+
+def get_policy(environment):
+    policies = getattr(models, environment.folder_name).policies
+    return getattr(policies, FLAGS.policy)
+
+
 def main(_):
     # It looks like OpenAI gym requires some sort of display, so we
     # have to fake one.
@@ -51,12 +78,13 @@ def main(_):
 
     ray.init()
 
-    policy = gym_rollouts.HastingsRandomPolicy(time_scale=200, magnitude_scale=1.7)
+    environment = get_environment()
+    policy = get_policy(environment)
 
     start = time.time()
 
     gym_rollouts.parallel_rollouts(
-        "CarRacing-v0",
+        environment.open_ai_name,
         policy=policy,
         max_steps=FLAGS.max_steps,
         num_rollouts=FLAGS.num_rollouts,

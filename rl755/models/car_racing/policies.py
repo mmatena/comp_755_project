@@ -8,6 +8,7 @@ Here is the information about a 3-d action vector:
 Values below/above the range are clipped to the min/max of the range, respectively.
 
 """
+from noise import pnoise1
 import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
@@ -22,6 +23,36 @@ tfd = tfp.distributions
 # a[1]: [0, 1], gas
 # a[2]: [0, 1], brakes
 # a[3]: unused
+
+
+class HastingsRandomPolicy(gym_rollouts.Policy):
+    """The random policy that Hastings Greer was using.
+
+    Currently only supports the CarRacing-v0 environment.
+
+    NOTE: The actions returned here have length 4 when the car racing
+    only needs actions of length 3.
+    """
+
+    def __init__(self, time_scale=200, magnitude_scale=1.7):
+        self._time_scale = time_scale
+        self._magnitude_scale = magnitude_scale
+
+    def initialize(self, env, max_steps, **kwargs):
+        del env, kwargs
+        start = np.random.random(4) * 10000
+        out = []
+        for i in range(2000):
+            action = [
+                self._magnitude_scale * pnoise1(i / self._time_scale + start_i, 5)
+                for start_i in start
+            ]
+            out.append(action)
+        self._actions = np.array(out)
+
+    def sample_action(self, obs, step, **kwargs):
+        del obs, kwargs
+        return self._actions[step]
 
 
 class CarRacingPolicy(gym_rollouts.Policy):

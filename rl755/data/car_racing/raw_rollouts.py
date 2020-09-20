@@ -6,8 +6,7 @@ import config
 from rl755.data.car_racing import processing
 
 TFRECORDS_PATTERN = (
-    config.dataset_dir + "/car_racing/" + 
-    "raw_rollouts/{split}/raw_rollouts.tfrecord*"
+    config.dataset_dir + "/car_racing/" + "raw_rollouts/{split}/raw_rollouts.tfrecord*"
 )
 
 
@@ -97,7 +96,7 @@ def random_rollout_slices(slice_size, split="train"):
     """
 
     def map_fn(x):
-        x = processing.raw_rollout_vae_32ld(x, slice_size=slice_size)
+        x = processing.slice_example(x, slice_size=slice_size)
         x["observations"] = _process_observations(x["observations"])
         return x
 
@@ -105,14 +104,14 @@ def random_rollout_slices(slice_size, split="train"):
     return ds.map(map_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
 
-def random_rollout_observations(obs_per_rollout=100, split="train"):
+def random_rollout_observations(obs_sampled_per_rollout=100, split="train"):
     """Returns a tf.data.Dataset where each item is a single image.
 
     Each example is a dict with tf.Tensor items:
       'observations': tf.float32, [96, 96, 3]
 
     Args:
-        obs_per_rollout: a positive float, the number of observations to extract from each
+        obs_sampled_per_rollout: a positive float, the number of observations to extract from each
             rollout. Extracting too many from each rollout can lead to images being repeated
             and having many correlated examples in each minibatch. Extracting too few can
             lead to poor performance since each raw rollout is large and takes a while to read
@@ -124,7 +123,9 @@ def random_rollout_observations(obs_per_rollout=100, split="train"):
 
     def random_obs(x):
         rollout_length = tf.shape(x["observations"])[0]
-        index = tf.random.uniform([obs_per_rollout], 0, rollout_length, dtype=tf.int32)
+        index = tf.random.uniform(
+            [obs_sampled_per_rollout], 0, rollout_length, dtype=tf.int32
+        )
         observation = tf.gather(x["observations"], index, axis=0)
         observation = _process_observations(observation)
         return {"observation": observation}

@@ -1,10 +1,12 @@
 import tensorflow as tf
 import tensorflow_probability as tfp
 
+from rl755.model.common.encoder import ObservationEncoder
+
 tfd = tfp.distributions
 
 
-def _get_encoder(latent_dim):
+def _get_encoder(representation_size):
     return tf.keras.Sequential(
         [
             tf.keras.layers.InputLayer(input_shape=(96, 96, 3)),
@@ -22,15 +24,15 @@ def _get_encoder(latent_dim):
             ),
             tf.keras.layers.Flatten(),
             # No activation
-            tf.keras.layers.Dense(2 * latent_dim),
+            tf.keras.layers.Dense(2 * representation_size),
         ]
     )
 
 
-def _get_decoder(latent_dim):
+def _get_decoder(representation_size):
     return tf.keras.Sequential(
         [
-            tf.keras.layers.InputLayer(input_shape=(latent_dim,)),
+            tf.keras.layers.InputLayer(input_shape=(representation_size,)),
             # No activation
             tf.keras.layers.Dense(units=1024),
             tf.keras.layers.Reshape(target_shape=(1, 1, 1024)),
@@ -50,25 +52,27 @@ def _get_decoder(latent_dim):
     )
 
 
-class Vae(tf.keras.Model):
+class Vae(ObservationEncoder):
     """A variational auto-encoder."""
 
-    def __init__(self, latent_dim=32, beta=1.0, start_step=0, name="vae", **kwargs):
+    def __init__(
+        self, representation_size=32, beta=1.0, start_step=0, name="vae", **kwargs
+    ):
         """Create a Vae.
 
         Args:
-            latent_dim: a positive integer, the size of the latent dimension
+            representation_size: a positive integer, the size of the latent dimension
             beta: a float, the weight to give to the KL loss
             start_step: an integer, used to initialize a tf.Variable that tracts the current step
             name: string, used by tf.keras.Model superclass
         """
         super().__init__(name=name, **kwargs)
-        self.latent_dim = latent_dim
+        self.representation_size = representation_size
         self.beta = beta
-        self.encoder = _get_encoder(latent_dim)
-        self.decoder = _get_decoder(latent_dim)
+        self.encoder = _get_encoder(representation_size)
+        self.decoder = _get_decoder(representation_size)
         self.prior = tfd.MultivariateNormalDiag(
-            tf.zeros(latent_dim), tf.ones(latent_dim)
+            tf.zeros(representation_size), tf.ones(representation_size)
         )
         self.step = tf.Variable(start_step, trainable=False, dtype=tf.int64)
 

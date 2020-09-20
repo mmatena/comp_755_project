@@ -22,6 +22,7 @@ from rl755.models.common.transformer import (
 
 import config
 
+
 def raw_rollout_vae_32ld():
     """VAE trained on images from raw rollouts for 100k steps with
     a batch size of 256 for 100k steps and a latent dim of 32 and
@@ -30,8 +31,8 @@ def raw_rollout_vae_32ld():
     Returns:
         A rl755.models.car_racing.vae.Vae instance.
     """
-    weights_path=config.vae_weights_path
-    vae = Vae(latent_dim=32, beta=1.0)
+    weights_path = config.vae_weights_path
+    vae = Vae(representation_size=32, beta=1.0)
     vae.load_weights(weights_path)
     return vae
 

@@ -191,7 +191,7 @@ There are a few requirements in order to use this script:
 - You must have a function that can be called with no arguments in the `rl755/models/$environment/saved_models.py` file that
 returns an object extending [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/common/encoder.py).
 The returned model must have its weights loaded.
-The `compute_full_representation` method will be used to generate the encoded observations. Please see the documentation of the method in [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/common/encoder.py) for more details. **Note: The [`structs.latent_image_rollout_to_tfrecord`](https://github.com/mmatena/comp_755_project/blob/master/rl755/common/structs.py#L98) hasn't been updated yet to support some new features. I'll update it soon.**
+The `compute_full_representation` method will be used to generate the encoded observations. Please see the documentation of the method in [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/common/encoder.py) for more details.
 - You'll need a `rl755/data/$environment/raw_rollouts.py` file containing a class named `RawRollouts` that implements the [`RawImageRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datasets.py) abstract class.
 
 The script takes the following flags:

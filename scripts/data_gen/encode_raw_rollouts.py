@@ -112,7 +112,7 @@ def encode_map_fn(x, model):
     else:
         extra = {}
     ret = {
-        "obs_latents": rep,
+        "observations": rep,
         "actions": tf.reshape(x["actions"], (-1,) + env.action_shape),
         "rewards": tf.reshape(x["rewards"], (-1, 1)),
     }
@@ -150,7 +150,7 @@ def run_shard(
     with tf.io.TFRecordWriter(filepath) as file_writer:
         for x in ds:
             file_writer.write(
-                structs.latent_image_rollout_to_tfrecord(**x).SerializeToString()
+                structs.encoded_rollout_to_tfrecord(x).SerializeToString()
             )
 
 

@@ -22,7 +22,7 @@ class Rollout:
         self.done = False
 
 
-def _to_float_feature_list(array, process_item_fn):
+def _to_float_feature_list(array, process_item_fn=lambda x: x):
     """Converts an array of floats to a tf.train.FeatureList.
 
     The `array` must be representable as a rank 2 tensor. Note that this trivially
@@ -124,4 +124,23 @@ def latent_image_rollout_to_tfrecord(obs_latents, actions, rewards, obs_std_devs
                 "rewards": _to_float_feature_list(rewards, lambda r: [r]),
             }
         )
+    )
+
+
+def encoded_rollout_to_tfrecord(example):
+    """Converts a rollout with encoded features into a tfrecord.
+
+    Args:
+        example: dict[str, tf.Tensor], the rollout. We assume all features are rank 2, tf.float32
+            tensors except for "rewards", which is a rank 1, tf.float32 tensor. Note that these
+            ranks include the time dimension.
+    Returns:
+        The example as a tf.train.SequenceExample.
+    """
+    feature_list = {
+        k: _to_float_feature_list(v) for k, v in example.items() if k != "rewards"
+    }
+    feature_list["rewards"] = _to_float_feature_list(example["rewards"], lambda r: [r])
+    return tf.train.SequenceExample(
+        feature_lists=tf.train.FeatureLists(feature_list=feature_list)
     )

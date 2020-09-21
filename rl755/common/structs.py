@@ -95,38 +95,6 @@ def tfrecord_to_key_value(record, key_size=768, value_size=33):
     return tf.io.parse_single_example(record, features)
 
 
-def latent_image_rollout_to_tfrecord(obs_latents, actions, rewards, obs_std_devs=None):
-    """Converts a rollout with the images encoded by e.g. a VAE to the equivalent tfrecord.
-
-    Args:
-        obs_latents: float32 tf.Tensor with shape [num_rollouts, latent_size]
-        actions: float32 tf.Tensor with shape [num_rollouts, 4]
-        rewards: float32 tf.Tensor with shape [num_rollouts]
-        obs_std_devs: None or float32 tf.Tensor with shape [num_rollouts, latent_size]
-    Returns:
-        A tf.train.SequenceExample corresponding to the inputs.
-    """
-    if obs_std_devs is None:
-        # TODO(mmatena): Figure out the best way to handle this. This can happen if we are
-        # using something like a deterministic encoder.
-        raise NotImplementedError(
-            "Figure out how to handle cases with no std dev on latents."
-        )
-
-    return tf.train.SequenceExample(
-        feature_lists=tf.train.FeatureLists(
-            feature_list={
-                "observations": _to_float_feature_list(obs_latents, lambda o: o),
-                "observation_std_devs": _to_float_feature_list(
-                    obs_std_devs, lambda o: o
-                ),
-                "actions": _to_float_feature_list(actions, lambda a: a),
-                "rewards": _to_float_feature_list(rewards, lambda r: [r]),
-            }
-        )
-    )
-
-
 def encoded_rollout_to_tfrecord(example):
     """Converts a rollout with encoded features into a tfrecord.
 

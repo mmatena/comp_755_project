@@ -1,7 +1,7 @@
 """Trains an autoregressive model on encoded rollouts."""
 import functools
 import os
-import importlib
+from pydoc import locate
 
 from absl import app
 from absl import flags
@@ -61,9 +61,7 @@ def get_model(environment):
     # model = importlib.import_module(environment.folder_name, models_module)
     # for s in FLAGS.model.split("."):
     #     model = importlib.import_module(s, model)
-    model = importlib.import_module(
-        f"rl755.models.{environment.folder_name}.{FLAGS.model}"
-    )
+    model = locate(f"rl755.models.{environment.folder_name}.{FLAGS.model}")
     return model()
     # model = getattr(models_module, environment.folder_name)
     # for s in FLAGS.model.split("."):
@@ -72,9 +70,7 @@ def get_model(environment):
 
 
 def get_train_dataset(environment):
-    m = importlib.import_module(
-        f"rl755.data.{environment.folder_name}.encoded_rollouts"
-    )
+    m = locate(f"rl755.data.{environment.folder_name}.encoded_rollouts")
     # m = importlib.import_module(environment.folder_name, data_module)
     # m = importlib.import_module("encoded_rollouts", m)
     # m = getattr(data_module, environment.folder_name).encoded_rollouts

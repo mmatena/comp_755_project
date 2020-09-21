@@ -104,9 +104,15 @@ def main(_):
     model.compile(optimizer=optimizer)
 
     steps_per_epoch = FLAGS.save_every_n_steps
+    # model.fit(
+    #     train_ds,
+    #     epochs=FLAGS.train_steps // steps_per_epoch,
+    #     steps_per_epoch=steps_per_epoch,
+    #     callbacks=callbacks,
+    # )
     model.fit(
         train_ds,
-        epochs=FLAGS.train_steps // steps_per_epoch,
+        epochs=1,
         steps_per_epoch=steps_per_epoch,
         callbacks=callbacks,
     )

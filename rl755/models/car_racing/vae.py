@@ -87,10 +87,10 @@ class Vae(ObservationEncoder):
     def encode_tensor(self, x):
         return self.encode(x).mean()
 
-    # @tf.function
-    # def compute_full_representation(self, x):
-    #     posterior = self.encode(x)
-    #     return posterior.mean(), {"obs_std_devs": posterior.stddev()}
+    @tf.function
+    def compute_full_representation(self, x):
+        posterior = self.encode(x)
+        return posterior.mean(), {"obs_std_devs": posterior.stddev()}
 
     def decode(self, z):
         logits = self.decoder(z)

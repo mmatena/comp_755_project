@@ -33,7 +33,8 @@ def _our_create_attention_mask(from_shape, input_mask, mask):
 
 
 class ArTransformer(SequentialModel):
-    def __init__(self, transformer_params, output_size):
+    def __init__(self, transformer_params, output_size, **kwargs):
+        super().__init__(**kwargs)
         self.transformer_params = transformer_params
         self.output_size = output_size
 

@@ -64,7 +64,7 @@ def get_model(environment):
 
 
 def get_train_dataset(environment):
-    m = getattr(data_module, environment.folder_name).enocded_rollouts
+    m = getattr(data_module, environment.folder_name).encoded_rollouts
     ds = getattr(m, FLAGS.rollouts_dataset)().get_autoregressive_slices(
         sequence_length=FLAGS.sequence_length,
         sample_observations=False,

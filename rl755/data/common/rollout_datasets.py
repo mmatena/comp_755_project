@@ -379,6 +379,5 @@ class EncodedRolloutDatasetBuilder(RolloutDatasetBuilder):
             targets = tf.reshape(targets, [sequence_length, rep_size])
             return inputs, targets
 
-        return self.random_rollout_slices_ds(
-            slice_size=sequence_length + 1, split=split
-        )
+        ds = self.random_rollout_slices_ds(slice_size=sequence_length + 1, split=split)
+        return ds.map(map_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)

@@ -380,5 +380,5 @@ class EncodedRolloutDatasetBuilder(RolloutDatasetBuilder):
             return inputs, targets
 
         return self.random_rollout_slices_ds(
-            self, slice_size=sequence_length + 1, split=split
+            slice_size=sequence_length + 1, split=split
         )

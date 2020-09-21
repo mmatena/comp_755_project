@@ -100,7 +100,7 @@ def main(_):
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=FLAGS.learning_rate)
 
-    model.compile(optimizer=optimizer, loss="mse")
+    model.compile(optimizer=optimizer)
 
     steps_per_epoch = FLAGS.save_every_n_steps
     model.fit(

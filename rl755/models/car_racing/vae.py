@@ -1,7 +1,7 @@
 import tensorflow as tf
 import tensorflow_probability as tfp
 
-from rl755.model.common.encoder import ObservationEncoder
+from rl755.models.common.encoder import ObservationEncoder
 
 tfd = tfp.distributions
 

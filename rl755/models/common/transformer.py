@@ -4,22 +4,15 @@ Note that we will be training on sequences of continuous inputs instead of
 discrete tokens, so we'll assume that we aren't using embeddings layers
 unless explicitly stated otherwise.
 """
-import collections
 import functools
 
 from bert.attention import AttentionLayer
 from bert.transformer import TransformerEncoderLayer
-import numpy as np
+
 import tensorflow as tf
-import tensorflow_probability as tfp
 from unittest import mock
 
-from rl755.models.car_racing.knn import KnnLookupLayer
-from rl755.models.common.layers import MixtureOfGaussiansLayer
-
-tfd = tfp.distributions
-
-LayerWithOutput = collections.namedtuple("LayerWithOutput", ["layer", "output"])
+from rl755.models.common.sequential import SequentialModel
 
 
 def _create_ar_mask(seq_len):
@@ -39,39 +32,15 @@ def _our_create_attention_mask(from_shape, input_mask, mask):
     return mask
 
 
-_original_layer_call = tf.keras.layers.Layer.__call__
-
-
-def _get_our_layer_call(array):
-    def fn(self, *args, **kwargs):
-        output = _original_layer_call(self, *args, **kwargs)
-        array.append(LayerWithOutput(layer=self, output=output))
-        return output
-
-    return fn
-
-
-class AutoregressiveTransformer(tf.keras.Model):
-    def __init__(
-        self,
-        transformer_params,
-        output_size,
-        num_components=None,
-        return_layer_outputs=False,
-        **kwargs
-    ):
-        # TODO(mmatena): Add docs
+class ArTransformer(SequentialModel):
+    def __init__(self, transformer_params, output_size, **kwargs):
         super().__init__(**kwargs)
-        assert num_components is None, "TODO(mmatena): Support mix of gaussians output."
         self.transformer_params = transformer_params
         self.output_size = output_size
-        self.num_components = num_components
-        self.return_layer_outputs = return_layer_outputs
 
     def build(self, input_shape):
         hidden_size = self.transformer_params.hidden_size
 
-        # TODO(mmatena): Use relative attention instead.
         self.pos_embeddings = self.add_weight(
             shape=[input_shape[-2], hidden_size],
             initializer="random_normal",
@@ -87,28 +56,13 @@ class AutoregressiveTransformer(tf.keras.Model):
         transformer_input_shape = list(input_shape[:-1]) + [hidden_size]
         self.transformer.build(transformer_input_shape)
 
-        # final_layer_size = (
-        #     self.num_components + 2 * self.num_components * self.output_size
-        # )
-        final_layer_size = self.output_size
         self.final_layer = tf.keras.layers.Dense(
-            units=final_layer_size, activation=None
+            units=self.output_size, activation=None
         )
         self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
         super().build(input_shape)
 
     def call(self, inputs, mask=None, training=None):
-        call_inner = lambda: self._call_inner(inputs, mask=mask, training=training)
-        if not self.return_layer_outputs:
-            return call_inner()
-        layers_with_output = []
-        override = _get_our_layer_call(layers_with_output)
-        with mock.patch.object(tf.keras.layers.Layer, "__call__", override):
-            outputs = call_inner()
-            return outputs, layers_with_output
-
-    def _call_inner(self, inputs, mask=None, training=None):
-        # TODO(mmatena): Make sure this is right.
         orig_mask = mask
         seqlen = tf.shape(inputs)[1]
         ar_mask = _create_ar_mask(seqlen)
@@ -134,115 +88,60 @@ class AutoregressiveTransformer(tf.keras.Model):
         output = self.final_layer(output, training=training)
         return output
 
-    @tf.function
-    def get_last_representation_tensor(self, inputs, mask=None):
-        assert (
-            self.return_layer_outputs
-        ), "Must be configured to return all layer outputs."
-        _, layers_with_output = self(inputs, mask=mask, training=False)
-        layer = self.transformer.encoder_layers[-1].self_attention_layer
-        return get_output_of_layer(layers_with_output, layer)[..., -1, :]
+    def get_loss_fn(self):
+        """Train using a MSE loss."""
+        return tf.keras.losses.MeanSquaredError()
 
-    def _get_mog_params(self, outputs):
-        logits, outputs = (
-            outputs[..., : self.num_components],
-            outputs[..., self.num_components :],
-        )
-        locs, scales = tf.split(outputs, num_or_size_splits=2, axis=-1)
-        locs = tf.split(
-            locs,
-            num_or_size_splits=self.num_components * [self.output_size],
-            axis=-1,
-        )
-        scales = tf.split(
-            tf.nn.softplus(scales),
-            num_or_size_splits=self.num_components * [self.output_size],
-            axis=-1,
-        )
-        return logits, locs, scales
-
-    def _get_gauss_components(self, outputs):
-        locs, scales = self._get_gauss_params(outputs)
-        return [
-            tfd.MultivariateNormalDiag(loc=loc, scale_diag=scale)
-            for loc, scale in zip(locs, scales)
-        ]
-
-    def get_mix_of_gauss(self, outputs):
-        logits, locs, scales = self._get_mog_params(outputs)
-        return tfd.Mixture(
-            cat=tfd.Categorical(logits=logits),
-            components=[
-                tfd.MultivariateNormalDiag(loc=loc, scale_diag=scale)
-                for loc, scale in zip(locs, scales)
-            ],
-        )
-
-    def nll_loss(self, global_batch_size=None):
-        def nll_loss(y_true, y_pred):
-            y_pred = self.get_mix_of_gauss(y_pred)
-            loss = -y_pred.log_prob(y_true)
-            if not global_batch_size:
-                loss = tf.reduce_mean(loss)
-            else:
-                loss = tf.nn.compute_average_loss(
-                    loss, global_batch_size=global_batch_size
-                )
-            return loss
-
-        return nll_loss
+    def get_hidden_representation(self, x, mask=None, training=None, position=-1):
+        # TODO
+        raise NotImplementedError()
 
 
-# TODO(mmatena): Reduce code duplication here.
-def get_output_of_layer(layers_with_output, layer_):
-    for layer, output in layers_with_output:
-        if layer is layer_:
-            return output
-    raise ValueError("Layer not found.")
+# Stuff below this line likely needs to be refactored.
+##############################################################################################
 
+# class AutoregressiveLookupTransformer(tf.keras.Model):
+#     def __init__(self, ar_transformer, knn_lookup, lambda_knn, **kwargs):
+#         super().__init__(**kwargs)
+#         assert ar_transformer.return_layer_outputs
+#         self.knn_lookup = knn_lookup
+#         self.lambda_knn = lambda_knn
+#         self.ar_transformer = ar_transformer
+#         self.lookup_layer = KnnLookupLayer(self.knn_lookup)
 
-class AutoregressiveLookupTransformer(tf.keras.Model):
-    def __init__(self, ar_transformer, knn_lookup, lambda_knn, **kwargs):
-        super().__init__(**kwargs)
-        assert ar_transformer.return_layer_outputs
-        self.knn_lookup = knn_lookup
-        self.lambda_knn = lambda_knn
-        self.ar_transformer = ar_transformer
-        self.lookup_layer = KnnLookupLayer(self.knn_lookup)
+#     def build(self, input_shape):
+#         self.ar_transformer.build(input_shape)
+#         self.lookup_layer.build(input_shape)
+#         super().build(input_shape)
 
-    def build(self, input_shape):
-        self.ar_transformer.build(input_shape)
-        self.lookup_layer.build(input_shape)
-        super().build(input_shape)
+#     def get_queries(self, layers_with_output):
+#         layer = self.ar_transformer.transformer.encoder_layers[-1].self_attention_layer
+#         return get_output_of_layer(layers_with_output, layer)
 
-    def get_queries(self, layers_with_output):
-        layer = self.ar_transformer.transformer.encoder_layers[-1].self_attention_layer
-        return get_output_of_layer(layers_with_output, layer)
+#     def load_ar_weights(self, weights_path):
+#         self.ar_transformer.load_weights(weights_path)
 
-    def load_ar_weights(self, weights_path):
-        self.ar_transformer.load_weights(weights_path)
+#     def call(self, inputs, mask=None, training=None):
+#         outputs, layers_with_output = self.ar_transformer(
+#             inputs, mask=mask, training=training
+#         )
+#         queries = self.get_queries(layers_with_output)
+#         values, distances = self.lookup_layer(queries)
 
-    def call(self, inputs, mask=None, training=None):
-        outputs, layers_with_output = self.ar_transformer(
-            inputs, mask=mask, training=training
-        )
-        queries = self.get_queries(layers_with_output)
-        values, distances = self.lookup_layer(queries)
+#         # Need to explicitly set the shapes or else the mod
+#         values = tf.reshape(
+#             values,
+#             tf.concat(
+#                 [tf.shape(outputs)[:2], [self.knn_lookup.k, tf.shape(outputs)[-1]]],
+#                 axis=0,
+#             ),
+#         )
+#         distances = tf.reshape(
+#             distances, tf.concat([tf.shape(outputs)[:2], [self.knn_lookup.k]], axis=0)
+#         )
 
-        # Need to explicitly set the shapes or else the mod
-        values = tf.reshape(
-            values,
-            tf.concat(
-                [tf.shape(outputs)[:2], [self.knn_lookup.k, tf.shape(outputs)[-1]]],
-                axis=0,
-            ),
-        )
-        distances = tf.reshape(
-            distances, tf.concat([tf.shape(outputs)[:2], [self.knn_lookup.k]], axis=0)
-        )
-
-        weights = tf.nn.softmax(-distances)
-        knn_estimates = tf.reduce_sum(
-            values * tf.expand_dims(weights, axis=-1), axis=-2
-        )
-        return self.lambda_knn * knn_estimates + (1 - self.lambda_knn) * outputs
+#         weights = tf.nn.softmax(-distances)
+#         knn_estimates = tf.reduce_sum(
+#             values * tf.expand_dims(weights, axis=-1), axis=-2
+#         )
+#         return self.lambda_knn * knn_estimates + (1 - self.lambda_knn) * outputs

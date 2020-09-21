@@ -41,7 +41,9 @@ def main(_):
     file_writer = tf.summary.create_file_writer(model_dir)
     file_writer.set_as_default()
 
-    ds = raw_rollouts.random_rollout_observations(obs_sampled_per_rollout=100)
+    ds = raw_rollouts.RawRollouts().random_rollout_observations(
+        obs_sampled_per_rollout=100
+    )
     ds = processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
 
     model_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(

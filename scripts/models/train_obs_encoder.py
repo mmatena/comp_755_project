@@ -1,12 +1,11 @@
 """Trains a model to encode individual observations."""
 import os
+from pydoc import locate
 
 from absl import app
 from absl import flags
 import tensorflow as tf
 
-from rl755 import models
-from rl755 import data as data_module
 from rl755.data.common import processing
 from rl755.environments import Environments
 
@@ -68,14 +67,12 @@ def get_environment():
 
 
 def get_model(environment):
-    model = getattr(models, environment.folder_name)
-    for s in FLAGS.model.split("."):
-        model = getattr(model, s)
+    model = locate(f"rl755.models.{environment.folder_name}.{FLAGS.model}")
     return model(representation_size=FLAGS.representation_size)
 
 
 def get_train_dataset(environment):
-    m = getattr(data_module, environment.folder_name)
+    m = locate(f"rl755.data.{environment.folder_name}.raw_rollouts")
     ds = m.RawRollouts().random_rollout_observations(
         obs_sampled_per_rollout=FLAGS.obs_sampled_per_rollout
     )
@@ -91,10 +88,6 @@ def main(_):
 
     train_ds = get_train_dataset(environment)
 
-    model = get_model(environment)
-
-    optimizer = tf.keras.optimizers.Adam(learning_rate=FLAGS.learning_rate)
-
     model_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
         filepath=os.path.join(model_dir, "model-{epoch:03d}.hdf5"),
         save_best_only=False,
@@ -102,6 +95,10 @@ def main(_):
     )
     tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=model_dir)
     callbacks = [model_checkpoint_cb, tensorboard_cb]
+
+    model = get_model(environment)
+
+    optimizer = tf.keras.optimizers.Adam(learning_rate=FLAGS.learning_rate)
 
     model.compile(optimizer=optimizer)
 
@@ -112,3 +109,7 @@ def main(_):
         steps_per_epoch=steps_per_epoch,
         callbacks=callbacks,
     )
+
+
+if __name__ == "__main__":
+    app.run(main)

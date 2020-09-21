@@ -145,7 +145,7 @@ The script takes the following flags:
 - `--model_dir` The directory where we save model checkpoints and tensorboard logs.
 - `--train_steps` The number of batches to train for.
 - `--environment` The name of the [`Environment`](https://github.com/mmatena/comp_755_project/blob/master/rl755/environments.py) enum from which the rollouts come from. For example, `CAR_RACING`.
-- `--model` The name of the model to train. The model will be accessed in a manner equivalent to `model = rl55.models.$environment.policies.$model(obs_sampled_per_rollout=<>)`. Note that this flag can contain periods to allow access to more deeply nested classes/functions. For example, `vae.Vae` would be valid. The model must subclass [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/common/encoder.py) or be a function returning an instance of such a class.
+- `--model` The name of the model to train. The model will be accessed in a manner equivalent to `model = rl55.models.$environment.$model(obs_sampled_per_rollout=<>)`. Note that this flag can contain periods to allow access to more deeply nested classes/functions. For example, `vae.Vae` would be valid. The model must subclass [`ObservationEncoder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/common/encoder.py) or be a function returning an instance of such a class.
 - `--batch_size` The number of raw observations in each mini batch.
 - `--representation_size` A positive integer representing the dimensionality of encoded representation. It will be passed as a kwarg to the model.
 - `--save_every_n_steps` Save a checkpoint every this number of training steps. Note that we are saving the weights only. The checkpoint file names will be formatted as `model-{checkpoint_number:03d}.hdf5`. The train loss will also only be logged to tensorboard every this number of training steps due to how keras works.
@@ -260,7 +260,31 @@ If you get to this point, feel free to reach out to mmatena for help.
 **Note: The existing way of doing stuff will probably require a bit of refactoring to handle different encoders. This part might change a bit soon.**
  -->
 ### 4. Train a sequential model on encoded rollouts
-TODO
+The goal of this step is to learn a model that takes in a history of observations, a history of actions,
+and then predicts the next observation given the action taken at the current step.
+
+You can use the [`scripts/models/train_sequential_model.py`](https://github.com/mmatena/comp_755_project/blob/master/scripts/models/train_sequential_model.py) script to learn such a model.
+You should train your model on the `volta-gpu` or `gpu` longleaf partitions.
+If your SLURM job has access to multiple GPUs, the script will use data parallelism to
+accelerate training through use of [`tf.distribute.MirroredStrategy`](https://www.tensorflow.org/api_docs/python/tf/distribute/MirroredStrategy).
+
+There are a few requirements in order to use this script:
+- You'll need function that takes no arguments and returns an instance of a class extending [`SequentialModel`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/common/sequential.py). It will need to reside somewhere in the `rl755/models/$environment` folder. Only the `get_loss_fn(self)` method is needed for this step. See [`rl755/models/car_racing/transformer.py`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/car_racing/transformer.py) for an example.
+- You'll need a `rl755/data/$environment/encoded_rollouts.py` file containing a class that implements the [`EncodedRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datasets.py) abstract class.
+See [`rl755/data/car_racing/encoded_rollouts.py`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/car_racing/encoded_rollouts.py) for an example.
+
+The script takes the following flags:
+- `--model_dir` The directory where we save model checkpoints and tensorboard logs.
+- `--train_steps` The number of batches to train for.
+- `--environment` The name of the [`Environment`](https://github.com/mmatena/comp_755_project/blob/master/rl755/environments.py) enum from which the rollouts come from. For example, `CAR_RACING`.
+- `--model` The name of the model to train. The model will be accessed in a manner equivalent to `model = rl55.models.$environment.$model()`. Note that this flag can contain periods to allow access to more deeply nested classes/functions. For example, `transformer.base_deterministic_transformer` would be valid. The model must subclass [`SequentialModel`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/common/sequential.py) or be a function returning an instance of such a class.
+- `--rollouts_dataset` The name of the dataset to train on. It will be accessed in manner equivalent to `rl755.data.$enivironment.encoded_rollouts.$rollouts_dataset()`. The dataset should extend the [`EncodedRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datasets.py) abstract class.
+- `--batch_size` The number of sequences in each mini batch.
+- `--sequence_length` A positive integer specifying the length of the sequences to train on.
+- `--learning_rate` A positive float indicating the learning rate to use. Currently we do not use a learning rate schedule.
+- `--sample_observations` A boolean controlling whether we sample probabilistic representations or not. Will have no effect for deterministic representations.
+- `--difference_targets` A boolean indicating whether to predict the next observation exactly or the difference between the next observation and the current observation. The difference is taken in representation space.
+- `--save_every_n_steps` Save a checkpoint every this number of training steps. Note that we are saving the weights only. The checkpoint file names will be formatted as `model-{checkpoint_number:03d}.hdf5`. The train loss will also only be logged to tensorboard every this number of training steps due to how keras works.
 
 ### 5. Learn a policy with the world model
 TODO

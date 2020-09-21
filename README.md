@@ -271,9 +271,58 @@ TODO, add something about configs
 
 
 ## General tips
-TODO, put the srun for both GPU and regular, the `-i` and `-m pdb`, dealing with `NaN`s during training, my transformer issues,
-my slurm stuff
 
+### Accessing a terminal on the GPU partition
+Running `sbatch` over and over again when debugging can get really slow.
+Luckily, there is a way to access a terminal on the GPU partition.
+If you make changes to your project, they will be reflected here without having
+to run another SLURM command.
+
+To do this, run the [`scripts/srun_gpu.sh`](https://github.com/mmatena/comp_755_project/blob/master/scripts/srun_gpu.sh) script.
+Once you get resources allocated, which typically doesn't take that long as long your resource requirements are reasonable, you'll
+enter a terminal with access to the GPUs on the `volta-gpu` partition.
+
+The [`scripts/srun_general.sh`](https://github.com/mmatena/comp_755_project/blob/master/scripts/srun_general.sh) script will let you
+do something similar on the `general` partition.
+
+*Note: I'll probably add some ways to set the resource requirements via command line flags for these scripts.*
+
+### Python debugging/development
+
+#### The `-i` flag
+
+Launching a python script with the `-i` flag like `python -i <script> <flags>` will run the script and place you in interactive mode
+once the script has completed.
+You'll have access to the variables in the main script.
+This is useful if you need to do some complex preparation, such as training a model for little bit, and then examine the
+objects you created.
+
+If you want to access a local variable within a function, you can mark it as `global` at the top of the function.
+
+#### Using `pdb`
+
+You can run a python script like `python -m pdb <script> <flags>`.
+Execution will pause immediately but press the `c` key to run the script.
+If the script crashes, you'll enter into the `pdb` debugger where the script crashed.
+Please see the [`pdb` documentation](https://docs.python.org/3/library/pdb.html) for more details.
+
+Unfortunately, you might not get useful information if the crash occurs in tensorflow code running in graph mode. 
+
+
+### Tensorflow tips
+
+#### NaNs during training.
+
+If you encounter NaNs during training, you can call [`tf.debugging.enable_check_numerics()`](https://www.tensorflow.org/api_docs/python/tf/debugging/enable_check_numerics) at the top of your script.
+Then tensorflow will crash when it first encounters a NaN during training and show you a useful stack trace including
+information about where the NaN first occured.
+
+Enabling this *might* make your code slower. I don't remember 100% if that's true or not, but be aware if you accidently leave
+that function call in when training for real.
+
+#### Eager mode
+Eager mode is sometimes easier to debug than graph. However it is often *much* slower than graph mode.
+To enable graph mode in a keras model, set the `run_eagerly=True` kwarg in the `model.compile` call.
 
 
 ## Contributing

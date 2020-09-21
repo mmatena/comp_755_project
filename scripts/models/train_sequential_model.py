@@ -1,6 +1,7 @@
 """Trains an autoregressive model on encoded rollouts."""
 import functools
 import os
+import importlib
 
 from absl import app
 from absl import flags
@@ -57,14 +58,20 @@ def get_environment():
 
 
 def get_model(environment):
-    model = getattr(models_module, environment.folder_name)
+    model = importlib.import_module(environment.folder_name, models_module)
     for s in FLAGS.model.split("."):
-        model = getattr(model, s)
+        model = importlib.import_module(s, model)
     return model()
+    # model = getattr(models_module, environment.folder_name)
+    # for s in FLAGS.model.split("."):
+    #     model = getattr(model, s)
+    # return model()
 
 
 def get_train_dataset(environment):
-    m = getattr(data_module, environment.folder_name).encoded_rollouts
+    m = importlib.import_module(environment.folder_name, data_module)
+    m = importlib.import_module("encoded_rollouts", m)
+    # m = getattr(data_module, environment.folder_name).encoded_rollouts
     ds = getattr(m, FLAGS.rollouts_dataset)().get_autoregressive_slices(
         sequence_length=FLAGS.sequence_length,
         sample_observations=False,

@@ -79,10 +79,6 @@ def get_train_dataset(environment):
     return processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
 
 
-def fake_loss(*args, **kwargs):
-    return tf.constant(0.0)
-
-
 def main(_):
     model_dir = FLAGS.model_dir
     environment = get_environment()
@@ -104,7 +100,7 @@ def main(_):
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=FLAGS.learning_rate)
 
-    model.compile(optimizer=optimizer, loss=fake_loss)
+    model.compile(optimizer=optimizer, loss="mse")
 
     steps_per_epoch = FLAGS.save_every_n_steps
     model.fit(

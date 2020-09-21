@@ -67,6 +67,7 @@ def get_environment():
 
 
 def get_model(environment):
+    # model = locate(f"rl755.models.{environment.folder_name}.{FLAGS.model}")
     model = locate(f"rl755.models.{environment.folder_name}.{FLAGS.model}")
     return model(representation_size=FLAGS.representation_size)
 

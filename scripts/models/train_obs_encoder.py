@@ -89,10 +89,6 @@ def main(_):
 
     train_ds = get_train_dataset(environment)
 
-    model = get_model(environment)
-
-    # optimizer = tf.keras.optimizers.Adam(learning_rate=FLAGS.learning_rate)
-
     model_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
         filepath=os.path.join(model_dir, "model-{epoch:03d}.hdf5"),
         save_best_only=False,
@@ -101,8 +97,11 @@ def main(_):
     tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=model_dir)
     callbacks = [model_checkpoint_cb, tensorboard_cb]
 
-    # model.compile(optimizer=optimizer)
-    model.compile(optimizer="adam")
+    model = get_model(environment)
+
+    optimizer = tf.keras.optimizers.Adam(learning_rate=FLAGS.learning_rate)
+
+    model.compile(optimizer=optimizer)
 
     steps_per_epoch = FLAGS.save_every_n_steps
     model.fit(

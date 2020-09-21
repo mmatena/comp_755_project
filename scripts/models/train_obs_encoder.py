@@ -1,5 +1,6 @@
 """Trains a model to encode individual observations."""
 import os
+from pydoc import locate
 
 from absl import app
 from absl import flags
@@ -68,9 +69,7 @@ def get_environment():
 
 
 def get_model(environment):
-    model = getattr(models_module, environment.folder_name)
-    for s in FLAGS.model.split("."):
-        model = getattr(model, s)
+    model = locate(f"rl755.data.{environment.folder_name}.{FLAGS.model}")
     return model(representation_size=FLAGS.representation_size)
 
 

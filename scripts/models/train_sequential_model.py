@@ -39,7 +39,13 @@ flags.DEFINE_integer(
 flags.DEFINE_integer(
     "sequence_length", 32, "Size of windows to train on.", lower_bound=1
 )
+
 flags.DEFINE_float("learning_rate", 1e-3, "")
+
+
+flags.DEFINE_boolean("sample_observations", False, "")
+flags.DEFINE_boolean("difference_targets", False, "")
+
 flags.DEFINE_integer(
     "save_every_n_steps",
     1000,
@@ -58,26 +64,16 @@ def get_environment():
 
 
 def get_model(environment):
-    # model = importlib.import_module(environment.folder_name, models_module)
-    # for s in FLAGS.model.split("."):
-    #     model = importlib.import_module(s, model)
     model = locate(f"rl755.models.{environment.folder_name}.{FLAGS.model}")
     return model()
-    # model = getattr(models_module, environment.folder_name)
-    # for s in FLAGS.model.split("."):
-    #     model = getattr(model, s)
-    # return model()
 
 
 def get_train_dataset(environment):
     m = locate(f"rl755.data.{environment.folder_name}.encoded_rollouts")
-    # m = importlib.import_module(environment.folder_name, data_module)
-    # m = importlib.import_module("encoded_rollouts", m)
-    # m = getattr(data_module, environment.folder_name).encoded_rollouts
     ds = getattr(m, FLAGS.rollouts_dataset)().get_autoregressive_slices(
         sequence_length=FLAGS.sequence_length,
-        sample_observations=False,
-        difference_targets=False,
+        sample_observations=FLAGS.sample_observations,
+        difference_targets=FLAGS.difference_targets,
         split="train",
     )
     return processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)

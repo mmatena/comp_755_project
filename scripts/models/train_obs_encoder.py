@@ -5,8 +5,8 @@ from absl import app
 from absl import flags
 import tensorflow as tf
 
-from rl755 import models
 from rl755 import data as data_module
+from rl755 import models as models_module
 from rl755.data.common import processing
 from rl755.environments import Environments
 
@@ -68,14 +68,14 @@ def get_environment():
 
 
 def get_model(environment):
-    model = getattr(models, environment.folder_name)
+    model = getattr(models_module, environment.folder_name)
     for s in FLAGS.model.split("."):
         model = getattr(model, s)
     return model(representation_size=FLAGS.representation_size)
 
 
 def get_train_dataset(environment):
-    m = getattr(data_module, environment.folder_name)
+    m = getattr(data_module, environment.folder_name).raw_rollouts
     ds = m.RawRollouts().random_rollout_observations(
         obs_sampled_per_rollout=FLAGS.obs_sampled_per_rollout
     )
@@ -112,3 +112,7 @@ def main(_):
         steps_per_epoch=steps_per_epoch,
         callbacks=callbacks,
     )
+
+
+if __name__ == "__main__":
+    app.run(main)

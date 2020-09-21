@@ -64,7 +64,7 @@ class RolloutDatasetBuilder(object):
         """
         return {}
 
-    def _process_observation(self, observation):
+    def _process_observations(self, observation):
         """Perform some processing processing on the observation tensor.
 
         The original purpose of this is that we needed to store images as strings
@@ -85,7 +85,7 @@ class RolloutDatasetBuilder(object):
         if we need to parse some features other than "observations", "actions",
         and "rewards".
 
-        This will be done after `_process_observation` has been called.
+        This will be done after `_process_observations` has been called.
 
         Args:
             example: a dict[str, tf.Tensor], an individual rollout
@@ -146,7 +146,7 @@ class RolloutDatasetBuilder(object):
             'actions': tf.float32, [rollout_len, action_size()]
             'rewards': tf.float32, [rollout_len]
 
-        Note that the `_process_observation` method can change the shape and
+        Note that the `_process_observations` method can change the shape and
         dtype of the 'observations' item if the `process_observations` kwarg
         is set to true.
 
@@ -272,7 +272,7 @@ class RawImageRolloutDatasetBuilder(RolloutDatasetBuilder):
     def _stored_observation_dtype(self):
         return tf.string
 
-    def _process_observation(self, observations):
+    def _process_observations(self, observations):
         observations = tf.map_fn(
             functools.partial(tf.io.parse_tensor, out_type=tf.uint8),
             tf.squeeze(observations),

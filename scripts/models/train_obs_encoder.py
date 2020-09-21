@@ -80,7 +80,7 @@ def get_train_dataset(environment):
 
 
 def fake_loss(*args, **kwargs):
-    return 0.0
+    return tf.constant(0.0)
 
 
 def main(_):

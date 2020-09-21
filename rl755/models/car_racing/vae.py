@@ -52,7 +52,7 @@ def _get_decoder(representation_size):
     )
 
 
-class Vae(tf.keras.Model):
+class Vae(ObservationEncoder):
     """A variational auto-encoder."""
 
     def __init__(
@@ -87,10 +87,10 @@ class Vae(tf.keras.Model):
     def encode_tensor(self, x):
         return self.encode(x).mean()
 
-    @tf.function
-    def compute_full_representation(self, x):
-        posterior = self.encode(x)
-        return posterior.mean(), {"obs_std_devs": posterior.stddev()}
+    # @tf.function
+    # def compute_full_representation(self, x):
+    #     posterior = self.encode(x)
+    #     return posterior.mean(), {"obs_std_devs": posterior.stddev()}
 
     def decode(self, z):
         logits = self.decoder(z)

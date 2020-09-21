@@ -8,8 +8,6 @@ from absl import flags
 
 import tensorflow as tf
 
-from rl755 import data as data_module
-from rl755 import models as models_module
 from rl755.data.common import processing
 from rl755.environments import Environments
 

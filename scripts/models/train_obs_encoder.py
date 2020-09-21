@@ -6,8 +6,6 @@ from absl import app
 from absl import flags
 import tensorflow as tf
 
-from rl755 import data as data_module
-from rl755 import models as models_module
 from rl755.data.common import processing
 from rl755.environments import Environments
 
@@ -74,7 +72,7 @@ def get_model(environment):
 
 
 def get_train_dataset(environment):
-    m = getattr(data_module, environment.folder_name).raw_rollouts
+    m = locate(f"rl755.data.{environment.folder_name}.raw_rollouts")
     ds = m.RawRollouts().random_rollout_observations(
         obs_sampled_per_rollout=FLAGS.obs_sampled_per_rollout
     )

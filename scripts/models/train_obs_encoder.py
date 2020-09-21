@@ -68,9 +68,6 @@ def get_environment():
 
 def get_model(environment):
     model = locate(f"rl755.models.{environment.folder_name}.{FLAGS.model}")
-    from rl755.models.car_racing.vae import Vae
-
-    model = Vae
     return model(representation_size=FLAGS.representation_size)
 
 
@@ -80,6 +77,10 @@ def get_train_dataset(environment):
         obs_sampled_per_rollout=FLAGS.obs_sampled_per_rollout
     )
     return processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
+
+
+def fake_loss(*args, **kwargs):
+    return 0.0
 
 
 def main(_):
@@ -103,7 +104,7 @@ def main(_):
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=FLAGS.learning_rate)
 
-    model.compile(optimizer=optimizer)
+    model.compile(optimizer=optimizer, loss=fake_loss)
 
     steps_per_epoch = FLAGS.save_every_n_steps
     model.fit(

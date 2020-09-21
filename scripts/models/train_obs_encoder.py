@@ -67,8 +67,10 @@ def get_environment():
 
 
 def get_model(environment):
-    # model = locate(f"rl755.models.{environment.folder_name}.{FLAGS.model}")
     model = locate(f"rl755.models.{environment.folder_name}.{FLAGS.model}")
+    from rl755.models.car_racing.vae import Vae
+
+    model = Vae
     return model(representation_size=FLAGS.representation_size)
 
 
@@ -104,15 +106,9 @@ def main(_):
     model.compile(optimizer=optimizer)
 
     steps_per_epoch = FLAGS.save_every_n_steps
-    # model.fit(
-    #     train_ds,
-    #     epochs=FLAGS.train_steps // steps_per_epoch,
-    #     steps_per_epoch=steps_per_epoch,
-    #     callbacks=callbacks,
-    # )
     model.fit(
         train_ds,
-        epochs=1,
+        epochs=FLAGS.train_steps // steps_per_epoch,
         steps_per_epoch=steps_per_epoch,
         callbacks=callbacks,
     )

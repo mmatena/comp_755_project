@@ -52,7 +52,7 @@ def _get_decoder(representation_size):
     )
 
 
-class Vae(ObservationEncoder):
+class Vae(tf.keras.Model):
     """A variational auto-encoder."""
 
     def __init__(

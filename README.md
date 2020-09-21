@@ -278,7 +278,6 @@ The script takes the following flags:
 - `--train_steps` The number of batches to train for.
 - `--environment` The name of the [`Environment`](https://github.com/mmatena/comp_755_project/blob/master/rl755/environments.py) enum from which the rollouts come from. For example, `CAR_RACING`.
 - `--model` The name of the model to train. The model will be accessed in a manner equivalent to `model = rl55.models.$environment.$model()`. Note that this flag can contain periods to allow access to more deeply nested classes/functions. For example, `transformer.base_deterministic_transformer` would be valid. The model must subclass [`SequentialModel`](https://github.com/mmatena/comp_755_project/blob/master/rl755/models/common/sequential.py) or be a function returning an instance of such a class.
-- `--batch_size` The number of raw observations in each mini batch.
 - `--rollouts_dataset` The name of the dataset to train on. It will be accessed in manner equivalent to `rl755.data.$enivironment.encoded_rollouts.$rollouts_dataset()`. The dataset should extend the [`EncodedRolloutDatasetBuilder`](https://github.com/mmatena/comp_755_project/blob/master/rl755/data/common/rollout_datasets.py) abstract class.
 - `--batch_size` The number of sequences in each mini batch.
 - `--sequence_length` A positive integer specifying the length of the sequences to train on.

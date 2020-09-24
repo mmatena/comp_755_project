@@ -40,7 +40,7 @@ flags.DEFINE_enum(
 flags.DEFINE_string(
     "policy",
     None,
-    "The name of the policy to use. Should be accessable via rl755.models.$env.policies.$policy."
+    "The name of the policy to use. Will be accessed via rl755.models.$env.policies.$policy()."
     "It should subclass rl755.data_gen.gym_rollouts.Policy or be a function returning such an object."
     "It will be called with no arguments.",
 )
@@ -67,7 +67,7 @@ def get_environment():
 
 def get_policy(environment):
     policies = getattr(models, environment.folder_name).policies
-    return getattr(policies, FLAGS.policy)
+    return getattr(policies, FLAGS.policy)()
 
 
 def main(_):

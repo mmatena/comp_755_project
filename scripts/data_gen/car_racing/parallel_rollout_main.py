@@ -2,6 +2,7 @@
 import functools
 import os
 import pickle
+from pydoc import locate
 import tempfile
 import time
 
@@ -66,8 +67,8 @@ def get_environment():
 
 
 def get_policy(environment):
-    policies = getattr(models, environment.folder_name).policies
-    return getattr(policies, FLAGS.policy)()
+    policy = locate(f"rl755.models.{environment.folder_name}.policies.{FLAGS.policy}")
+    return policy()
 
 
 def main(_):

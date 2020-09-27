@@ -90,9 +90,6 @@ class Vae(ObservationEncoder):
         )
         self.step = tf.Variable(start_step, trainable=False, dtype=tf.int64)
 
-    # def x_from_data(self, data):
-    #     return data["observation"]
-
     def encode(self, x):
         mean, prevar = tf.split(self.encoder(x), num_or_size_splits=2, axis=-1)
         return tfd.MultivariateNormalDiag(loc=mean, scale_diag=tf.nn.softplus(prevar))
@@ -118,30 +115,5 @@ class Vae(ObservationEncoder):
         self.posterior = self.encode(x)
         return self.decode(self.posterior.sample())
 
-    # def get_losses(self, x):
-    #     posterior = self.encode(x)
-    #     reconstruction = self.decode(posterior.sample())
-
-    #     # TODO(mmatena): Figure out the right combination of reduce_mean and
-    #     # reduce_sum to use here.
-    #     loss_recon = tf.reduce_sum(tf.square(x - reconstruction))
-    #     loss_recon /= tf.cast(tf.shape(x)[0], tf.float32)
-    #     loss_kl = tf.reduce_mean(tfd.kl_divergence(posterior, self.prior))
-    #     return loss_recon, loss_kl
-
-    # def train_step(self, data):
-    #     self.step.assign_add(1)
-
-    #     x = self.x_from_data(data)
-    #     with tf.GradientTape() as tape:
-    #         loss_recon, loss_kl = self.get_losses(x)
-
-    #         loss = loss_recon + self.beta * loss_kl
-
-    #     gradients = tape.gradient(loss, self.trainable_variables)
-    #     self.optimizer.apply_gradients(zip(gradients, self.trainable_variables))
-
-    #     tf.summary.scalar("loss", data=loss, step=self.step)
-    #     tf.summary.scalar("l2_loss", data=loss_recon, step=self.step)
-    #     tf.summary.scalar("kl_loss", data=loss_kl, step=self.step)
-    #     return {"loss": loss, "l2": loss_recon, "kl": loss_kl}
+    def get_loss_fn(self):
+        return VaeLoss(self)

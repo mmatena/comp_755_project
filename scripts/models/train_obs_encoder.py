@@ -104,12 +104,10 @@ def main(_):
     callbacks = [model_checkpoint_cb, tensorboard_cb]
 
     model = get_model(environment)
-    loss = locate(f"rl755.models.{environment.folder_name}.vae.VaeLoss")
-    loss = loss(model)
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=FLAGS.learning_rate)
 
-    model.compile(optimizer=optimizer, loss=loss)
+    model.compile(optimizer=optimizer, loss=model.get_loss_fn())
 
     steps_per_epoch = FLAGS.save_every_n_steps
     model.fit(

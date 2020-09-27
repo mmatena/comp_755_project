@@ -43,3 +43,13 @@ class ObservationEncoder(tf.keras.Model):
             standard deviation of the posterior distribution for a VAE.
         """
         raise NotImplementedError()
+
+    def get_loss_fn(self):
+        """Returns the loss function that will be used to train the encoder.
+
+        Returns:
+            An acceptable keras loss function. This can be a function taking
+            in (y_true, y_pred) as arguments and returning a scalar loss tensor.
+            It can also be a instance of a subclass of tf.keras.losses.Loss.
+        """
+        raise NotImplementedError()

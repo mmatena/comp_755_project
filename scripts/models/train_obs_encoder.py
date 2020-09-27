@@ -76,6 +76,9 @@ def get_train_dataset(environment):
     ds = m.RawRollouts().random_rollout_observations(
         obs_sampled_per_rollout=FLAGS.obs_sampled_per_rollout
     )
+    ds = ds.map(
+        lambda x: x["observation"], num_parallel_calls=tf.data.experimental.AUTOTUNE
+    )
     return processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
 
 

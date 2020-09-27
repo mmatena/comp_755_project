@@ -90,8 +90,8 @@ class Vae(ObservationEncoder):
         )
         self.step = tf.Variable(start_step, trainable=False, dtype=tf.int64)
 
-    def x_from_data(self, data):
-        return data["observation"]
+    # def x_from_data(self, data):
+    #     return data["observation"]
 
     def encode(self, x):
         mean, prevar = tf.split(self.encoder(x), num_or_size_splits=2, axis=-1)

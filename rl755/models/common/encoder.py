@@ -16,15 +16,6 @@ class ObservationEncoder(tf.keras.Model):
         """
         super().__init__(**kwargs)
 
-    def train_step(self, data):
-        """The model must implement a custom train step.
-
-        This comes from training VAEs. If other representation learning techniques
-        can use a pre-built keras loss, then we should find a way to let them use
-        that. That'll make support for data parallelism much easier.
-        """
-        raise NotImplementedError()
-
     def compute_full_representation(self, x):
         """Returns a representation given a batch of raw observations.
 
@@ -41,5 +32,15 @@ class ObservationEncoder(tf.keras.Model):
             The dict, if present, allows for returning other information relevant
             to the representation. For example, this lets you return the
             standard deviation of the posterior distribution for a VAE.
+        """
+        raise NotImplementedError()
+
+    def get_loss_fn(self):
+        """Returns the loss function that will be used to train the encoder.
+
+        Returns:
+            An acceptable keras loss function. This can be a function taking
+            in (y_true, y_pred) as arguments and returning a scalar loss tensor.
+            It can also be a instance of a subclass of tf.keras.losses.Loss.
         """
         raise NotImplementedError()

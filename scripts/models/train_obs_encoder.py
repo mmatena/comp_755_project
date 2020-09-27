@@ -71,12 +71,19 @@ def get_model(environment):
     return model(representation_size=FLAGS.representation_size)
 
 
+def get_final_ds_representation(x):
+    return x["observation"], x["observation"]
+
+
 def get_train_dataset(environment):
     m = locate(f"rl755.data.{environment.folder_name}.raw_rollouts")
     ds = m.RawRollouts().random_rollout_observations(
         obs_sampled_per_rollout=FLAGS.obs_sampled_per_rollout
     )
-    return processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
+    ds = processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
+    return ds.map(
+        get_final_ds_representation, num_parallel_calls=tf.data.experimental.AUTOTUNE
+    )
 
 
 def main(_):
@@ -100,7 +107,7 @@ def main(_):
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=FLAGS.learning_rate)
 
-    model.compile(optimizer=optimizer)
+    model.compile(optimizer=optimizer, loss=model.get_loss_fn())
 
     steps_per_epoch = FLAGS.save_every_n_steps
     model.fit(

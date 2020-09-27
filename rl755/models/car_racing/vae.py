@@ -60,7 +60,7 @@ class VaeLoss(tf.keras.losses.Loss):
     def call(self, y_true, y_pred):
         posterior = self.model.posterior
         prior = self.model.prior
-        loss_recon = tf.reduce_sum(tf.square(y_pred - y_pred))
+        loss_recon = tf.reduce_sum(tf.square(y_true - y_pred))
         loss_recon /= tf.cast(tf.shape(y_pred)[0], tf.float32)
         loss_kl = tf.reduce_mean(tfd.kl_divergence(posterior, prior))
         return loss_recon + self.model.beta * loss_kl

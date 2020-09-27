@@ -16,15 +16,6 @@ class ObservationEncoder(tf.keras.Model):
         """
         super().__init__(**kwargs)
 
-    def train_step(self, data):
-        """The model must implement a custom train step.
-
-        This comes from training VAEs. If other representation learning techniques
-        can use a pre-built keras loss, then we should find a way to let them use
-        that. That'll make support for data parallelism much easier.
-        """
-        raise NotImplementedError()
-
     def compute_full_representation(self, x):
         """Returns a representation given a batch of raw observations.
 

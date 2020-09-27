@@ -52,6 +52,20 @@ def _get_decoder(representation_size):
     )
 
 
+class VaeLoss(tf.keras.losses.Loss):
+    def __init__(self, model, **kwargs):
+        super().__init__(**kwargs)
+        self.model = model
+
+    def call(self, y_true, y_pred):
+        posterior = self.model.posterior
+        prior = self.model.prior
+        loss_recon = tf.reduce_sum(tf.square(y_pred - y_pred))
+        loss_recon /= tf.cast(tf.shape(y_pred)[0], tf.float32)
+        loss_kl = tf.reduce_mean(tfd.kl_divergence(posterior, prior))
+        return loss_recon + self.model.beta * loss_kl
+
+
 class Vae(ObservationEncoder):
     """A variational auto-encoder."""
 
@@ -100,30 +114,34 @@ class Vae(ObservationEncoder):
         z = self.prior.sample(num_samples)
         return self.decode(z)
 
-    def get_losses(self, x):
-        posterior = self.encode(x)
-        reconstruction = self.decode(posterior.sample())
+    def call(self, x, training=None):
+        self.posterior = self.encode(x)
+        return self.decode(self.posterior.sample())
 
-        # TODO(mmatena): Figure out the right combination of reduce_mean and
-        # reduce_sum to use here.
-        loss_recon = tf.reduce_sum(tf.square(x - reconstruction))
-        loss_recon /= tf.cast(tf.shape(x)[0], tf.float32)
-        loss_kl = tf.reduce_mean(tfd.kl_divergence(posterior, self.prior))
-        return loss_recon, loss_kl
+    # def get_losses(self, x):
+    #     posterior = self.encode(x)
+    #     reconstruction = self.decode(posterior.sample())
 
-    def train_step(self, data):
-        self.step.assign_add(1)
+    #     # TODO(mmatena): Figure out the right combination of reduce_mean and
+    #     # reduce_sum to use here.
+    #     loss_recon = tf.reduce_sum(tf.square(x - reconstruction))
+    #     loss_recon /= tf.cast(tf.shape(x)[0], tf.float32)
+    #     loss_kl = tf.reduce_mean(tfd.kl_divergence(posterior, self.prior))
+    #     return loss_recon, loss_kl
 
-        x = self.x_from_data(data)
-        with tf.GradientTape() as tape:
-            loss_recon, loss_kl = self.get_losses(x)
+    # def train_step(self, data):
+    #     self.step.assign_add(1)
 
-            loss = loss_recon + self.beta * loss_kl
+    #     x = self.x_from_data(data)
+    #     with tf.GradientTape() as tape:
+    #         loss_recon, loss_kl = self.get_losses(x)
 
-        gradients = tape.gradient(loss, self.trainable_variables)
-        self.optimizer.apply_gradients(zip(gradients, self.trainable_variables))
+    #         loss = loss_recon + self.beta * loss_kl
 
-        tf.summary.scalar("loss", data=loss, step=self.step)
-        tf.summary.scalar("l2_loss", data=loss_recon, step=self.step)
-        tf.summary.scalar("kl_loss", data=loss_kl, step=self.step)
-        return {"loss": loss, "l2": loss_recon, "kl": loss_kl}
+    #     gradients = tape.gradient(loss, self.trainable_variables)
+    #     self.optimizer.apply_gradients(zip(gradients, self.trainable_variables))
+
+    #     tf.summary.scalar("loss", data=loss, step=self.step)
+    #     tf.summary.scalar("l2_loss", data=loss_recon, step=self.step)
+    #     tf.summary.scalar("kl_loss", data=loss_kl, step=self.step)
+    #     return {"loss": loss, "l2": loss_recon, "kl": loss_kl}

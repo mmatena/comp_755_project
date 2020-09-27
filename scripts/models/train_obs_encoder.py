@@ -71,15 +71,19 @@ def get_model(environment):
     return model(representation_size=FLAGS.representation_size)
 
 
+def get_final_ds_representation(x):
+    return x["observation"], x["observation"]
+
+
 def get_train_dataset(environment):
     m = locate(f"rl755.data.{environment.folder_name}.raw_rollouts")
     ds = m.RawRollouts().random_rollout_observations(
         obs_sampled_per_rollout=FLAGS.obs_sampled_per_rollout
     )
-    ds = ds.map(
-        lambda x: x["observation"], num_parallel_calls=tf.data.experimental.AUTOTUNE
+    ds = processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
+    return ds.map(
+        get_final_ds_representation, num_parallel_calls=tf.data.experimental.AUTOTUNE
     )
-    return processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
 
 
 def main(_):

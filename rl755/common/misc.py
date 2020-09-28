@@ -23,7 +23,7 @@ def evenly_partition(lis, n):
     """
     if isinstance(lis, int):
         # TODO(mmatena): This could be done in another functions without generating lists.
-        return [len(p) for p in evenly_partition(range(lis), n)]
+        return [len(p) for p in evenly_partition(list(range(lis)), n)]
 
     base_partition_size = len(lis) // n
     partitions = list(divide_chunks(lis, base_partition_size))

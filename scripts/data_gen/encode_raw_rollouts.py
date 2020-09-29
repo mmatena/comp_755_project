@@ -1,6 +1,7 @@
 """Train a VAE on random images collected from the rollouts."""
 import functools
 import os
+from pydoc import locate
 import time
 
 from absl import app
@@ -98,8 +99,8 @@ def get_dataset(outer_shard_index, num_outer_shards, num_sub_shards):
 
 
 def load_model(model_name, environment):
-    saved_models = getattr(models_module, environment.folder_name).saved_models
-    return getattr(saved_models, model_name)()
+    model = locate(f"rl755.models.{environment.folder_name}.saved_models.{model_name}")
+    return model()
 
 
 def encode_map_fn(x, model):

@@ -89,7 +89,6 @@ def get_dataset(outer_shard_index, num_outer_shards, num_sub_shards):
     ds = files.interleave(
         tf.data.TFRecordDataset,
         num_parallel_calls=tf.data.experimental.AUTOTUNE,
-        deterministic=False,
     )
     ds = ds.map(
         functools.partial(raw_rollouts.parse_tfrecord, process_observations=True),

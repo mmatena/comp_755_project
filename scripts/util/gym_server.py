@@ -23,7 +23,7 @@ IP_FILE = "/pine/scr/m/m/mmatena/tmp/gym_server_ip.txt"
 
 
 # Information to be returned after we do a step.
-StepInfo = collections.namedtuple("StepInfo", ["reward", "done"])
+StepInfo = collections.namedtuple("StepInfo", ["reward", "done", "observation"])
 
 
 class GymEnvironments(object):
@@ -55,8 +55,9 @@ class GymEnvironments(object):
             if action is None:
                 ret.append(None)
                 continue
-            _, reward, done, _ = env.step(action)
-            ret.append(StepInfo(reward=reward, done=done))
+            # _, reward, done, _ = env.step(action)
+            obs, reward, done, _ = env.step(action)
+            ret.append(StepInfo(reward=reward, done=done, observation=obs))
         return ret
 
     def render(self, whether_to_renders):

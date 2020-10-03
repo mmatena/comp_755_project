@@ -20,7 +20,7 @@ from rl755.models.car_racing import transformer
 from rl755.models.car_racing import saved_models
 from rl755.common.structs import Rollout
 
-StepInfo = collections.namedtuple("StepInfo", ["reward", "done"])
+StepInfo = collections.namedtuple("StepInfo", ["reward", "done", "observation"])
 
 
 def fn(x):
@@ -96,6 +96,49 @@ max_seqlen = 32
 #     )
 #     return np.mean([sum(r.reward_l) for r in rollouts])
 
+#
+# def batched_rollout(env, policy, max_steps, batch_size):
+#     print("TODO: The handling for dones is incorrect!")
+#     env.reset()
+#     policy.initialize(env=env, max_steps=max_steps)
+
+#     dones = batch_size * [False]
+
+#     rollout = Rollout()
+#     for step in range(max_steps):
+#         # TODO(mmatena): Support environments without a "state_pixels" render mode.
+#         start = time.time()
+#         whether_to_renders = pickle.dumps([not d for d in dones])
+#         obs = env.render(whether_to_renders)
+#         # This might happen if we are running on a remote gym server using rpc.
+#         if isinstance(obs, bytes):
+#             obs = pickle.loads(obs)
+#         print(f"Render time: {time.time() - start} s")
+
+#         start = time.time()
+#         action = policy.sample_action(obs=obs, step=step, rollout=rollout)
+#         print(f"Sample action time: {time.time() - start} s")
+
+#         start = time.time()
+#         step_infos = env.step(pickle.dumps(action))
+#         # This might happen if we are running on a remote gym server using rpc.
+#         if isinstance(step_infos, bytes):
+#             step_infos = pickle.loads(step_infos)
+#         print(f"Env step time: {time.time() - start} s")
+
+#         rollout.obs_l.append(obs)
+#         rollout.action_l.append(action)
+#         rollout.reward_l.append([si.reward for si in step_infos])
+
+#         for i, si in enumerate(step_infos):
+#             if si.done:
+#                 dones[i] = True
+
+#         if all(dones):
+#             break
+
+#     return [sum(s) for s in np.array(rollout.reward_l).T.tolist()]
+
 
 def batched_rollout(env, policy, max_steps, batch_size):
     print("TODO: The handling for dones is incorrect!")
@@ -106,14 +149,16 @@ def batched_rollout(env, policy, max_steps, batch_size):
 
     rollout = Rollout()
     for step in range(max_steps):
-        # TODO(mmatena): Support environments without a "state_pixels" render mode.
-        start = time.time()
-        whether_to_renders = pickle.dumps([not d for d in dones])
-        obs = env.render(whether_to_renders)
-        # This might happen if we are running on a remote gym server using rpc.
-        if isinstance(obs, bytes):
-            obs = pickle.loads(obs)
-        print(f"Render time: {time.time() - start} s")
+        if step == 0:
+            # TODO(mmatena): Support environments without a "state_pixels" render mode.
+            start = time.time()
+            whether_to_renders = pickle.dumps([not d for d in dones])
+            obs = env.render(whether_to_renders)
+            # This might happen if we are running on a remote gym server using rpc.
+            if isinstance(obs, bytes):
+                obs = pickle.loads(obs)
+            print(f"Render time: {time.time() - start} s")
+            rollout.obs_l.append(obs)
 
         start = time.time()
         action = policy.sample_action(obs=obs, step=step, rollout=rollout)
@@ -126,7 +171,7 @@ def batched_rollout(env, policy, max_steps, batch_size):
             step_infos = pickle.loads(step_infos)
         print(f"Env step time: {time.time() - start} s")
 
-        rollout.obs_l.append(obs)
+        rollout.obs_l.append([si.observation for si in step_infos])
         rollout.action_l.append(action)
         rollout.reward_l.append([si.reward for si in step_infos])
 

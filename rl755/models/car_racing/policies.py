@@ -144,7 +144,7 @@ class CarRacingPolicy(gym_rollouts.Policy):
         return inputs, mask, nonpadding_seqlen
 
     def sample_action(self, obs, step, rollout, **kwargs):
-        obs = np.ones([128, 96, 96, 3], dtype=np.uint8).aslist()
+        obs = np.ones([128, 96, 96, 3], dtype=np.uint8).tolist()
         start = time.time()
         obs = tf.cast(obs, tf.float32) / 255.0
         print(f"A: {time.time() - start} s")

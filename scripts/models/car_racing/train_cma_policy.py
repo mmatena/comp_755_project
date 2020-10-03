@@ -137,7 +137,7 @@ def batched_rollout(env, policy, max_steps, batch_size):
         if all(dones):
             break
 
-    return rollout.reward_l
+    return np.array(rollout.reward_l).T.tolist()
 
 
 def get_scores(solutions):

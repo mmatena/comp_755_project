@@ -47,9 +47,23 @@ class GymEnvironments(object):
         self.display.close()
 
     def step(self, actions):
+        # assert len(actions) == len(self.envs)
+        # ret = []
+        # for action, env in zip(actions, self.envs):
+        #     # None as actions means do nothing, can we used when one env
+        #     # is finished but others aren't.
+        #     if action is None:
+        #         ret.append(None)
+        #         continue
+        #     # _, reward, done, _ = env.step(action)
+        #     obs, reward, done, _ = env.step(action)
+        #     ret.append(StepInfo(reward=reward, done=done, observation=obs))
+        # return ret
         assert len(actions) == len(self.envs)
         ret = []
-        for action, env in zip(actions, self.envs):
+        # TODO: support other shapes
+        observations = np.empty([self.num_environments, 96, 96, 3], dtype=np.uint8)
+        for i, (action, env) in enumerate(zip(actions, self.envs)):
             # None as actions means do nothing, can we used when one env
             # is finished but others aren't.
             if action is None:
@@ -57,8 +71,9 @@ class GymEnvironments(object):
                 continue
             # _, reward, done, _ = env.step(action)
             obs, reward, done, _ = env.step(action)
-            ret.append(StepInfo(reward=reward, done=done, observation=obs))
-        return ret
+            observations[i] = obs
+            ret.append(StepInfo(reward=reward, done=done, observation=None))
+        return ret, observations
 
     def render(self, whether_to_renders):
         assert len(whether_to_renders) == len(self.envs)
@@ -105,12 +120,12 @@ class OpenAiGymService(rpyc.Service):
     def exposed_render(self, whether_to_renders):
         whether_to_renders = pickle.loads(whether_to_renders)
         ret = self.env.render(whether_to_renders)
-        return rpyc.core.brine.dump(pickle.dumps(ret))
+        return pickle.dumps(ret)
 
     def exposed_step(self, actions):
         actions = pickle.loads(actions)
         ret = self.env.step(actions)
-        return rpyc.core.brine.dump(pickle.dumps(ret))
+        return pickle.dumps(ret)
 
     def exposed_close(self):
         self.env.close()

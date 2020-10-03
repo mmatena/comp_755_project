@@ -210,7 +210,7 @@ max_seqlen = 32
 
 
 def make(env):
-    env.make("CarRacing-v0")
+    env.make("CarRacing-v0", num_environments=None)
 
 
 def reset(env):

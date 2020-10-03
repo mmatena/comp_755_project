@@ -8,6 +8,8 @@ Here is the information about a 3-d action vector:
 Values below/above the range are clipped to the min/max of the range, respectively.
 
 """
+import time
+
 from noise import pnoise1
 import numpy as np
 import tensorflow as tf
@@ -143,16 +145,20 @@ class CarRacingPolicy(gym_rollouts.Policy):
 
     def sample_action(self, obs, step, rollout, **kwargs):
         obs = tf.cast(obs, tf.float32) / 255.0
+        start = time.time()
         enc_obs = self.encoder.encode_tensor(obs)
+        print(f"VAE time: {time.time() - start} s")
         # TODO(mmatena): Handle this case better.
         if step == 0:
             self.encoded_obs.append(enc_obs)
             return self.policy.sample_action(np.zeros([enc_obs.shape[0], 256 + 32]))
         inputs, mask, nonpadding_seqlen = self._create_inputs(rollout)
+        start = time.time()
         # TODO(mmatena): This could be potentially be made hugely more efficient by reusing computations.
         hidden_state = self.sequence_model.get_hidden_representation(
             inputs, mask=mask, position=nonpadding_seqlen - 1
         )
+        print(f"Transformer time: {time.time() - start} s")
 
         self.encoded_obs.append(enc_obs)
 

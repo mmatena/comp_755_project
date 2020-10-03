@@ -4,6 +4,7 @@ import os
 import pickle
 import socket
 import time
+from absl import logging
 
 from absl import app
 from absl import flags
@@ -131,7 +132,7 @@ class OpenAiGymService(rpyc.Service):
         actions = pickle.loads(actions)
         start = time.time()
         ret = self.env.step(actions)
-        print(f"Step time: {time.time() - start}")
+        logging.info(f"Step time: {time.time() - start}")
         return pickle.dumps(ret)
 
     def exposed_close(self):

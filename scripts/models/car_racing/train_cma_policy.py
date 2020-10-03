@@ -167,10 +167,10 @@ def batched_rollout(env, policy, max_steps, batch_size):
         print(f"Sample action time: {time.time() - start} s")
 
         start = time.time()
-        step_infos, observations = env.step(pickle.dumps(action))
+        step_infos = env.step(pickle.dumps(action))
         # This might happen if we are running on a remote gym server using rpc.
         if isinstance(step_infos, bytes):
-            step_infos = pickle.loads(step_infos)
+            step_infos, observations = pickle.loads(step_infos)
         print(f"Env step time: {time.time() - start} s")
 
         rollout.obs_l.append(observations)

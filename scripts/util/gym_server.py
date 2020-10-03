@@ -56,13 +56,13 @@ class GymEnvironments(object):
             logging.info(actual_spec)
             return _original_get_display(actual_spec)
 
-        with mock.patch.object(
+        mock.patch.object(
             rendering,
             "get_display",
             functools.partial(our_get_display, actual_spec=f":{self.display.display}"),
-        ):
+        )
 
-            self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
+        self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
         for env in self.envs:
             env.reset()
 

@@ -213,7 +213,7 @@ for i in range(2):
     start = time.time()
     solutions = es.ask()
 
-    num_trials = 4
+    num_trials = 16
     args = functools.reduce(list.__add__, [num_trials * [s] for s in solutions])
 
     scores = get_scores(args)

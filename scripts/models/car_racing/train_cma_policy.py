@@ -149,6 +149,7 @@ def batched_rollout(env, policy, max_steps, batch_size):
     dones = batch_size * [False]
     rollout = Rollout()
     for step in range(max_steps):
+        step_start = time.time()
         if step == 0:
             # TODO(mmatena): Support environments without a "state_pixels" render mode.
             start = time.time()
@@ -183,6 +184,8 @@ def batched_rollout(env, policy, max_steps, batch_size):
 
         if all(dones):
             break
+
+        print(f"Step time: {time.time() - step_start} s")
 
     return [sum(s) for s in np.array(rollout.reward_l).T.tolist()]
 

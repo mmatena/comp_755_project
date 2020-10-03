@@ -145,8 +145,7 @@ class CarRacingPolicy(gym_rollouts.Policy):
 
     def sample_action(self, obs, step, rollout, **kwargs):
         start = time.time()
-        # obs = tf.cast(obs, tf.float32) / 255.0
-        obs = tf.cast(tf.ones([128, 96, 96, 3], dtype=tf.uint8), tf.float32) / 255.0
+        obs = tf.cast(obs, tf.float32) / 255.0
         print(f"A: {time.time() - start} s")
 
         # start = time.time()

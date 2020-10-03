@@ -55,7 +55,7 @@ with open(IP_FILE, "r") as f:
     ip = f.read()
 
 # TODO(mmatena): Make this configurable.
-conn = rpyc.connect(ip, 18861, config={"allow_all_attrs": True})
+conn = rpyc.connect(ip, 18861, config={"allow_pickle": True})
 conn._config["sync_request_timeout"] = None
 gym_service = conn.root
 

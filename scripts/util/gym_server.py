@@ -125,8 +125,7 @@ def main(_):
         OpenAiGymService,
         port=FLAGS.port,
         protocol_config={
-            "allow_public_attrs": True,
-            "allow_all_attrs": True,
+            "allow_pickle": True,
         },
     )
     t.start()

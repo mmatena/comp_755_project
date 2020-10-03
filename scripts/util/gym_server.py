@@ -4,6 +4,9 @@ import os
 import pickle
 import socket
 import time
+import concurrent.futures
+
+
 from absl import logging
 
 from absl import app
@@ -52,21 +55,29 @@ class GymEnvironments(object):
 
     def step(self, actions):
         assert len(actions) == len(self.envs)
-        ret = []
         # TODO: support other shapes
         observations = np.empty([self.num_environments, 96, 96, 3], dtype=np.uint8)
         rewards = np.empty([self.num_environments], dtype=np.float32)
-        for i, (action, env) in enumerate(zip(actions, self.envs)):
-            # None as actions means do nothing, can we used when one env
-            # is finished but others aren't.
-            if action is None:
-                ret.append(None)
-                continue
-            # _, reward, done, _ = env.step(action)
+
+        def step_env(i, action, env):
             obs, reward, done, _ = env.step(action)
-            observations[i] = obs
-            rewards[i] = reward
-            # TODO(mmatena): Something with the dones
+            return obs, reward
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            future_to_index = {
+                executor.submit(step_env, action, env): i
+                for i, (action, env) in enumerate(zip(actions, self.envs))
+            }
+            for future in concurrent.futures.as_completed(future_to_index):
+                i = future_to_index[future]
+                obs, reward = future.result()
+                observations[i] = obs
+                rewards[i] = reward
+        # for i, (action, env) in enumerate(zip(actions, self.envs)):
+        #     obs, reward, done, _ = env.step(action)
+        #     observations[i] = obs
+        #     rewards[i] = reward
+        #     # TODO(mmatena): Something with the dones
         return StepInfo(reward=rewards, done=None, observation=observations)
 
     def render(self, whether_to_renders):

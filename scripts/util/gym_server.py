@@ -14,6 +14,9 @@ import numpy as np
 from pyvirtualdisplay import Display
 import rpyc
 from rpyc.utils.server import ThreadedServer
+from rpyc.core.channel import Channel
+
+Channel.COMPRESSION_LEVEL = 9
 
 FLAGS = flags.FLAGS
 

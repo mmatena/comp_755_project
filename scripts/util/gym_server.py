@@ -58,26 +58,11 @@ class GymEnvironments(object):
         # TODO: support other shapes
         observations = np.empty([self.num_environments, 96, 96, 3], dtype=np.uint8)
         rewards = np.empty([self.num_environments], dtype=np.float32)
-
-        def step_env(action, env):
+        for i, (action, env) in enumerate(zip(actions, self.envs)):
             obs, reward, done, _ = env.step(action)
-            return obs, reward
-
-        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-            future_to_index = {
-                executor.submit(step_env, action, env): i
-                for i, (action, env) in enumerate(zip(actions, self.envs))
-            }
-            for future in concurrent.futures.as_completed(future_to_index):
-                i = future_to_index[future]
-                obs, reward = future.result()
-                observations[i] = obs
-                rewards[i] = reward
-        # for i, (action, env) in enumerate(zip(actions, self.envs)):
-        #     obs, reward, done, _ = env.step(action)
-        #     observations[i] = obs
-        #     rewards[i] = reward
-        #     # TODO(mmatena): Something with the dones
+            observations[i] = obs
+            rewards[i] = reward
+            # TODO(mmatena): Something with the dones
         return StepInfo(reward=rewards, done=None, observation=observations)
 
     def render(self, whether_to_renders):

@@ -15,6 +15,7 @@ import tensorflow as tf
 from rl755.common import misc
 from rl755.data_gen import gym_rollouts
 from rl755.models.car_racing import policies
+from rl755.models.car_racing import transformer
 from rl755.models.car_racing import saved_models
 from rl755.common.structs import Rollout
 
@@ -39,8 +40,8 @@ class LinearPolicy(object):
         if isinstance(inputs, tf.Tensor):
             inputs = inputs.numpy()
         action = np.matmul(self.w, inputs) + self.b
-        action = np.reshape(action, [3])
-        return tuple(action.tolist())
+        action = np.reshape(action, [-1, 3])
+        return action
 
 
 # TODO(mmatena): Make this cleaner.
@@ -55,8 +56,8 @@ gym_service = conn.root
 
 
 encoder = saved_models.raw_rollout_vae_32ld()
-sequence_model = saved_models.encoded_rollout_transformer()
-sequence_model.return_layer_outputs = True
+# sequence_model = saved_models.encoded_rollout_transformer()
+sequence_model = transformer.base_deterministic_transformer()
 in_size = 256 + 32
 out_size = 3
 max_seqlen = 32

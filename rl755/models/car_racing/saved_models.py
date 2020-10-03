@@ -13,12 +13,7 @@ saved parameters and architecture manually.
 from bert.transformer import TransformerEncoderLayer
 import tensorflow as tf
 
-from rl755.models.car_racing.knn import KnnLookup
 from rl755.models.car_racing.vae import Vae
-from rl755.models.common.transformer import (
-    AutoregressiveLookupTransformer,
-    AutoregressiveTransformer,
-)
 
 import config
 

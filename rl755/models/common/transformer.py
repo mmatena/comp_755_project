@@ -85,6 +85,7 @@ class ArTransformer(SequentialModel):
             functools.partial(_our_create_attention_mask, mask=mask),
         ):
             output = self.transformer(inputs, mask=orig_mask, training=training)
+        self.penultimate_activations = output
         output = self.final_layer(output, training=training)
         return output
 
@@ -93,8 +94,22 @@ class ArTransformer(SequentialModel):
         return tf.keras.losses.MeanSquaredError()
 
     def get_hidden_representation(self, x, mask=None, training=None, position=-1):
-        # TODO
-        raise NotImplementedError()
+        """Returns the hidden representation used to represent the positiion in the sequence.
+
+        Args:
+            x: a tf.Tensor with dtype float32 and shape [batch, sequence, model_input]
+            mask: an optional boolean or int tf.Tensor with shape [batch, sequence]
+            training: bool, whether to call the transformer in train mode
+            position: a positive integer, the index in the sequence hidden representations to
+                returns
+        Returns:
+            A tf.Tensor of dtype float32 and shape [batch, hidden]
+        """
+        self(x, mask=mask, training=training)
+        # TODO(mmatena): This isn't the best layer to use, I'm just doing now for testing
+        # as its quick and easy.
+        print("TODO(mmatena): This isn't the best layer to use.")
+        return self.penultimate_activations[..., position, :]
 
 
 # Stuff below this line likely needs to be refactored.

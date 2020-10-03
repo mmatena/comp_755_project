@@ -164,7 +164,7 @@ def get_scores(solutions):
         policy=linear_policy,
         max_seqlen=max_seqlen,
     )
-    gym_service.make("CarRacing-v0")
+    gym_service.make("CarRacing-v0", len(solutions))
     print("Increase MAX STEPS!!!!!")
     return batched_rollout(
         gym_service, policy, max_steps=100, batch_size=len(solutions)

@@ -49,21 +49,26 @@ class GymEnvironments(object):
         self.display.start()
         from gym.envs.classic_control import rendering
 
-        _original_get_display = rendering.get_display
+        # _original_get_display = rendering.get_display
 
-        def our_get_display(spec, actual_spec):
-            del spec
-            logging.info(actual_spec)
-            return _original_get_display(actual_spec)
+        # def our_get_display(spec, actual_spec):
+        #     del spec
+        #     logging.info(actual_spec)
+        #     return _original_get_display(actual_spec)
 
-        mock.patch.object(
-            rendering,
-            "get_display",
-            functools.partial(our_get_display, actual_spec=f":{self.display.display}"),
-        )
+        # mock.patch.object(
+        #     rendering,
+        #     "get_display",
+        #     functools.partial(our_get_display, actual_spec=f":{self.display.display}"),
+        # )
 
         self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
         for env in self.envs:
+            WINDOW_W = 1000
+            WINDOW_H = 800
+            env.viewer = rendering.Viewer(
+                WINDOW_W, WINDOW_H, display=f":{self.display.display}"
+            )
             env.reset()
 
     def close(self):

@@ -1,4 +1,5 @@
 """Learns a simple policy using CMA."""
+import collections
 import functools
 import multiprocessing
 import pickle
@@ -18,6 +19,8 @@ from rl755.models.car_racing import policies
 from rl755.models.car_racing import transformer
 from rl755.models.car_racing import saved_models
 from rl755.common.structs import Rollout
+
+StepInfo = collections.namedtuple("StepInfo", ["reward", "done"])
 
 
 def fn(x):

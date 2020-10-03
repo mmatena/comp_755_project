@@ -63,7 +63,7 @@ class GymEnvironments(object):
             obs, reward, done, _ = env.step(action)
             return obs, reward
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
             future_to_index = {
                 executor.submit(step_env, action, env): i
                 for i, (action, env) in enumerate(zip(actions, self.envs))

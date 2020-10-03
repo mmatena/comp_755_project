@@ -107,24 +107,24 @@ def batched_rollout(env, policy, max_steps, batch_size):
     rollout = Rollout()
     for step in range(max_steps):
         # TODO(mmatena): Support environments without a "state_pixels" render mode.
-        # start = time.time()
+        start = time.time()
         whether_to_renders = pickle.dumps([not d for d in dones])
         obs = env.render(whether_to_renders)
         # This might happen if we are running on a remote gym server using rpc.
         if isinstance(obs, bytes):
             obs = pickle.loads(obs)
-        # print(f"Render time: {time.time() - start} s")
+        print(f"Render time: {time.time() - start} s")
 
-        # start = time.time()
+        start = time.time()
         action = policy.sample_action(obs=obs, step=step, rollout=rollout)
-        # print(f"Sample action time: {time.time() - start} s")
+        print(f"Sample action time: {time.time() - start} s")
 
-        # start = time.time()
+        start = time.time()
         step_infos = env.step(pickle.dumps(action))
         # This might happen if we are running on a remote gym server using rpc.
         if isinstance(step_infos, bytes):
             step_infos = pickle.loads(step_infos)
-        # print(f"Env step time: {time.time() - start} s")
+        print(f"Env step time: {time.time() - start} s")
 
         rollout.obs_l.append(obs)
         rollout.action_l.append(action)
@@ -177,25 +177,5 @@ for i in range(2):
 
     print(f"CMA step time: {time.time() - start} s")
 
-# for i in range(2):
-#     start = time.time()
-#     solutions = es.ask()
-
-#     num_trials = 2
-#     args = functools.reduce(list.__add__, [num_trials * [s] for s in solutions])
-
-#     # fitlist = np.zeros(es.popsize)
-#     # for i in range(es.popsize):
-#     #     fitlist[i] = get_score(solutions[i], num_trials=2)
-#     processes = 6
-#     with multiprocessing.Pool(processes=processes) as pool:
-#         scores = pool.map(get_score, args)
-#     scores = misc.divide_chunks(scores, num_trials)
-#     fitlist = [sum(s) for s in scores]
-
-#     es.tell(solutions, fitlist)
-
-#     print(f"CMA step time: {time.time() - start} s")
-# print(es.result)
 
 # CMA step time: 21 + 27 s

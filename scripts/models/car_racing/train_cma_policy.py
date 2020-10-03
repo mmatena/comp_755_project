@@ -146,7 +146,6 @@ def batched_rollout(env, policy, max_steps, batch_size):
     policy.initialize(env=env, max_steps=max_steps)
 
     dones = batch_size * [False]
-
     rollout = Rollout()
     for step in range(max_steps):
         if step == 0:

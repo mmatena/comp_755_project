@@ -160,6 +160,8 @@ def batched_rollout(env, policy, max_steps, batch_size):
             print(f"Render time: {time.time() - start} s")
             rollout.obs_l.append(obs)
 
+        obs = rollout.obs_l[-1]
+
         start = time.time()
         action = policy.sample_action(obs=obs, step=step, rollout=rollout)
         print(f"Sample action time: {time.time() - start} s")

@@ -135,6 +135,7 @@ class CarRacingPolicy(gym_rollouts.Policy):
 
         observations = tf.stack(observations, axis=-2)
         actions = tf.stack(actions, axis=-2)
+        actions = tf.cast(actions, tf.float32)
 
         inputs = tf.concat([observations, actions], axis=-1)
         inputs, mask = self._ensure_sequence_length(inputs)

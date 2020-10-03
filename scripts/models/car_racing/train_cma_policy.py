@@ -40,7 +40,7 @@ class LinearPolicy(object):
         if isinstance(inputs, tf.Tensor):
             inputs = inputs.numpy()
         # action = np.matmul(self.w, inputs) + self.b
-        action = np.tensordot(self.w, inputs, [[-1], [-1]]) + self.b
+        action = np.einsum("ijk,ik->ij", self.w, inputs) + self.b
         action = np.reshape(action, [-1, 3])
         return action
 

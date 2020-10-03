@@ -164,6 +164,8 @@ class CarRacingPolicy(gym_rollouts.Policy):
 
         policy_input = tf.concat([enc_obs, hidden_state], axis=-1)
 
+        start = time.time()
         action = self.policy.sample_action(policy_input)
+        print(f"Subpolicy time: {time.time() - start} s")
 
         return action

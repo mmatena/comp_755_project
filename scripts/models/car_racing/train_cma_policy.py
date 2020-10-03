@@ -137,7 +137,7 @@ def batched_rollout(env, policy, max_steps, batch_size):
         if all(dones):
             break
 
-    return rollout
+    return rollout.reward_l
 
 
 def get_scores(solutions):

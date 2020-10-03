@@ -59,7 +59,7 @@ class GymEnvironments(object):
         observations = np.empty([self.num_environments, 96, 96, 3], dtype=np.uint8)
         rewards = np.empty([self.num_environments], dtype=np.float32)
 
-        def step_env(i, action, env):
+        def step_env(action, env):
             obs, reward, done, _ = env.step(action)
             return obs, reward
 

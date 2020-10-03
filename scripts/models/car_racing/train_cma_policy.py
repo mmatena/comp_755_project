@@ -104,7 +104,8 @@ def batched_rollout(env, policy, max_steps, batch_size):
     for step in range(max_steps):
         # TODO(mmatena): Support environments without a "state_pixels" render mode.
         # start = time.time()
-        obs = env.render("state_pixels")
+        whether_to_renders = pickle.dumps([not d for d in dones])
+        obs = env.render(whether_to_renders)
         # This might happen if we are running on a remote gym server using rpc.
         if isinstance(obs, bytes):
             obs = pickle.loads(obs)
@@ -115,7 +116,7 @@ def batched_rollout(env, policy, max_steps, batch_size):
         # print(f"Sample action time: {time.time() - start} s")
 
         # start = time.time()
-        step_infos = env.step(action)
+        step_infos = env.step(pickle.dumps(action))
         # This might happen if we are running on a remote gym server using rpc.
         if isinstance(step_infos, bytes):
             step_infos = pickle.loads(step_infos)
@@ -133,25 +134,6 @@ def batched_rollout(env, policy, max_steps, batch_size):
             break
 
     return rollout
-
-
-# def get_score(flat_array):
-#     # conn = rpyc.connect(ip, 18861, config={"allow_all_attrs": True})
-#     # conn._config["sync_request_timeout"] = None
-#     # gym_service = conn.root
-
-#     linear_policy = LinearPolicy.from_flat_array(
-#         flat_array, in_size=in_size, out_size=out_size
-#     )
-#     policy = policies.CarRacingPolicy(
-#         encoder=encoder,
-#         sequence_model=sequence_model,
-#         policy=linear_policy,
-#         max_seqlen=max_seqlen,
-#     )
-#     gym_service.make("CarRacing-v0")
-#     print("Increase MAX STEPS!!!!!")
-#     return gym_rollouts.single_rollout(gym_service, policy, max_steps=100)
 
 
 def get_scores(solutions):

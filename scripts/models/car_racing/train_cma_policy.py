@@ -154,9 +154,7 @@ def batched_rollout(env, policy, max_steps, batch_size):
             start = time.time()
             whether_to_renders = pickle.dumps([not d for d in dones])
             obs = env.render(whether_to_renders)
-            # This might happen if we are running on a remote gym server using rpc.
-            if isinstance(obs, bytes):
-                obs = pickle.loads(obs)
+            obs = pickle.loads(rpyc.core.brine.load(obs))
             print(f"Render time: {time.time() - start} s")
             rollout.obs_l.append(obs)
 
@@ -168,9 +166,7 @@ def batched_rollout(env, policy, max_steps, batch_size):
 
         start = time.time()
         step_infos = env.step(pickle.dumps(action))
-        # This might happen if we are running on a remote gym server using rpc.
-        if isinstance(step_infos, bytes):
-            step_infos = pickle.loads(step_infos)
+        step_infos = pickle.loads(rpyc.core.brine.load(step_infos))
         print(f"Env step time: {time.time() - start} s")
 
         rollout.obs_l.append([si.observation for si in step_infos])

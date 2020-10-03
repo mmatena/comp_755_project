@@ -101,7 +101,6 @@ class OpenAiGymService(rpyc.Service):
             num_environments=num_environments,
             env_name=env_name,
         )
-        self.env.start()
 
     def exposed_render(self, whether_to_renders):
         whether_to_renders = pickle.loads(whether_to_renders)

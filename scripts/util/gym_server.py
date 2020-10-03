@@ -100,7 +100,7 @@ class SingleGymEnvironment(object):
     """Multiple synchornized gym environments."""
 
     def __init__(self, env_name):
-        self.env = gym.make(self.env_name)
+        self.env = gym.make(env_name)
         self.env.reset()
 
     def step(self, action):
@@ -178,12 +178,12 @@ class SingleOpenAiGymService(rpyc.Service):
         if self.env:
             self.env.reset()
 
-    def exposed_make(self, env_name, num_environments):
+    def exposed_make(self, env_name):
         self.env = SingleGymEnvironment(
             env_name=env_name,
         )
 
-    def exposed_render(self, whether_to_renders):
+    def exposed_render(self):
         ret = self.env.render()
         return pickle.dumps(ret)
 

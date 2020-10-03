@@ -210,7 +210,7 @@ max_seqlen = 32
 
 
 def make(env):
-    env.make("CarRacing-v0", num_environments=None)
+    env.make("CarRacing-v0")
 
 
 def reset(env):
@@ -219,7 +219,7 @@ def reset(env):
 
 def render(envs, pool):
     def _render(env):
-        obs = env.render(None)
+        obs = env.render()
         return pickle.loads(obs)
 
     obs = pool.map(_render, envs)

@@ -144,7 +144,7 @@ class CarRacingPolicy(gym_rollouts.Policy):
         return inputs, mask, nonpadding_seqlen
 
     def sample_action(self, obs, step, rollout, **kwargs):
-        start = time.time()
+        # start = time.time()
         obs = tf.cast(obs, tf.float32) / 255.0
         # start = time.time()
         enc_obs = self.encoder.encode_tensor(obs)
@@ -153,7 +153,9 @@ class CarRacingPolicy(gym_rollouts.Policy):
         if step == 0:
             self.encoded_obs.append(enc_obs)
             return self.policy.sample_action(np.zeros([enc_obs.shape[0], 256 + 32]))
+        start = time.time()
         inputs, mask, nonpadding_seqlen = self._create_inputs(rollout)
+        print(f"Create inputs time: {time.time() - start} s")
         # start = time.time()
         # TODO(mmatena): This could be potentially be made hugely more efficient by reusing computations.
         hidden_state = self.sequence_model.get_hidden_representation(
@@ -169,5 +171,5 @@ class CarRacingPolicy(gym_rollouts.Policy):
         action = self.policy.sample_action(policy_input)
         # print(f"Subpolicy time: {time.time() - start} s")
 
-        print(f"Inner sample action time time: {time.time() - start} s")
+        # print(f"Inner sample action time time: {time.time() - start} s")
         return action

@@ -6,7 +6,7 @@
 PROJECT_DIR=~/projects/comp_755_project
 
 NUM_CORES=16
-MEMORY=8g
+MEMORY=16g
 #############################################################
 
 module add python/3.6.6
@@ -29,7 +29,7 @@ launch() {
     --time=8:30:00 \
     --mem=${MEMORY} \
     --partition=volta-gpu \
-    --gres=gpu:2 \
+    --gres=gpu:1 \
     --qos=gpu_access \
     --wrap="\"$(run_python)\"")
   eval $CMD

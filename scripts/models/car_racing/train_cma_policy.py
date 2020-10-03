@@ -169,11 +169,7 @@ for i in range(2):
     num_trials = 2
     args = functools.reduce(list.__add__, [num_trials * [s] for s in solutions])
 
-    # fitlist = np.zeros(es.popsize)
-    # for i in range(es.popsize):
-    #     fitlist[i] = get_score(solutions[i], num_trials=2)
-    scores = get_scores(solutions)
-    print(scores)
+    scores = get_scores(args)
     scores = misc.divide_chunks(scores, num_trials)
     fitlist = [sum(s) / num_trials for s in scores]
 

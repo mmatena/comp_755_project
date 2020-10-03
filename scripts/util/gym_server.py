@@ -4,6 +4,7 @@ import os
 import pickle
 import socket
 import time
+import zlib
 
 from absl import app
 from absl import flags
@@ -105,12 +106,12 @@ class OpenAiGymService(rpyc.Service):
     def exposed_render(self, whether_to_renders):
         whether_to_renders = pickle.loads(whether_to_renders)
         ret = self.env.render(whether_to_renders)
-        return pickle.dumps(ret)
+        return zlib.compress(pickle.dumps(ret))
 
     def exposed_step(self, actions):
         actions = pickle.loads(actions)
         ret = self.env.step(actions)
-        return pickle.dumps(ret)
+        return zlib.compress(pickle.dumps(ret))
 
     def exposed_close(self):
         self.env.close()

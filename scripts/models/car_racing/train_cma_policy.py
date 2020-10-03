@@ -156,7 +156,7 @@ def batched_rollout(env, policy, max_steps, batch_size):
             obs = env.render(whether_to_renders)
             # This might happen if we are running on a remote gym server using rpc.
             if isinstance(obs, bytes):
-                obs = pickle.loads(zlib.decompress(obs))
+                obs = pickle.loads(obs)
             print(f"Render time: {time.time() - start} s")
             rollout.obs_l.append(obs)
 
@@ -170,7 +170,7 @@ def batched_rollout(env, policy, max_steps, batch_size):
         step_infos = env.step(pickle.dumps(action))
         # This might happen if we are running on a remote gym server using rpc.
         if isinstance(step_infos, bytes):
-            step_infos = pickle.loads(zlib.decompress(step_infos))
+            step_infos = pickle.loads(step_infos)
         print(f"Env step time: {time.time() - start} s")
 
         rollout.obs_l.append([si.observation for si in step_infos])

@@ -137,7 +137,7 @@ def batched_rollout(env, policy, max_steps, batch_size):
         if all(dones):
             break
 
-    return np.array(rollout.reward_l).T.tolist()
+    return [sum(s) for s in np.array(rollout.reward_l).T.tolist()]
 
 
 def get_scores(solutions):
@@ -174,7 +174,7 @@ for i in range(2):
     #     fitlist[i] = get_score(solutions[i], num_trials=2)
     scores = get_scores(solutions)
     scores = misc.divide_chunks(scores, num_trials)
-    fitlist = [sum(s) for s in scores]
+    fitlist = [sum(s) / num_trials for s in scores]
 
     es.tell(solutions, fitlist)
 

@@ -166,13 +166,13 @@ class CarRacingPolicy(gym_rollouts.Policy):
         # print(f"Transformer time: {time.time() - start} s")
 
         self.encoded_obs.append(enc_obs)
-        start = time.time()
+        # start = time.time()
         policy_input = tf.concat([enc_obs, hidden_state], axis=-1)
-        print(f"Concat time: {time.time() - start} s")
+        # print(f"Concat time: {time.time() - start} s")
 
         # start = time.time()
         action = self.policy.sample_action(policy_input)
         # print(f"Subpolicy time: {time.time() - start} s")
 
-        print(f"Inner sample action time time: {time.time() - start} s")
+        # print(f"Inner sample action time time: {time.time() - start} s")
         return action

@@ -26,10 +26,10 @@ def fn(x):
 
 class LinearPolicy(object):
     @staticmethod
-    def from_flat_array(array, in_size, out_size):
+    def from_flat_arrays(array, in_size, out_size):
         array = np.array(array)
-        w, b = array[:-out_size], array[-out_size:]
-        w = np.reshape(w, [out_size, in_size])
+        w, b = array[:, :-out_size], array[:, -out_size:]
+        w = np.reshape(w, [-1, out_size, in_size])
         return LinearPolicy(w=w, b=b)
 
     def __init__(self, w, b):
@@ -135,13 +135,28 @@ def batched_rollout(env, policy, max_steps, batch_size):
     return rollout
 
 
-def get_score(flat_array):
-    # conn = rpyc.connect(ip, 18861, config={"allow_all_attrs": True})
-    # conn._config["sync_request_timeout"] = None
-    # gym_service = conn.root
+# def get_score(flat_array):
+#     # conn = rpyc.connect(ip, 18861, config={"allow_all_attrs": True})
+#     # conn._config["sync_request_timeout"] = None
+#     # gym_service = conn.root
 
-    linear_policy = LinearPolicy.from_flat_array(
-        flat_array, in_size=in_size, out_size=out_size
+#     linear_policy = LinearPolicy.from_flat_array(
+#         flat_array, in_size=in_size, out_size=out_size
+#     )
+#     policy = policies.CarRacingPolicy(
+#         encoder=encoder,
+#         sequence_model=sequence_model,
+#         policy=linear_policy,
+#         max_seqlen=max_seqlen,
+#     )
+#     gym_service.make("CarRacing-v0")
+#     print("Increase MAX STEPS!!!!!")
+#     return gym_rollouts.single_rollout(gym_service, policy, max_steps=100)
+
+
+def get_scores(solutions):
+    linear_policy = LinearPolicy.from_flat_arrays(
+        solutions, in_size=in_size, out_size=out_size
     )
     policy = policies.CarRacingPolicy(
         encoder=encoder,
@@ -151,11 +166,9 @@ def get_score(flat_array):
     )
     gym_service.make("CarRacing-v0")
     print("Increase MAX STEPS!!!!!")
-    return gym_rollouts.single_rollout(gym_service, policy, max_steps=100)
-
-
-def get_scores(solutions):
-    pass
+    return batched_rollout(
+        gym_service, policy, max_steps=100, batch_size=len(solutions)
+    )
 
 
 # es = cma.CMAEvolutionStrategy(8 * [0], 0.5, {"popsize": 64})

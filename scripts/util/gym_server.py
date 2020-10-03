@@ -13,7 +13,6 @@ from absl import app
 from absl import flags
 
 import gym
-from gym.envs.box2d import car_racing
 
 import numpy as np
 
@@ -37,9 +36,6 @@ IP_FILE = "/pine/scr/m/m/mmatena/tmp/gym_server_ip.txt"
 StepInfo = collections.namedtuple("StepInfo", ["reward", "done", "observation"])
 
 
-car_racing.FPS = 200
-
-
 class GymEnvironments(object):
     """Multiple synchornized gym environments."""
 
@@ -51,30 +47,8 @@ class GymEnvironments(object):
     def _create_envs(self):
         self.display = Display(visible=0, size=(400, 300))
         self.display.start()
-        from gym.envs.classic_control import rendering
-
-        # _original_get_display = rendering.get_display
-
-        # def our_get_display(spec, actual_spec):
-        #     del spec
-        #     logging.info(actual_spec)
-        #     return _original_get_display(actual_spec)
-
-        # mock.patch.object(
-        #     rendering,
-        #     "get_display",
-        #     functools.partial(our_get_display, actual_spec=f":{self.display.display}"),
-        # )
-
-        self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
-        WINDOW_W = 1000
-        WINDOW_H = 800
-        viewer = rendering.Viewer(
-            WINDOW_W, WINDOW_H, display=f":{self.display.display}"
-        )
-        print("@@@@@", f":{self.display.display}")
         for env in self.envs:
-            env.viewer = viewer
+            env.metadata["video.frames_per_second"] = 200
             env.reset()
 
     def close(self):

@@ -151,7 +151,7 @@ class CarRacingPolicy(gym_rollouts.Policy):
             return self.policy.sample_action(np.zeros([enc_obs.shape[0], 256 + 32]))
         inputs, mask, nonpadding_seqlen = self._create_inputs(rollout)
         # TODO(mmatena): This could be potentially be made hugely more efficient by reusing computations.
-        hidden_state = self.sequence_model.get_last_representation_tensor(
+        hidden_state = self.sequence_model.get_hidden_representation(
             inputs, mask=mask, position=nonpadding_seqlen - 1
         )
 

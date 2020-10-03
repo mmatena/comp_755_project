@@ -16,7 +16,7 @@ import rpyc
 from rpyc.utils.server import ThreadedServer
 from rpyc.core.channel import Channel
 
-Channel.COMPRESSION_LEVEL = 9
+Channel.COMPRESSION_LEVEL = 6
 
 FLAGS = flags.FLAGS
 

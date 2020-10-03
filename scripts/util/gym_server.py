@@ -13,6 +13,7 @@ from absl import app
 from absl import flags
 
 import gym
+from gym.envs.box2d import car_racing
 
 import numpy as np
 
@@ -34,6 +35,9 @@ IP_FILE = "/pine/scr/m/m/mmatena/tmp/gym_server_ip.txt"
 
 # Information to be returned after we do a step.
 StepInfo = collections.namedtuple("StepInfo", ["reward", "done", "observation"])
+
+
+car_racing.FPS = 200
 
 
 class GymEnvironments(object):

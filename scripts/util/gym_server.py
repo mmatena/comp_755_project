@@ -63,6 +63,7 @@ class GymEnvironments(object):
         ret = []
         # TODO: support other shapes
         observations = np.empty([self.num_environments, 96, 96, 3], dtype=np.uint8)
+        rewards = np.empty([self.num_environments], dtype=np.float32)
         for i, (action, env) in enumerate(zip(actions, self.envs)):
             # None as actions means do nothing, can we used when one env
             # is finished but others aren't.
@@ -72,8 +73,9 @@ class GymEnvironments(object):
             # _, reward, done, _ = env.step(action)
             obs, reward, done, _ = env.step(action)
             observations[i] = obs
-            ret.append(StepInfo(reward=reward, done=done, observation=None))
-        return ret, observations
+            rewards[i] = reward
+            # TODO(mmatena): Something with the dones
+        return StepInfo(reward=rewards, done=None, observation=observations)
 
     def render(self, whether_to_renders):
         assert len(whether_to_renders) == len(self.envs)

@@ -172,12 +172,12 @@ def batched_rollout(env, policy, max_steps, batch_size):
         print(f"Env step time A: {time.time() - start} s")
         # This might happen if we are running on a remote gym server using rpc.
         if isinstance(step_infos, bytes):
-            step_infos, observations = pickle.loads(step_infos)
+            step_infos = pickle.loads(step_infos)
         print(f"Env step time: {time.time() - start} s")
 
-        rollout.obs_l.append(observations)
+        rollout.obs_l.append(step_infos.observations)
         rollout.action_l.append(action)
-        rollout.reward_l.append([si.reward for si in step_infos])
+        rollout.reward_l.append(step_infos.rewards)
 
         for i, si in enumerate(step_infos):
             if si.done:

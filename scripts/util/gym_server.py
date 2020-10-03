@@ -53,7 +53,7 @@ class GymEnvironments(object):
 
         def our_get_display(spec, actual_spec):
             del spec
-            print("@@@@", actual_spec)
+            logging.info(actual_spec)
             return _original_get_display(actual_spec)
 
         with mock.patch.object(

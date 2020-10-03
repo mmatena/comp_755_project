@@ -175,9 +175,9 @@ def batched_rollout(env, policy, max_steps, batch_size):
             step_infos = pickle.loads(step_infos)
         print(f"Env step time: {time.time() - start} s")
 
-        rollout.obs_l.append(step_infos.observations)
+        rollout.obs_l.append(step_infos.observation)
         rollout.action_l.append(action)
-        rollout.reward_l.append(step_infos.rewards)
+        rollout.reward_l.append(step_infos.reward)
 
         for i, si in enumerate(step_infos):
             if si.done:

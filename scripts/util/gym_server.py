@@ -63,13 +63,14 @@ class GymEnvironments(object):
         # )
 
         self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
+        WINDOW_W = 1000
+        WINDOW_H = 800
+        viewer = rendering.Viewer(
+            WINDOW_W, WINDOW_H, display=f":{self.display.display}"
+        )
         print("@@@@@", f":{self.display.display}")
         for env in self.envs:
-            WINDOW_W = 1000
-            WINDOW_H = 800
-            env.viewer = rendering.Viewer(
-                WINDOW_W, WINDOW_H, display=f":{self.display.display}"
-            )
+            env.viewer = viewer
             env.reset()
 
     def close(self):

@@ -179,12 +179,12 @@ def batched_rollout(env, policy, max_steps, batch_size):
         rollout.action_l.append(action)
         rollout.reward_l.append(step_infos.reward)
 
-        for i, si in enumerate(step_infos):
-            if si.done:
-                dones[i] = True
+        # for i, si in enumerate(step_infos):
+        #     if si.done:
+        #         dones[i] = True
 
-        if all(dones):
-            break
+        # if all(dones):
+        #     break
 
         print(f"Step time: {time.time() - step_start} s")
 

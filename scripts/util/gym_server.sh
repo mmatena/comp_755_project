@@ -5,7 +5,7 @@
 #############################################################
 PROJECT_DIR=~/projects/comp_755_project
 
-NUM_CORES=8
+NUM_CORES=16
 MEMORY=8g
 #############################################################
 
@@ -29,7 +29,7 @@ launch() {
     --time=8:30:00 \
     --mem=${MEMORY} \
     --partition=volta-gpu \
-    --gres=gpu:1 \
+    --gres=gpu:2 \
     --qos=gpu_access \
     --wrap="\"$(run_python)\"")
   eval $CMD

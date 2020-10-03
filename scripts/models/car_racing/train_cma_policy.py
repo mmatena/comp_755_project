@@ -56,9 +56,9 @@ with open(IP_FILE, "r") as f:
     ip = f.read()
 
 # TODO(mmatena): Make this configurable.
-# conn = rpyc.connect(ip, 18861, config={"allow_pickle": True})
-# conn._config["sync_request_timeout"] = None
-# gym_service = conn.root
+conn = rpyc.connect(ip, 18861, config={"allow_pickle": True})
+conn._config["sync_request_timeout"] = None
+gym_service = conn.root
 
 
 encoder = saved_models.raw_rollout_vae_32ld()
@@ -142,115 +142,23 @@ max_seqlen = 32
 #     return [sum(s) for s in np.array(rollout.reward_l).T.tolist()]
 
 
-# def batched_rollout(env, policy, max_steps, batch_size):
-#     print("TODO: The handling for dones is incorrect!")
-#     env.reset()
-#     policy.initialize(env=env, max_steps=max_steps)
-
-#     dones = batch_size * [False]
-#     rollout = Rollout()
-#     for step in range(max_steps):
-#         step_start = time.time()
-#         if step == 0:
-#             # TODO(mmatena): Support environments without a "state_pixels" render mode.
-#             start = time.time()
-#             whether_to_renders = pickle.dumps([not d for d in dones])
-#             obs = env.render(whether_to_renders)
-#             # This might happen if we are running on a remote gym server using rpc.
-#             if isinstance(obs, bytes):
-#                 obs = pickle.loads(obs)
-#             print(f"Render time: {time.time() - start} s")
-#             rollout.obs_l.append(obs)
-
-#         obs = rollout.obs_l[-1]
-
-#         start = time.time()
-#         action = policy.sample_action(obs=obs, step=step, rollout=rollout)
-#         print(f"Sample action time: {time.time() - start} s")
-
-#         start = time.time()
-#         step_infos = env.step(pickle.dumps(action))
-#         print(f"Env step time A: {time.time() - start} s")
-#         # This might happen if we are running on a remote gym server using rpc.
-#         if isinstance(step_infos, bytes):
-#             step_infos = pickle.loads(step_infos)
-#         print(f"Env step time: {time.time() - start} s")
-
-#         rollout.obs_l.append(step_infos.observation)
-#         rollout.action_l.append(action)
-#         rollout.reward_l.append(step_infos.reward)
-
-#         # for i, si in enumerate(step_infos):
-#         #     if si.done:
-#         #         dones[i] = True
-
-#         # if all(dones):
-#         #     break
-
-#         print(f"Step time: {time.time() - step_start} s")
-
-#     return [sum(s) for s in np.array(rollout.reward_l).T.tolist()]
-
-
-# def get_scores(solutions):
-#     linear_policy = LinearPolicy.from_flat_arrays(
-#         solutions, in_size=in_size, out_size=out_size
-#     )
-#     policy = policies.CarRacingPolicy(
-#         encoder=encoder,
-#         sequence_model=sequence_model,
-#         policy=linear_policy,
-#         max_seqlen=max_seqlen,
-#     )
-#     gym_service.make("CarRacing-v0", len(solutions))
-#     print("Increase MAX STEPS!!!!!")
-#     return batched_rollout(
-#         gym_service, policy, max_steps=100, batch_size=len(solutions)
-#     )
-
-
-def make(env):
-    env.make("CarRacing-v0")
-
-
-def reset(env):
-    env.reset()
-
-
-def render(envs, pool):
-    def _render(env):
-        obs = env.render()
-        return pickle.loads(obs)
-
-    obs = pool.map(_render, envs)
-    return np.stack(obs, axis=0)
-
-
-def step_env(envs, actions, pool):
-    def _step(env, action):
-        ret = env.step(pickle.dumps(action))
-        return pickle.loads(ret)
-
-    step_infos = pool.starmap(_step, zip(envs, actions))
-    observations = np.array([s.observation for s in step_infos])
-    rewards = np.array([s.reward for s in step_infos])
-    return StepInfo(observation=observations, reward=rewards, done=None)
-
-
-def batched_rollout(envs, policy, pool, max_steps, batch_size):
+def batched_rollout(env, policy, max_steps, batch_size):
     print("TODO: The handling for dones is incorrect!")
-    # env.reset()
-    pool.map(reset, envs)
+    env.reset()
+    policy.initialize(env=env, max_steps=max_steps)
 
-    policy.initialize(env=None, max_steps=max_steps)
-
+    dones = batch_size * [False]
     rollout = Rollout()
     for step in range(max_steps):
         step_start = time.time()
         if step == 0:
             # TODO(mmatena): Support environments without a "state_pixels" render mode.
             start = time.time()
-            obs = render(envs, pool)
+            whether_to_renders = pickle.dumps([not d for d in dones])
+            obs = env.render(whether_to_renders)
+            # This might happen if we are running on a remote gym server using rpc.
+            if isinstance(obs, bytes):
+                obs = pickle.loads(obs)
             print(f"Render time: {time.time() - start} s")
             rollout.obs_l.append(obs)
 
@@ -261,7 +169,11 @@ def batched_rollout(envs, policy, pool, max_steps, batch_size):
         print(f"Sample action time: {time.time() - start} s")
 
         start = time.time()
-        step_infos = step_env(envs, action, pool)
+        step_infos = env.step(pickle.dumps(action))
+        print(f"Env step time A: {time.time() - start} s")
+        # This might happen if we are running on a remote gym server using rpc.
+        if isinstance(step_infos, bytes):
+            step_infos = pickle.loads(step_infos)
         print(f"Env step time: {time.time() - start} s")
 
         rollout.obs_l.append(step_infos.observation)
@@ -290,19 +202,11 @@ def get_scores(solutions):
         policy=linear_policy,
         max_seqlen=max_seqlen,
     )
-    envs = []
-    for i in range(len(solutions)):
-        conn = rpyc.connect(ip, 18861, config={"allow_pickle": True})
-        conn._config["sync_request_timeout"] = None
-        envs.append(conn.root)
-    # with multiprocessing.Pool(5) as pool:
-    with ThreadPool(5) as pool:
-        # [gym_service.make("CarRacing-v0") for _ in solutions]
-        pool.map(make, envs)
-        print("Increase MAX STEPS!!!!!")
-        return batched_rollout(
-            envs, policy, pool=pool, max_steps=100, batch_size=len(solutions)
-        )
+    gym_service.make("CarRacing-v0", len(solutions))
+    print("Increase MAX STEPS!!!!!")
+    return batched_rollout(
+        gym_service, policy, max_steps=100, batch_size=len(solutions)
+    )
 
 
 es = cma.CMAEvolutionStrategy(

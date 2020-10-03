@@ -39,8 +39,8 @@ class GymEnvironments(object):
         self._create_envs()
 
     def _create_envs(self):
-        # self.display = Display(visible=0, size=(400, 300))
-        # self.display.start()
+        self.display = Display(visible=0, size=(400, 300))
+        self.display.start()
         self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
         for env in self.envs:
             env.reset()
@@ -51,18 +51,6 @@ class GymEnvironments(object):
         self.display.close()
 
     def step(self, actions):
-        # assert len(actions) == len(self.envs)
-        # ret = []
-        # for action, env in zip(actions, self.envs):
-        #     # None as actions means do nothing, can we used when one env
-        #     # is finished but others aren't.
-        #     if action is None:
-        #         ret.append(None)
-        #         continue
-        #     # _, reward, done, _ = env.step(action)
-        #     obs, reward, done, _ = env.step(action)
-        #     ret.append(StepInfo(reward=reward, done=done, observation=obs))
-        # return ret
         assert len(actions) == len(self.envs)
         ret = []
         # TODO: support other shapes
@@ -96,40 +84,12 @@ class GymEnvironments(object):
             env.reset()
 
 
-class SingleGymEnvironment(object):
-    """Multiple synchornized gym environments."""
-
-    def __init__(self, env_name):
-        self.env = gym.make(env_name)
-        self.env.reset()
-
-    def step(self, action):
-        obs, reward, done, _ = self.env.step(action)
-        return StepInfo(reward=reward, done=None, observation=obs)
-
-    def render(self):
-        return self.env.render("state_pixels")
-
-    def reset(self):
-        self.env.reset()
-
-
 class OpenAiGymService(rpyc.Service):
     """Note that a new intance will be created for each connection."""
 
     def __init__(self):
         super().__init__()
         self.env = None
-
-    def on_connect(self, conn):
-        # code that runs when a connection is created
-        # (to init the service, if needed)
-        pass
-
-    def on_disconnect(self, conn):
-        # code that runs after the connection has already closed
-        # (to finalize the service, if needed)
-        pass
 
     def exposed_reset(self):
         if self.env:
@@ -157,56 +117,13 @@ class OpenAiGymService(rpyc.Service):
         self.env.close()
 
 
-class SingleOpenAiGymService(rpyc.Service):
-    """Note that a new intance will be created for each connection."""
-
-    def __init__(self):
-        super().__init__()
-        self.env = None
-
-    def on_connect(self, conn):
-        # code that runs when a connection is created
-        # (to init the service, if needed)
-        pass
-
-    def on_disconnect(self, conn):
-        # code that runs after the connection has already closed
-        # (to finalize the service, if needed)
-        pass
-
-    def exposed_reset(self):
-        if self.env:
-            self.env.reset()
-
-    def exposed_make(self, env_name):
-        self.env = SingleGymEnvironment(
-            env_name=env_name,
-        )
-
-    def exposed_render(self):
-        ret = self.env.render()
-        return pickle.dumps(ret)
-
-    def exposed_step(self, actions):
-        actions = pickle.loads(actions)
-        ret = self.env.step(actions)
-        return pickle.dumps(ret)
-
-    def exposed_close(self):
-        self.env.close()
-
-
 def main(_):
-    display = Display(visible=0, size=(400, 300))
-    display.start()
-
     hostname = socket.gethostbyname(socket.gethostname())
     with open(IP_FILE, "w+") as f:
         f.write(hostname)
 
     t = ThreadedServer(
-        # OpenAiGymService,
-        SingleOpenAiGymService,
+        OpenAiGymService,
         port=FLAGS.port,
         protocol_config={
             "allow_pickle": True,

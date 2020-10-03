@@ -13,7 +13,6 @@ from absl import app
 from absl import flags
 
 import gym
-from gym.envs.classic_control import rendering
 
 import numpy as np
 
@@ -36,14 +35,6 @@ IP_FILE = "/pine/scr/m/m/mmatena/tmp/gym_server_ip.txt"
 # Information to be returned after we do a step.
 StepInfo = collections.namedtuple("StepInfo", ["reward", "done", "observation"])
 
-_original_get_display = rendering.get_display
-
-
-def our_get_display(spec, actual_spec):
-    del spec
-    print("@@@@", actual_spec)
-    return _original_get_display(actual_spec)
-
 
 class GymEnvironments(object):
     """Multiple synchornized gym environments."""
@@ -56,6 +47,15 @@ class GymEnvironments(object):
     def _create_envs(self):
         self.display = Display(visible=0, size=(400, 300))
         self.display.start()
+        from gym.envs.classic_control import rendering
+
+        _original_get_display = rendering.get_display
+
+        def our_get_display(spec, actual_spec):
+            del spec
+            print("@@@@", actual_spec)
+            return _original_get_display(actual_spec)
+
         with mock.patch.object(
             rendering,
             "get_display",

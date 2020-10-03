@@ -30,10 +30,9 @@ class GymEnvironments(object):
     """Multiple synchornized gym environments."""
 
     def __init__(self, num_environments, env_name):
-        super().__init__()
-
         self.num_environments = num_environments
         self.env_name = env_name
+        self._create_envs()
 
     def _create_envs(self):
         self.display = Display(visible=0, size=(400, 300))

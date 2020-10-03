@@ -2,6 +2,7 @@
 import collections
 import functools
 import multiprocessing
+from multiprocessing.pool import ThreadPool
 import pickle
 import time
 import zlib
@@ -294,7 +295,8 @@ def get_scores(solutions):
         conn = rpyc.connect(ip, 18861, config={"allow_pickle": True})
         conn._config["sync_request_timeout"] = None
         envs.append(conn.root)
-    with multiprocessing.Pool(5) as pool:
+    # with multiprocessing.Pool(5) as pool:
+    with ThreadPool(5) as pool:
         # [gym_service.make("CarRacing-v0") for _ in solutions]
         pool.map(make, envs)
         print("Increase MAX STEPS!!!!!")

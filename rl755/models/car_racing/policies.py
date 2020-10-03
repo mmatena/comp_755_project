@@ -142,7 +142,6 @@ class CarRacingPolicy(gym_rollouts.Policy):
         return inputs, mask, nonpadding_seqlen
 
     def sample_action(self, obs, step, rollout, **kwargs):
-        print(f"Step: {step}")
         obs = tf.cast(obs, tf.float32) / 255.0
         enc_obs = self.encoder.encode_tensor(obs)
         # TODO(mmatena): Handle this case better.

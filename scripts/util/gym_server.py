@@ -124,7 +124,15 @@ def main(_):
     for _ in range(5):
         s.exposed_step(pickle.dumps(BATCH * [[1, 1.0, 1]]))
         s.exposed_step(pickle.dumps(BATCH * [[1, 1.0, 1]]))
-    logging.info(f"Step time: {time.time() - start}")
+    logging.info(f"Time: {time.time() - start}")
+    # 16.6 / 5
+    # 33.3 / 10
+
+    ######################################################
+    ######################################################
+    ######################################################
+    ######################################################
+    ######################################################
 
     # hostname = socket.gethostbyname(socket.gethostname())
     # with open(IP_FILE, "w+") as f:

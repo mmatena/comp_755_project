@@ -159,7 +159,7 @@ def get_scores(solutions):
 
 # es = cma.CMAEvolutionStrategy(8 * [0], 0.5, {"popsize": 64})
 es = cma.CMAEvolutionStrategy(
-    (in_size * out_size + out_size) * [0], 0.5, {"popsize": 2}
+    (in_size * out_size + out_size) * [0], 0.5, {"popsize": 3}
 )
 
 for i in range(2):
@@ -173,10 +173,11 @@ for i in range(2):
     # for i in range(es.popsize):
     #     fitlist[i] = get_score(solutions[i], num_trials=2)
     scores = get_scores(solutions)
+    print(scores)
     scores = misc.divide_chunks(scores, num_trials)
     fitlist = [sum(s) / num_trials for s in scores]
 
-    es.tell(solutions, fitlist)
+    es.tell(solutions, (np.array(fitlist)))
 
     print(f"CMA step time: {time.time() - start} s")
 

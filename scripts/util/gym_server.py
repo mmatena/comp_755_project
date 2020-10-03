@@ -4,7 +4,7 @@ import os
 import pickle
 import socket
 import time
-import concurrent.futures
+import functools
 
 
 from absl import logging
@@ -13,12 +13,16 @@ from absl import app
 from absl import flags
 
 import gym
+from gym.envs.classic_control import rendering
+
 import numpy as np
 
 from pyvirtualdisplay import Display
 import rpyc
 from rpyc.utils.server import ThreadedServer
 from rpyc.core.channel import Channel
+
+from unittest import mock
 
 Channel.COMPRESSION_LEVEL = 6
 
@@ -32,6 +36,13 @@ IP_FILE = "/pine/scr/m/m/mmatena/tmp/gym_server_ip.txt"
 # Information to be returned after we do a step.
 StepInfo = collections.namedtuple("StepInfo", ["reward", "done", "observation"])
 
+_original_get_display = rendering.get_display
+
+
+def our_get_display(spec, actual_spec):
+    del spec
+    return _original_get_display(actual_spec)
+
 
 class GymEnvironments(object):
     """Multiple synchornized gym environments."""
@@ -44,7 +55,13 @@ class GymEnvironments(object):
     def _create_envs(self):
         self.display = Display(visible=0, size=(400, 300))
         self.display.start()
-        self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
+        with mock.patch.object(
+            rendering,
+            "get_display",
+            functools.partial(our_get_display, actual_spec=f":{self.display.display}"),
+        ):
+
+            self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
         for env in self.envs:
             env.reset()
 

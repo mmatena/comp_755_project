@@ -159,7 +159,7 @@ def get_scores(solutions):
 
 # es = cma.CMAEvolutionStrategy(8 * [0], 0.5, {"popsize": 64})
 es = cma.CMAEvolutionStrategy(
-    (in_size * out_size + out_size) * [0], 0.5, {"popsize": 3}
+    (in_size * out_size + out_size) * [0], 0.5, {"popsize": 16}
 )
 
 for i in range(2):

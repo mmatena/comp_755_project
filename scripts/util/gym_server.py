@@ -41,6 +41,7 @@ _original_get_display = rendering.get_display
 
 def our_get_display(spec, actual_spec):
     del spec
+    print("@@@@", actual_spec)
     return _original_get_display(actual_spec)
 
 

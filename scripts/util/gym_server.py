@@ -64,8 +64,8 @@ class GymEnvironments(object):
 
         self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
         for env in self.envs:
-            WINDOW_W = 1000
-            WINDOW_H = 800
+            WINDOW_W = 96
+            WINDOW_H = 96
             env.viewer = rendering.Viewer(
                 WINDOW_W, WINDOW_H, display=f":{self.display.display}"
             )

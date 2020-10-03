@@ -129,7 +129,9 @@ class OpenAiGymService(rpyc.Service):
 
     def exposed_step(self, actions):
         actions = pickle.loads(actions)
+        start = time.time()
         ret = self.env.step(actions)
+        print(f"Step time: {time.time() - start}")
         return pickle.dumps(ret)
 
     def exposed_close(self):

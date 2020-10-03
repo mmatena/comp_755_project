@@ -47,6 +47,7 @@ class GymEnvironments(object):
     def _create_envs(self):
         self.display = Display(visible=0, size=(400, 300))
         self.display.start()
+        self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
         for env in self.envs:
             env.metadata["video.frames_per_second"] = 200
             env.reset()

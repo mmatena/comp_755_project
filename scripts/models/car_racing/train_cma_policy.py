@@ -39,7 +39,8 @@ class LinearPolicy(object):
     def sample_action(self, inputs):
         if isinstance(inputs, tf.Tensor):
             inputs = inputs.numpy()
-        action = np.matmul(self.w, inputs) + self.b
+        # action = np.matmul(self.w, inputs) + self.b
+        action = np.tensordot(self.w, inputs, [[-1], [-1]]) + self.b
         action = np.reshape(action, [-1, 3])
         return action
 

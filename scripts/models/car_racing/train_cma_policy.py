@@ -1,6 +1,7 @@
 """Learns a simple policy using CMA."""
 import functools
 import multiprocessing
+import pickle
 import time
 
 from absl import app
@@ -15,6 +16,7 @@ from rl755.common import misc
 from rl755.data_gen import gym_rollouts
 from rl755.models.car_racing import policies
 from rl755.models.car_racing import saved_models
+from rl755.common.structs import Rollout
 
 
 def fn(x):
@@ -90,6 +92,48 @@ max_seqlen = 32
 #     return np.mean([sum(r.reward_l) for r in rollouts])
 
 
+def batched_rollout(env, policy, max_steps, batch_size):
+    print("TODO: The handling for dones is incorrect!")
+    env.reset()
+    policy.initialize(env=env, max_steps=max_steps)
+
+    dones = batch_size * [False]
+
+    rollout = Rollout()
+    for step in range(max_steps):
+        # TODO(mmatena): Support environments without a "state_pixels" render mode.
+        # start = time.time()
+        obs = env.render("state_pixels")
+        # This might happen if we are running on a remote gym server using rpc.
+        if isinstance(obs, bytes):
+            obs = pickle.loads(obs)
+        # print(f"Render time: {time.time() - start} s")
+
+        # start = time.time()
+        action = policy.sample_action(obs=obs, step=step, rollout=rollout)
+        # print(f"Sample action time: {time.time() - start} s")
+
+        # start = time.time()
+        step_infos = env.step(action)
+        # This might happen if we are running on a remote gym server using rpc.
+        if isinstance(step_infos, bytes):
+            step_infos = pickle.loads(step_infos)
+        # print(f"Env step time: {time.time() - start} s")
+
+        rollout.obs_l.append(obs)
+        rollout.action_l.append(action)
+        rollout.reward_l.append([si.reward for si in step_infos])
+
+        for i, si in enumerate(step_infos):
+            if si.done:
+                dones[i] = True
+
+        if all(dones):
+            break
+
+    return rollout
+
+
 def get_score(flat_array):
     # conn = rpyc.connect(ip, 18861, config={"allow_all_attrs": True})
     # conn._config["sync_request_timeout"] = None
@@ -109,17 +153,15 @@ def get_score(flat_array):
     return gym_rollouts.single_rollout(gym_service, policy, max_steps=100)
 
 
-# It looks like OpenAI gym requires some sort of display, so we
-# have to fake one.
-display = Display(visible=0, size=(400, 300))
-display.start()
+def get_scores(solutions):
+    pass
 
-# ray.init(address="localhost:6379")
 
 # es = cma.CMAEvolutionStrategy(8 * [0], 0.5, {"popsize": 64})
 es = cma.CMAEvolutionStrategy(
     (in_size * out_size + out_size) * [0], 0.5, {"popsize": 2}
 )
+
 for i in range(2):
     start = time.time()
     solutions = es.ask()
@@ -130,15 +172,33 @@ for i in range(2):
     # fitlist = np.zeros(es.popsize)
     # for i in range(es.popsize):
     #     fitlist[i] = get_score(solutions[i], num_trials=2)
-    processes = 6
-    with multiprocessing.Pool(processes=processes) as pool:
-        scores = pool.map(get_score, args)
+    scores = get_scores(solutions)
     scores = misc.divide_chunks(scores, num_trials)
     fitlist = [sum(s) for s in scores]
 
     es.tell(solutions, fitlist)
 
     print(f"CMA step time: {time.time() - start} s")
+
+# for i in range(2):
+#     start = time.time()
+#     solutions = es.ask()
+
+#     num_trials = 2
+#     args = functools.reduce(list.__add__, [num_trials * [s] for s in solutions])
+
+#     # fitlist = np.zeros(es.popsize)
+#     # for i in range(es.popsize):
+#     #     fitlist[i] = get_score(solutions[i], num_trials=2)
+#     processes = 6
+#     with multiprocessing.Pool(processes=processes) as pool:
+#         scores = pool.map(get_score, args)
+#     scores = misc.divide_chunks(scores, num_trials)
+#     fitlist = [sum(s) for s in scores]
+
+#     es.tell(solutions, fitlist)
+
+#     print(f"CMA step time: {time.time() - start} s")
 # print(es.result)
 
 # CMA step time: 21 + 27 s

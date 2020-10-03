@@ -5,8 +5,8 @@
 #############################################################
 PROJECT_DIR=~/projects/comp_755_project
 
-NUM_CORES=4
-MEMORY=4g
+NUM_CORES=8
+MEMORY=8g
 #############################################################
 
 module add python/3.6.6
@@ -14,11 +14,10 @@ module add tensorflow_py3/2.1.0
 module add gcc/9.1.0
 
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
-# LD_EXPORT_CMD="export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/package_hacks/gcc/9.1.0/lib64"
+
 
 run_python() {
-  # echo "python $PROJECT_DIR/scripts/util/gym_server.py"
-  echo "python $PROJECT_DIR/scripts/util/parallel_gym_2.py"
+  echo "python $PROJECT_DIR/scripts/util/gym_server.py"
 }
 
 

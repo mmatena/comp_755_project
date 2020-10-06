@@ -31,7 +31,7 @@ launch() {
     --time=2:30:00 \
     --mem=8g \
     --partition=gpu \
-    --gres=gpu:4 \
+    --gres=gpu:1 \
     --qos=gpu_access \
     --pty \
     $(run_singularity))

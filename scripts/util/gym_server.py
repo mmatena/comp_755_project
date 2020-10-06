@@ -57,6 +57,7 @@ Channel.COMPRESSION_LEVEL = 6
 FLAGS = flags.FLAGS
 
 flags.DEFINE_integer("port", 18861, "The port to listen on.")
+flags.DEFINE_integer("parallelism", 1, "")
 
 IP_FILE = "/pine/scr/m/m/mmatena/tmp/gym_server_ip.txt"
 
@@ -591,6 +592,12 @@ class CarRacing(gym.Env, EzPickle):
         self.score_label.draw()
 
 
+##########################################################################
+##########################################################################
+##########################################################################
+##########################################################################
+
+
 class GymEnvironments(object):
     """Multiple synchornized gym environments."""
 
@@ -640,12 +647,47 @@ class GymEnvironments(object):
             env.reset()
 
 
+# class OpenAiGymService(rpyc.Service):
+#     """Note that a new intance will be created for each connection."""
+
+#     def __init__(self):
+#         super().__init__()
+#         self.env = None
+#         self.parallelism = FLAGS.parallelism
+
+#     def exposed_reset(self):
+#         if self.env:
+#             self.env.reset()
+
+#     def exposed_make(self, env_name, num_environments):
+#         self.env = GymEnvironments(
+#             num_environments=num_environments,
+#             env_name=env_name,
+#         )
+
+#     def exposed_render(self, whether_to_renders):
+#         whether_to_renders = pickle.loads(whether_to_renders)
+#         ret = self.env.render(whether_to_renders)
+#         return pickle.dumps(ret)
+
+#     def exposed_step(self, actions):
+#         actions = pickle.loads(actions)
+#         start = time.time()
+#         ret = self.env.step(actions)
+#         logging.info(f"Step time: {time.time() - start}")
+#         return pickle.dumps(ret)
+
+#     def exposed_close(self):
+#         self.env.close()
+
+
 class OpenAiGymService(rpyc.Service):
     """Note that a new intance will be created for each connection."""
 
     def __init__(self):
         super().__init__()
         self.env = None
+        self.parallelism = FLAGS.parallelism
 
     def exposed_reset(self):
         if self.env:
@@ -664,9 +706,9 @@ class OpenAiGymService(rpyc.Service):
 
     def exposed_step(self, actions):
         actions = pickle.loads(actions)
-        start = time.time()
+        # start = time.time()
         ret = self.env.step(actions)
-        logging.info(f"Step time: {time.time() - start}")
+        # logging.info(f"Step time: {time.time() - start}")
         return pickle.dumps(ret)
 
     def exposed_close(self):

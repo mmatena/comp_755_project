@@ -27,6 +27,14 @@ from unittest import mock
 from rl755.common import misc
 from rl755.environments.car_racing import CarRacing
 
+import pyglet
+
+# Errors otherwise in the singularity environment.
+pyglet.options["debug_gl"] = False
+if True:
+    from pyglet import gl
+
+
 Channel.COMPRESSION_LEVEL = 6
 
 FLAGS = flags.FLAGS
@@ -39,12 +47,6 @@ IP_FILE = "/pine/scr/m/m/mmatena/tmp/gym_server_ip.txt"
 
 # Information to be returned after we do a step.
 StepInfo = collections.namedtuple("StepInfo", ["reward", "done", "observation"])
-
-
-##########################################################################
-##########################################################################
-##########################################################################
-##########################################################################
 
 
 class GymEnvironments(object):

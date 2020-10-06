@@ -700,7 +700,7 @@ class OpenAiGymService(rpyc.Service):
         self.parallelism = FLAGS.parallelism
 
     def exposed_reset(self):
-        ray.get([env.remote.reset() for env in self.envs])
+        ray.get([env.reset.remote() for env in self.envs])
 
     def exposed_make(self, env_name, num_environments):
         partitions = misc.evenly_partition(num_environments, self.parallelism)
@@ -717,7 +717,7 @@ class OpenAiGymService(rpyc.Service):
         partitions = misc.evenly_partition(whether_to_renders, self.parallelism)
         ret = []
         for p, env in zip(partitions, self.envs):
-            ret.append(env.remote.render(p))
+            ret.append(env.render.remote(p))
         ret = ray.get(ret)
         # TODO: Need to combine stuff here.
         return pickle.dumps(ret)
@@ -727,13 +727,13 @@ class OpenAiGymService(rpyc.Service):
         partitions = misc.evenly_partition(actions, self.parallelism)
         ret = []
         for p, env in zip(partitions, self.envs):
-            ret.append(env.remote.step(p))
+            ret.append(env.step.remote(p))
         ret = ray.get(ret)
         # TODO: Need to combine stuff here.
         return pickle.dumps(ret)
 
     def exposed_close(self):
-        ray.get([env.remote.close() for env in self.envs])
+        ray.get([env.close.remote() for env in self.envs])
 
 
 def main(_):

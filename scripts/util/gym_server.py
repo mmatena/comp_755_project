@@ -59,8 +59,8 @@ class GymEnvironments(object):
         self._create_envs()
 
     def _create_envs(self):
-        # self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
-        self.envs = [CarRacing() for _ in range(self.num_environments)]
+        self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
+        # self.envs = [CarRacing() for _ in range(self.num_environments)]
         for env in self.envs:
             env.reset()
 

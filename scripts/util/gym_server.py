@@ -614,11 +614,8 @@ class GymEnvironments(object):
         self._create_envs()
 
     def _create_envs(self):
-        # self.display = Display(visible=0, size=(400, 300))
-        # self.display.start()
-
-        # self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
-        self.envs = [CarRacing() for _ in range(self.num_environments)]
+        self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
+        # self.envs = [CarRacing() for _ in range(self.num_environments)]
         for env in self.envs:
             env.reset()
 
@@ -762,6 +759,8 @@ def main(_):
     ######################################################
     ######################################################
     ######################################################
+    # display = Display(visible=0, size=(400, 300))
+    # display.start()
 
     # hostname = socket.gethostbyname(socket.gethostname())
     # with open(IP_FILE, "w+") as f:

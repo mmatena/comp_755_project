@@ -193,8 +193,11 @@ def main(_):
     logging.info(f"Time: {time.time() - start}")
 
     # Using gpu partition, 8g memory, 12 cpu, 1 gpu
+    # Times are for 10 steps with 128 envs.
+
     # No ray, fast car:
-    #   2.7282283306121826 s
+    #   2.7282283306121826
+
     # Ray, 1 parallelism, slow car:
     #   20.5257728099823
     # Ray, 2 parallelism, slow car:
@@ -211,6 +214,19 @@ def main(_):
     #   2.1441810131073
     # Ray, 64 parallelism, slow car:
     #   2.388378858566284
+
+    # Ray, 1 parallelism, fast car:
+    #   3.21494460105896
+    # Ray, 2 parallelism, fast car:
+    #   1.6657295227050781
+    # Ray, 4 parallelism, fast car:
+    #   1.0739614963531494
+    # Ray, 8 parallelism, fast car:
+    #   0.9639308452606201
+    # Ray, 12 parallelism, fast car:
+    #   0.8984279632568359
+    # Ray, 16 parallelism, fast car:
+    #   0.950084924697876
 
     ######################################################
     ######################################################

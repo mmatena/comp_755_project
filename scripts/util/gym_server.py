@@ -46,7 +46,10 @@ from gym.envs.box2d.car_dynamics import Car
 from gym.utils import colorize, seeding, EzPickle
 
 import pyglet
-from pyglet import gl
+
+pyglet.options["debug_gl"] = False
+if True:
+    from pyglet import gl
 
 #
 #
@@ -610,8 +613,8 @@ class GymEnvironments(object):
         self.display = Display(visible=0, size=(400, 300))
         self.display.start()
 
-        self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
-        # self.envs = [CarRacing() for _ in range(self.num_environments)]
+        # self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
+        self.envs = [CarRacing() for _ in range(self.num_environments)]
         for env in self.envs:
             env.reset()
 

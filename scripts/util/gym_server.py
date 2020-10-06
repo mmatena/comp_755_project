@@ -6,7 +6,6 @@ import socket
 import time
 import functools
 
-
 from absl import logging
 
 from absl import app
@@ -16,12 +15,16 @@ import gym
 
 import numpy as np
 
+import ray
+
 from pyvirtualdisplay import Display
 import rpyc
 from rpyc.utils.server import ThreadedServer
 from rpyc.core.channel import Channel
 
 from unittest import mock
+
+from rl755.common import misc
 
 #
 #
@@ -47,6 +50,7 @@ from gym.utils import colorize, seeding, EzPickle
 
 import pyglet
 
+# Errors otherwise in the singularity environment.
 pyglet.options["debug_gl"] = False
 if True:
     from pyglet import gl
@@ -650,40 +654,6 @@ class GymEnvironments(object):
             env.reset()
 
 
-class OpenAiGymService(rpyc.Service):
-    """Note that a new intance will be created for each connection."""
-
-    def __init__(self):
-        super().__init__()
-        self.env = None
-        self.parallelism = FLAGS.parallelism
-
-    def exposed_reset(self):
-        if self.env:
-            self.env.reset()
-
-    def exposed_make(self, env_name, num_environments):
-        self.env = GymEnvironments(
-            num_environments=num_environments,
-            env_name=env_name,
-        )
-
-    def exposed_render(self, whether_to_renders):
-        whether_to_renders = pickle.loads(whether_to_renders)
-        ret = self.env.render(whether_to_renders)
-        return pickle.dumps(ret)
-
-    def exposed_step(self, actions):
-        actions = pickle.loads(actions)
-        start = time.time()
-        ret = self.env.step(actions)
-        logging.info(f"Step time: {time.time() - start}")
-        return pickle.dumps(ret)
-
-    def exposed_close(self):
-        self.env.close()
-
-
 # class OpenAiGymService(rpyc.Service):
 #     """Note that a new intance will be created for each connection."""
 
@@ -709,13 +679,61 @@ class OpenAiGymService(rpyc.Service):
 
 #     def exposed_step(self, actions):
 #         actions = pickle.loads(actions)
-#         # start = time.time()
+#         start = time.time()
 #         ret = self.env.step(actions)
-#         # logging.info(f"Step time: {time.time() - start}")
+#         logging.info(f"Step time: {time.time() - start}")
 #         return pickle.dumps(ret)
 
 #     def exposed_close(self):
 #         self.env.close()
+
+RemoteGymEnvironments = ray.remote(GymEnvironments)
+
+
+class OpenAiGymService(rpyc.Service):
+    """Note that a new intance will be created for each connection."""
+
+    def __init__(self):
+        super().__init__()
+        self.envs = []
+        self.env = None
+        self.parallelism = FLAGS.parallelism
+
+    def exposed_reset(self):
+        ray.get([env.remote.reset() for env in self.envs])
+
+    def exposed_make(self, env_name, num_environments):
+        partitions = misc.evenly_partition(num_environments, self.parallelism)
+        self.envs = []
+        for num_envs in partitions:
+            env = RemoteGymEnvironments.remote(
+                num_environments=num_envs,
+                env_name=env_name,
+            )
+            self.envs.append(env)
+
+    def exposed_render(self, whether_to_renders):
+        whether_to_renders = pickle.loads(whether_to_renders)
+        partitions = misc.evenly_partition(whether_to_renders, self.parallelism)
+        ret = []
+        for p, env in zip(partitions, self.envs):
+            ret.append(env.remote.render(p))
+        ret = ray.get(ret)
+        # TODO: Need to combine stuff here.
+        return pickle.dumps(ret)
+
+    def exposed_step(self, actions):
+        actions = pickle.loads(actions)
+        partitions = misc.evenly_partition(actions, self.parallelism)
+        ret = []
+        for p, env in zip(partitions, self.envs):
+            ret.append(env.remote.step(p))
+        ret = ray.get(ret)
+        # TODO: Need to combine stuff here.
+        return pickle.dumps(ret)
+
+    def exposed_close(self):
+        ray.get([env.remote.close() for env in self.envs])
 
 
 def main(_):
@@ -730,8 +748,9 @@ def main(_):
         s.exposed_step(pickle.dumps(BATCH * [[1, 1.0, 1]]))
         s.exposed_step(pickle.dumps(BATCH * [[1, 1.0, 1]]))
     logging.info(f"Time: {time.time() - start}")
-    # 16.6 / 5
-    # 33.3 / 10
+
+    # No ray:
+    #   2.7282283306121826 s
 
     ######################################################
     ######################################################

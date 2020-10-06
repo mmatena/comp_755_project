@@ -233,11 +233,15 @@ def main(_):
     #   0.950084924697876
 
     #######################################################
-    # Using gpu partition, 8g memory, 12 cpu, 4 gpu
+    # Using gpu partition, 8g memory, 12 cpu, 1 gpu
     # Times are for 10 steps with 128 envs.
 
     # Ray, 1 parallelism, fast car:
-    #   0
+    #   7.674569845199585
+    # Ray, 4 parallelism, fast car:
+    #   5.7330076694488525
+    # Ray, 12 parallelism, fast car:
+    #   5.5085039138793945
 
     ######################################################
     ######################################################

@@ -29,9 +29,9 @@ launch() {
   CMD=$(echo srun \
     --ntasks=12 \
     --time=2:30:00 \
-    --mem=8g \
+    --mem=12g \
     --partition=gpu \
-    --gres=gpu:1 \
+    --gres=gpu:4 \
     --qos=gpu_access \
     --pty \
     $(run_shell))

@@ -25,7 +25,8 @@ from rpyc.core.channel import Channel
 from unittest import mock
 
 from rl755.common import misc
-from rl755.environments.car_racing import CarRacing
+
+# from rl755.environments.car_racing import CarRacing
 
 import pyglet
 

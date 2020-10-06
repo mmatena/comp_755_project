@@ -610,8 +610,8 @@ class GymEnvironments(object):
         self.display = Display(visible=0, size=(400, 300))
         self.display.start()
 
-        # self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
-        self.envs = [CarRacing() for _ in range(self.num_environments)]
+        self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
+        # self.envs = [CarRacing() for _ in range(self.num_environments)]
         for env in self.envs:
             env.reset()
 
@@ -647,40 +647,6 @@ class GymEnvironments(object):
             env.reset()
 
 
-# class OpenAiGymService(rpyc.Service):
-#     """Note that a new intance will be created for each connection."""
-
-#     def __init__(self):
-#         super().__init__()
-#         self.env = None
-#         self.parallelism = FLAGS.parallelism
-
-#     def exposed_reset(self):
-#         if self.env:
-#             self.env.reset()
-
-#     def exposed_make(self, env_name, num_environments):
-#         self.env = GymEnvironments(
-#             num_environments=num_environments,
-#             env_name=env_name,
-#         )
-
-#     def exposed_render(self, whether_to_renders):
-#         whether_to_renders = pickle.loads(whether_to_renders)
-#         ret = self.env.render(whether_to_renders)
-#         return pickle.dumps(ret)
-
-#     def exposed_step(self, actions):
-#         actions = pickle.loads(actions)
-#         start = time.time()
-#         ret = self.env.step(actions)
-#         logging.info(f"Step time: {time.time() - start}")
-#         return pickle.dumps(ret)
-
-#     def exposed_close(self):
-#         self.env.close()
-
-
 class OpenAiGymService(rpyc.Service):
     """Note that a new intance will be created for each connection."""
 
@@ -706,13 +672,47 @@ class OpenAiGymService(rpyc.Service):
 
     def exposed_step(self, actions):
         actions = pickle.loads(actions)
-        # start = time.time()
+        start = time.time()
         ret = self.env.step(actions)
-        # logging.info(f"Step time: {time.time() - start}")
+        logging.info(f"Step time: {time.time() - start}")
         return pickle.dumps(ret)
 
     def exposed_close(self):
         self.env.close()
+
+
+# class OpenAiGymService(rpyc.Service):
+#     """Note that a new intance will be created for each connection."""
+
+#     def __init__(self):
+#         super().__init__()
+#         self.env = None
+#         self.parallelism = FLAGS.parallelism
+
+#     def exposed_reset(self):
+#         if self.env:
+#             self.env.reset()
+
+#     def exposed_make(self, env_name, num_environments):
+#         self.env = GymEnvironments(
+#             num_environments=num_environments,
+#             env_name=env_name,
+#         )
+
+#     def exposed_render(self, whether_to_renders):
+#         whether_to_renders = pickle.loads(whether_to_renders)
+#         ret = self.env.render(whether_to_renders)
+#         return pickle.dumps(ret)
+
+#     def exposed_step(self, actions):
+#         actions = pickle.loads(actions)
+#         # start = time.time()
+#         ret = self.env.step(actions)
+#         # logging.info(f"Step time: {time.time() - start}")
+#         return pickle.dumps(ret)
+
+#     def exposed_close(self):
+#         self.env.close()
 
 
 def main(_):

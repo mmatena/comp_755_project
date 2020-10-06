@@ -614,8 +614,8 @@ class GymEnvironments(object):
         self._create_envs()
 
     def _create_envs(self):
-        self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
-        # self.envs = [CarRacing() for _ in range(self.num_environments)]
+        # self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
+        self.envs = [CarRacing() for _ in range(self.num_environments)]
         for env in self.envs:
             env.reset()
 
@@ -750,9 +750,25 @@ def main(_):
         s.exposed_step(pickle.dumps(BATCH * [[1, 1.0, 1]]))
     logging.info(f"Time: {time.time() - start}")
 
-    # Using gpu partition, 8g memory, 12 cpu
-    # No ray:
+    # Using gpu partition, 8g memory, 12 cpu, 1 gpu
+    # No ray, fast car:
     #   2.7282283306121826 s
+    # Ray, 1 parallelism, slow car:
+    #   20.5257728099823
+    # Ray, 2 parallelism, slow car:
+    #   10.191755294799805
+    # Ray, 4 parallelism, slow car:
+    #   5.053348541259766
+    # Ray, 8 parallelism, slow car:
+    #   3.4551267623901367
+    # Ray, 12 parallelism, slow car:
+    #   2.750385046005249
+    # Ray, 16 parallelism, slow car:
+    #   2.5808982849121094
+    # Ray, 32 parallelism, slow car:
+    #   2.1441810131073
+    # Ray, 64 parallelism, slow car:
+    #   2.388378858566284
 
     ######################################################
     ######################################################

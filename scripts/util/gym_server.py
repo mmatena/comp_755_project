@@ -609,6 +609,8 @@ class GymEnvironments(object):
     """Multiple synchornized gym environments."""
 
     def __init__(self, num_environments, env_name):
+        import pyglet
+
         self.num_environments = num_environments
         self.env_name = env_name
         self._create_envs()

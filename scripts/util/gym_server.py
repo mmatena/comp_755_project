@@ -196,7 +196,7 @@ def main(_):
     logging.info(f"Time: {time.time() - start}")
 
     #######################################################
-    # Using gpu partition, 8g memory, 12 cpu, 1 gpu
+    # On the login node:
     # Times are for 10 steps with 128 envs.
 
     # No ray, fast car:

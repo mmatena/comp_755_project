@@ -737,6 +737,8 @@ class OpenAiGymService(rpyc.Service):
 
 
 def main(_):
+    ray.init()
+
     BATCH = 128
     s = OpenAiGymService()
     s.exposed_make("CarRacing-v0", BATCH)
@@ -749,6 +751,7 @@ def main(_):
         s.exposed_step(pickle.dumps(BATCH * [[1, 1.0, 1]]))
     logging.info(f"Time: {time.time() - start}")
 
+    # Using gpu partition, 8g memory, 12 cpu
     # No ray:
     #   2.7282283306121826 s
 

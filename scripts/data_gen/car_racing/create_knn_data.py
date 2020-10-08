@@ -61,10 +61,6 @@ flags.mark_flag_as_required("out_name")
 SEQUENCE_LENGTH = 32
 
 
-def get_model():
-    return saved_models.encoded_rollout_transformer()
-
-
 def get_dataset_files():
     files = (
         tf.io.matching_files(encoded_rollouts.TFRECORDS_PATTERN.format(split="train"))
@@ -158,7 +154,7 @@ def main(_):
 
     ds = get_dataset()
 
-    model = get_model()
+    model = saved_models.encoded_rollout_transformer(env)
     model.return_layer_outputs = True
 
     start = time.time()

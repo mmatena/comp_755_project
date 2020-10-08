@@ -67,7 +67,7 @@ def get_environment():
 
 
 def get_policy(environment):
-    policy = locate(f"rl755.models.{environment.folder_name}.policies.{FLAGS.policy}")
+    policy = locate(f"rl755.models.policies.{FLAGS.policy}")
     return policy()
 
 

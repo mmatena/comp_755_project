@@ -70,7 +70,9 @@ def get_environment():
 
 def get_raw_rollouts_builder():
     env = get_environment()
-    return getattr(data_module, env.folder_name).raw_rollouts.RawRollouts()
+    #return getattr(data_module, env.folder_name).raw_rollouts.RawRollouts()
+    raw_rollouts = locate(f"rl755.data.{env.folder_name}.raw_rollouts.RawRollouts")
+    return raw_rollouts()
 
 
 def get_dataset_files():

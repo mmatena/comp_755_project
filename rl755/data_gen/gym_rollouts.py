@@ -9,7 +9,7 @@ import ray
 
 from rl755.common.misc import evenly_partition
 from rl755.common.structs import Rollout
-
+from rl755.environments import EnvironmentInfo, EnvironmentInfos
 
 class Policy(object):
     """Abstract base class for policies"""
@@ -95,12 +95,13 @@ def single_rollout(env, policy, max_steps):
     return rollout
 
 
-def serial_rollouts(env_name, policy, max_steps, num_rollouts, process_rollout_fn):
+def serial_rollouts(env_info, policy, max_steps, num_rollouts, process_rollout_fn):
     """Runs `num_rollouts` and applies `process_rollout_fn` to each generated Rollout object."""
-    if isinstance(env_name, str):
-        env = gym.make(env_name)
+    if isinstance(env_info, EnvironmentInfo):
+        env = gym.make(env_info.open_ai_name)
     else:
-        env = env_name
+        #Is this used?
+        env = env_info
     for _ in range(num_rollouts):
         rollout = single_rollout(env, policy=policy, max_steps=max_steps)
         process_rollout_fn(rollout)
@@ -108,12 +109,12 @@ def serial_rollouts(env_name, policy, max_steps, num_rollouts, process_rollout_f
 
 
 def parallel_rollouts(
-    env_name, policy, max_steps, num_rollouts, process_rollout_fn, parallelism=1
+    env_info, policy, max_steps, num_rollouts, process_rollout_fn, parallelism=1
 ):
     """Runs `num_rollouts` with up to `parallelism` rollouts occuring concurrently."""
     fn = ray.remote(serial_rollouts)
     do_rollouts = lambda num_serial: fn.remote(
-        env_name=env_name,
+        env_info=env_info,
         policy=policy,
         max_steps=max_steps,
         num_rollouts=num_serial,

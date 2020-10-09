@@ -23,9 +23,8 @@ class EnvironmentInfo(object):
         self.action_shape = action_shape
 
 
-@unique
-class Environments(Enum):
-    """All supported environments."""
+EnvironmentInfos = {
+    #"""All supported environments."""
 
     # The car racing environment. Here, observations are a uint8 tensor with
     # shape [96,96,3] representing an image.
@@ -35,32 +34,17 @@ class Environments(Enum):
     #     a[1]: [0, 1], gas
     #     a[2]: [0, 1], brakes
     # Values below/above the range are clipped to the min/max of the range, respectively.
-    CAR_RACING = EnvironmentInfo(
+    "CAR_RACING" : EnvironmentInfo(
         open_ai_name="CarRacing-v0",
         folder_name="car_racing",
         observation_shape=(96, 96, 3),
         action_shape=(3,),
-    )
+    ),
 
-    TAKE_COVER = EnvironmentInfo(
+    "TAKE_COVER" : EnvironmentInfo(
         open_ai_name="VizdoomTakeCover-v0",
         folder_name="take_cover",
         observation_shape=(96, 96, 3),
         action_shape=(1,),
     )
-    
-    @property
-    def open_ai_name(self):
-        return self.value.open_ai_name
-
-    @property
-    def folder_name(self):
-        return self.value.folder_name
-
-    @property
-    def observation_shape(self):
-        return self.value.observation_shape
-
-    @property
-    def action_shape(self):
-        return self.value.action_shape
+}

@@ -42,6 +42,13 @@ class Environments(Enum):
         action_shape=(3,),
     )
 
+    TAKE_COVER = EnvironmentInfo(
+        open_ai_name="VizdoomTakeCover-v0",
+        folder_name="take_cover",
+        observation_shape=(96, 96, 3),
+        action_shape=(1,),
+    )
+    
     @property
     def open_ai_name(self):
         return self.value.open_ai_name

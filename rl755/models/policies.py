@@ -20,6 +20,14 @@ from rl755.data_gen import gym_rollouts
 tfd = tfp.distributions
 
 
+class RandomIIDPolicy(gym_rollouts.Policy):
+        
+    def initialize(self, env, max_steps, **kwargs):
+        self.env = env
+
+    def sample_action(self, obs, step, rollout, **kwargs):
+        return self.env.action_space.sample()
+
 class HastingsRandomPolicy(gym_rollouts.Policy):
     """The random policy that Hastings Greer was using.
 

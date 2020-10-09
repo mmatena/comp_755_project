@@ -2,6 +2,7 @@
 import time
 
 import gym
+import vizdoomgym
 import numpy as np
 import pickle
 import ray
@@ -61,22 +62,26 @@ def single_rollout(env, policy, max_steps):
     policy.initialize(env=env, max_steps=max_steps)
 
     rollout = Rollout()
+    obs = env.observation_space.low
     for step in range(max_steps):
         # TODO(mmatena): Support environments without a "state_pixels" render mode.
         # start = time.time()
-        obs = env.render("state_pixels")
+#        obs = env.render("state_pixels")
         # print(f"Render time: {time.time() - start} s")
 
         # This might happen if we are running on a remote gym server using rpc.
-        if isinstance(obs, bytes):
-            obs = pickle.loads(obs)
+#        if isinstance(obs, bytes):
+#            obs = pickle.loads(obs)
+        # The previous version of this code had the network responding to the observation taken
+        # before its most recent action, for good reaction times it must respond to the observation
+        #taken after its most recent action.
 
         # start = time.time()
-        action = policy.sample_action(obs=obs.tolist(), step=step, rollout=rollout)
+        action = policy.sample_action(obs=obs, step=step, rollout=rollout)
         # print(f"Sample action time: {time.time() - start} s")
 
         # start = time.time()
-        _, reward, done, _ = env.step(action)
+        obs, reward, done, _ = env.step(action)
         # print(f"Env step time: {time.time() - start} s")
 
         rollout.obs_l.append(obs)

@@ -6,15 +6,12 @@ class LSTM(SequentialModel):
         super().__init__(**kwargs)
         self.output_size = output_size
         self.hidden_size = hidden_size
-        self.lstm = tf.keras.Sequential([
-            tf.keras.layers.Dense(units=self.hidden_size, activation=None),
-            tf.keras.layers.LSTM(units=self.hidden_size, return_sequences=True)
-        ])
+        self.lstm = tf.keras.layers.LSTM(units=self.hidden_size, return_sequences=True)
         self.final_layer = tf.keras.layers.Dense(
             units=self.output_size, activation=None
         )
 
-    def call(self, inputs, training=None):
+    def call(self, inputs, mask=None, training=None):
         x = self.lstm(inputs, training=training)
         self.hidden_output = x
         output = self.final_layer(x, training=training)
@@ -24,6 +21,6 @@ class LSTM(SequentialModel):
         """Train using a MSE loss."""
         return tf.keras.losses.MeanSquaredError()
 
-    def get_hidden_representation(self, x, training=None): 
-        self(x, training=training)
-        return self.hidden_output
+    def get_hidden_representation(self, x, mask=None, training=None, position=-1): 
+        self(x, training=training, mask=mask)
+        return self.hidden_output[..., position, :]

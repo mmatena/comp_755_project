@@ -31,6 +31,14 @@ Some of our infrastructure goals include:
 - Make use of the parallelism and storage available on the longleaf cluster.
 - Make switching between OpenAI Gym environments easy.
 
+## Adding vizdoom 
+```
+sudo apt-get install cmake libboost-all-dev libgtk2.0-dev libsdl2-dev python-numpy
+git clone https://github.com/shakenes/vizdoomgym.git
+cd vizdoomgym
+pip install -e .
+```
+
 ## Running experiments
 Our general experimental flow is based on the [World Models](https://arxiv.org/pdf/1803.10122.pdf) paper.
 Here is an overview:

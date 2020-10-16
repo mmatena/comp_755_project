@@ -13,9 +13,8 @@ from pyvirtualdisplay import Display
 
 from rl755 import models
 from rl755.data_gen import gym_rollouts
-from rl755.environments import Environments
+from rl755.environments import EnvironmentInfos
 
-_ENV_NAME_TO_ENV = Environments.__members__
 
 FLAGS = flags.FLAGS
 
@@ -35,13 +34,13 @@ flags.DEFINE_string("out_dir", None, "The directory to write the pickled rollout
 flags.DEFINE_enum(
     "environment",
     None,
-    _ENV_NAME_TO_ENV.keys(),
+    EnvironmentInfos.keys(),
     "Which environment (aka task) to do rollouts on.",
 )
 flags.DEFINE_string(
     "policy",
     None,
-    "The name of the policy to use. Will be accessed via rl755.models.$env.policies.$policy()."
+    "The name of the policy to use. Will be accessed via rl755.models.policies.$policy(env)."
     "It should subclass rl755.data_gen.gym_rollouts.Policy or be a function returning such an object."
     "It will be called with no arguments.",
 )
@@ -53,6 +52,8 @@ flags.mark_flag_as_required("out_dir")
 flags.mark_flag_as_required("environment")
 flags.mark_flag_as_required("policy")
 
+def get_environment_info():
+    return EnvironmentInfos[FLAGS.environment]
 
 def pickle_rollout(rollout, out_dir):
     # TODO(mmatena): Find better way to write to disc. Perhaps write as a tf record?
@@ -61,13 +62,10 @@ def pickle_rollout(rollout, out_dir):
         pickle.dump([rollout], f)
     os.close(fd)
 
-
-def get_environment():
-    return _ENV_NAME_TO_ENV[FLAGS.environment]
-
-
-def get_policy(environment):
+def get_policy(environment_info):
     policy = locate(f"rl755.models.policies.{FLAGS.policy}")
+    if not(policy):
+        raise("Policy Not Found")
     return policy()
 
 
@@ -79,17 +77,23 @@ def main(_):
 
     ray.init()
 
-    environment = get_environment()
-    policy = get_policy(environment)
+    environment_info = get_environment_info()
+    policy = get_policy(environment_info)
 
+    qualified_out_dir = os.path.join(FLAGS.out_dir, environment_info.folder_name)
+ 
+    if not os.path.exists(qualified_out_dir):
+        os.makedirs(qualified_out_dir)
     start = time.time()
 
     gym_rollouts.parallel_rollouts(
-        environment.open_ai_name,
+        environment_info,
         policy=policy,
         max_steps=FLAGS.max_steps,
         num_rollouts=FLAGS.num_rollouts,
-        process_rollout_fn=functools.partial(pickle_rollout, out_dir=FLAGS.out_dir),
+        process_rollout_fn=functools.partial(
+            pickle_rollout, 
+            out_dir=qualified_out_dir),
         parallelism=FLAGS.parallelism,
     )
 

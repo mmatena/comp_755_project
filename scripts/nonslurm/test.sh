@@ -1,7 +1,7 @@
 
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 python scripts/data_gen/car_racing/parallel_rollout_main.py \
-  --num_rollouts=12 \
+  --num_rollouts=120 \
   --parallelism=12 \
   --max_steps=1000 \
   --out_dir=tmp \

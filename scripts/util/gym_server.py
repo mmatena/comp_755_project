@@ -96,86 +96,87 @@ class GymEnvironments(object):
             env.reset()
 
 
-# class OpenAiGymService(rpyc.Service):
-#     """Note that a new intance will be created for each connection."""
-
-#     def __init__(self):
-#         super().__init__()
-#         self.env = None
-#         self.parallelism = FLAGS.parallelism
-
-#     def exposed_reset(self):
-#         if self.env:
-#             self.env.reset()
-
-#     def exposed_make(self, env_name, num_environments):
-#         self.env = GymEnvironments(
-#             num_environments=num_environments,
-#             env_name=env_name,
-#         )
-
-#     def exposed_render(self, whether_to_renders):
-#         whether_to_renders = pickle.loads(whether_to_renders)
-#         ret = self.env.render(whether_to_renders)
-#         return pickle.dumps(ret)
-
-#     def exposed_step(self, actions):
-#         actions = pickle.loads(actions)
-#         start = time.time()
-#         ret = self.env.step(actions)
-#         logging.info(f"Step time: {time.time() - start}")
-#         return pickle.dumps(ret)
-
-#     def exposed_close(self):
-#         self.env.close()
-
-RemoteGymEnvironments = ray.remote(GymEnvironments)
-
-
 class OpenAiGymService(rpyc.Service):
     """Note that a new intance will be created for each connection."""
 
     def __init__(self):
         super().__init__()
-        self.envs = []
         self.env = None
         self.parallelism = FLAGS.parallelism
 
     def exposed_reset(self):
-        ray.get([env.reset.remote() for env in self.envs])
+        if self.env:
+            self.env.reset()
 
     def exposed_make(self, env_name, num_environments):
-        partitions = misc.evenly_partition(num_environments, self.parallelism)
-        self.envs = []
-        for num_envs in partitions:
-            env = RemoteGymEnvironments.remote(
-                num_environments=num_envs,
-                env_name=env_name,
-            )
-            self.envs.append(env)
+        self.env = GymEnvironments(
+            num_environments=num_environments,
+            env_name=env_name,
+        )
 
     def exposed_render(self, whether_to_renders):
         whether_to_renders = pickle.loads(whether_to_renders)
-        partitions = misc.evenly_partition(whether_to_renders, self.parallelism)
-        ret = []
-        for p, env in zip(partitions, self.envs):
-            ret.append(env.render.remote(p))
-        ret = ray.get(ret)
-        # TODO: Need to combine stuff here.
+        ret = self.env.render(whether_to_renders)
         return pickle.dumps(ret)
 
     def exposed_step(self, actions):
         actions = pickle.loads(actions)
-        partitions = misc.evenly_partition(actions, self.parallelism)
-        ret = []
-        for p, env in zip(partitions, self.envs):
-            ret.append(env.step.remote(p))
-        ret = ray.get(ret)
-        # TODO: Need to combine stuff here.
+        start = time.time()
+        ret = self.env.step(actions)
+        logging.info(f"Step time: {time.time() - start}")
         return pickle.dumps(ret)
 
     def exposed_close(self):
-        ray.get([env.close.remote() for env in self.envs])
+        self.env.close()
+
+
+# RemoteGymEnvironments = ray.remote(GymEnvironments)
+
+
+# class OpenAiGymService(rpyc.Service):
+#     """Note that a new intance will be created for each connection."""
+
+#     def __init__(self):
+#         super().__init__()
+#         self.envs = []
+#         self.env = None
+#         self.parallelism = FLAGS.parallelism
+
+#     def exposed_reset(self):
+#         ray.get([env.reset.remote() for env in self.envs])
+
+#     def exposed_make(self, env_name, num_environments):
+#         partitions = misc.evenly_partition(num_environments, self.parallelism)
+#         self.envs = []
+#         for num_envs in partitions:
+#             env = RemoteGymEnvironments.remote(
+#                 num_environments=num_envs,
+#                 env_name=env_name,
+#             )
+#             self.envs.append(env)
+
+#     def exposed_render(self, whether_to_renders):
+#         whether_to_renders = pickle.loads(whether_to_renders)
+#         partitions = misc.evenly_partition(whether_to_renders, self.parallelism)
+#         ret = []
+#         for p, env in zip(partitions, self.envs):
+#             ret.append(env.render.remote(p))
+#         ret = ray.get(ret)
+#         # TODO: Need to combine stuff here.
+#         return pickle.dumps(ret)
+
+#     def exposed_step(self, actions):
+#         actions = pickle.loads(actions)
+#         partitions = misc.evenly_partition(actions, self.parallelism)
+#         ret = []
+#         for p, env in zip(partitions, self.envs):
+#             ret.append(env.step.remote(p))
+#         ret = ray.get(ret)
+#         # TODO: Need to combine stuff here.
+#         return pickle.dumps(ret)
+
+#     def exposed_close(self):
+#         ray.get([env.close.remote() for env in self.envs])
 
 
 def main(_):

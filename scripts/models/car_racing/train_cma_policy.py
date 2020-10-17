@@ -210,14 +210,14 @@ def get_scores(solutions):
 
 
 es = cma.CMAEvolutionStrategy(
-    (in_size * out_size + out_size) * [0], 0.5, {"popsize": 64}
+    (in_size * out_size + out_size) * [0], 0.5, {"popsize": 16}
 )
 
 for i in range(2):
     start = time.time()
     solutions = es.ask()
 
-    num_trials = 2
+    num_trials = 3
     args = functools.reduce(list.__add__, [num_trials * [s] for s in solutions])
 
     scores = get_scores(args)

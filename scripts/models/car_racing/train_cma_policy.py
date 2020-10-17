@@ -77,37 +77,37 @@ def batched_rollout(env, policy, max_steps, batch_size):
     dones = batch_size * [False]
     rollout = Rollout()
     for step in range(max_steps):
-        step_start = time.time()
+        # step_start = time.time()
         if step == 0:
             # TODO(mmatena): Support environments without a "state_pixels" render mode.
-            start = time.time()
+            # start = time.time()
             whether_to_renders = pickle.dumps([not d for d in dones])
             obs = env.render(whether_to_renders)
             # This might happen if we are running on a remote gym server using rpc.
             if isinstance(obs, bytes):
                 obs = pickle.loads(obs)
-            print(f"Render time: {time.time() - start} s")
+            # print(f"Render time: {time.time() - start} s")
             rollout.obs_l.append(obs)
 
         obs = rollout.obs_l[-1]
 
-        start = time.time()
+        # start = time.time()
         action = policy.sample_action(obs=obs, step=step, rollout=rollout)
-        print(f"Sample action time: {time.time() - start} s")
+        # print(f"Sample action time: {time.time() - start} s")
 
-        start = time.time()
+        # start = time.time()
         step_infos = env.step(pickle.dumps(action))
-        print(f"Env step time A: {time.time() - start} s")
+        # print(f"Env step time A: {time.time() - start} s")
         # This might happen if we are running on a remote gym server using rpc.
         if isinstance(step_infos, bytes):
             step_infos = pickle.loads(step_infos)
-        print(f"Env step time: {time.time() - start} s")
+        # print(f"Env step time: {time.time() - start} s")
 
         rollout.obs_l.append(step_infos.observation)
         rollout.action_l.append(action)
         rollout.reward_l.append(step_infos.reward)
 
-        print(f"Step time: {time.time() - step_start} s")
+        # print(f"Step time: {time.time() - step_start} s")
 
     return [sum(s) for s in np.array(rollout.reward_l).T.tolist()]
 
@@ -129,8 +129,10 @@ def get_scores(solutions):
     )
 
 
-POP_SIZE = 16
-NUM_TRIALS = 3
+# POP_SIZE = 16
+# NUM_TRIALS = 3
+POP_SIZE = 8
+NUM_TRIALS = 6
 CMA_STEPS = 100
 
 es = cma.CMAEvolutionStrategy(

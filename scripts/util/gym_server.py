@@ -180,21 +180,21 @@ class OpenAiGymService(rpyc.Service):
 
 
 def main(_):
-    display = Display(visible=0, size=(400, 300))
-    display.start()
-    # ray.init()
+    # display = Display(visible=0, size=(400, 300))
+    # display.start()
+    # # ray.init()
 
-    BATCH = 128
-    s = OpenAiGymService()
-    s.exposed_make("CarRacing-v0", BATCH)
-    s.exposed_step(pickle.dumps(BATCH * [[1, 1.0, 1]]))
-    s.exposed_step(pickle.dumps(BATCH * [[1, 1.0, 1]]))
+    # BATCH = 128
+    # s = OpenAiGymService()
+    # s.exposed_make("CarRacing-v0", BATCH)
+    # s.exposed_step(pickle.dumps(BATCH * [[1, 1.0, 1]]))
+    # s.exposed_step(pickle.dumps(BATCH * [[1, 1.0, 1]]))
 
-    start = time.time()
-    for _ in range(5):
-        s.exposed_step(pickle.dumps(BATCH * [[1, 1.0, 1]]))
-        s.exposed_step(pickle.dumps(BATCH * [[1, 1.0, 1]]))
-    logging.info(f"Time: {time.time() - start}")
+    # start = time.time()
+    # for _ in range(5):
+    #     s.exposed_step(pickle.dumps(BATCH * [[1, 1.0, 1]]))
+    #     s.exposed_step(pickle.dumps(BATCH * [[1, 1.0, 1]]))
+    # logging.info(f"Time: {time.time() - start}")
 
     #######################################################
     # On the login node:
@@ -249,21 +249,21 @@ def main(_):
     ######################################################
     ######################################################
     ######################################################
-    # display = Display(visible=0, size=(400, 300))
-    # display.start()
+    display = Display(visible=0, size=(400, 300))
+    display.start()
 
-    # hostname = socket.gethostbyname(socket.gethostname())
-    # with open(IP_FILE, "w+") as f:
-    #     f.write(hostname)
+    hostname = socket.gethostbyname(socket.gethostname())
+    with open(IP_FILE, "w+") as f:
+        f.write(hostname)
 
-    # t = ThreadedServer(
-    #     OpenAiGymService,
-    #     port=FLAGS.port,
-    #     protocol_config={
-    #         "allow_pickle": True,
-    #     },
-    # )
-    # t.start()
+    t = ThreadedServer(
+        OpenAiGymService,
+        port=FLAGS.port,
+        protocol_config={
+            "allow_pickle": True,
+        },
+    )
+    t.start()
 
 
 if __name__ == "__main__":

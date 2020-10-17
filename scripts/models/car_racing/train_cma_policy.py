@@ -131,12 +131,13 @@ def get_scores(solutions):
 
 POP_SIZE = 16
 NUM_TRIALS = 3
+CMA_STEPS = 15
 
 es = cma.CMAEvolutionStrategy(
     (in_size * out_size + out_size) * [0], 0.5, {"popsize": POP_SIZE}
 )
 
-for i in range(2):
+for i in range(CMA_STEPS):
     start = time.time()
     solutions = es.ask()
 

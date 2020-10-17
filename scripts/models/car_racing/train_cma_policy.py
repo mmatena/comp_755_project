@@ -131,7 +131,7 @@ def get_scores(solutions):
 
 POP_SIZE = 16
 NUM_TRIALS = 3
-CMA_STEPS = 25
+CMA_STEPS = 100
 
 es = cma.CMAEvolutionStrategy(
     (in_size * out_size + out_size) * [0], 0.5, {"popsize": POP_SIZE}

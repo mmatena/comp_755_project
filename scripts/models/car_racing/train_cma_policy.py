@@ -125,7 +125,7 @@ def get_scores(solutions):
     gym_service.make("CarRacing-v0", len(solutions))
     print("Increase MAX STEPS!!!!!")
     return batched_rollout(
-        gym_service, policy, max_steps=100, batch_size=len(solutions)
+        gym_service, policy, max_steps=250, batch_size=len(solutions)
     )
 
 
@@ -133,7 +133,7 @@ def get_scores(solutions):
 # NUM_TRIALS = 3
 POP_SIZE = 8
 NUM_TRIALS = 6
-CMA_STEPS = 250
+CMA_STEPS = 100
 
 es = cma.CMAEvolutionStrategy(
     (in_size * out_size + out_size) * [0], 0.5, {"popsize": POP_SIZE}

@@ -112,7 +112,7 @@ def batched_rollout(env, policy, max_steps, batch_size):
     return [sum(s) for s in np.array(rollout.reward_l).T.tolist()]
 
 
-def get_scores(solutions):
+def get_scores(solutions, max_steps):
     linear_policy = LinearPolicy.from_flat_arrays(
         solutions, in_size=in_size, out_size=out_size
     )
@@ -123,9 +123,9 @@ def get_scores(solutions):
         max_seqlen=max_seqlen,
     )
     gym_service.make("CarRacing-v0", len(solutions))
-    print("Increase MAX STEPS!!!!!")
+    # print("Increase MAX STEPS!!!!!")
     return batched_rollout(
-        gym_service, policy, max_steps=250, batch_size=len(solutions)
+        gym_service, policy, max_steps=max_steps, batch_size=len(solutions)
     )
 
 
@@ -133,7 +133,7 @@ def get_scores(solutions):
 # NUM_TRIALS = 3
 POP_SIZE = 8
 NUM_TRIALS = 6
-CMA_STEPS = 100
+CMA_STEPS = 250
 
 es = cma.CMAEvolutionStrategy(
     (in_size * out_size + out_size) * [0], 0.5, {"popsize": POP_SIZE}
@@ -146,7 +146,7 @@ for i in range(CMA_STEPS):
     num_trials = NUM_TRIALS
     args = functools.reduce(list.__add__, [num_trials * [s] for s in solutions])
 
-    scores = get_scores(args)
+    scores = get_scores(args, max_steps=20 + 5 * i)
     scores = misc.divide_chunks(scores, num_trials)
     fitlist = [sum(s) / num_trials for s in scores]
 
@@ -155,3 +155,4 @@ for i in range(CMA_STEPS):
 
     print(f"CMA step time: {time.time() - start} s")
     print(f"CMA max score: {max(fitlist)}")
+    print(f"CMA max score per step: {max(fitlist) / (20 + 5 * i)}")

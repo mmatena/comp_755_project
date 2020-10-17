@@ -65,7 +65,6 @@ class GymEnvironments(object):
     def close(self):
         for env in self.envs:
             env.close()
-        self.display.close()
 
     def step(self, actions):
         assert len(actions) == len(self.envs)
@@ -119,9 +118,9 @@ class OpenAiGymService(rpyc.Service):
 
     def exposed_step(self, actions):
         actions = pickle.loads(actions)
-        start = time.time()
+        # start = time.time()
         ret = self.env.step(actions)
-        logging.info(f"Step time: {time.time() - start}")
+        # logging.info(f"Step time: {time.time() - start}")
         return pickle.dumps(ret)
 
     def exposed_close(self):

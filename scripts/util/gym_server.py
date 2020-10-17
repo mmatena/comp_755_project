@@ -182,7 +182,7 @@ class OpenAiGymService(rpyc.Service):
 def main(_):
     display = Display(visible=0, size=(400, 300))
     display.start()
-    ray.init()
+    # ray.init()
 
     BATCH = 128
     s = OpenAiGymService()

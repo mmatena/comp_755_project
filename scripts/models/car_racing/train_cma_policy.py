@@ -148,7 +148,8 @@ for i in range(CMA_STEPS):
     scores = misc.divide_chunks(scores, num_trials)
     fitlist = [sum(s) / num_trials for s in scores]
 
-    es.tell(solutions, (np.array(fitlist)))
+    # We take the negative since our CMA is trying to reduce a loss.
+    es.tell(solutions, (-np.array(fitlist)))
 
     print(f"CMA step time: {time.time() - start} s")
     print(f"CMA max score: {max(fitlist)}")

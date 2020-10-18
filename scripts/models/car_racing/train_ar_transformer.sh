@@ -12,7 +12,7 @@ MODEL_DIR=/pine/scr/m/m/mmatena/mse_ar_transformer_train
 
 TRAIN_STEPS=100000
 
-NUM_GPUS=4
+NUM_GPUS=2
 NUM_CORES=8
 MEMORY=8g
 TIME="2-"

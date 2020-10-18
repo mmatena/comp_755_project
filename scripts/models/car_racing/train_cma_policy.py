@@ -1,9 +1,8 @@
 """Learns a simple policy using CMA."""
 import collections
 import functools
-import multiprocessing
-from multiprocessing.pool import ThreadPool
 import pickle
+from pydoc import locate
 import time
 import zlib
 
@@ -11,62 +10,90 @@ from absl import app
 from absl import flags
 import cma
 import numpy as np
-from pyvirtualdisplay import Display
 import rpyc
 import tensorflow as tf
 
 from rl755.common import misc
 from rl755.data_gen import gym_rollouts
-from rl755.models.car_racing import policies
-from rl755.models.car_racing import transformer
-from rl755.models.car_racing import saved_models
-from rl755.common.structs import Rollout
+from rl755.models.common.learned_policy import PolicyWrapper
+from rl755.common.structs import Rollout, StepInfo
+from rl755.environments import Environments
 
-StepInfo = collections.namedtuple("StepInfo", ["reward", "done", "observation"])
+_ENV_NAME_TO_ENV = Environments.__members__
 
+FLAGS = flags.FLAGS
 
-def fn(x):
-    return np.sum((x - 5.0) ** 2)
+flags.DEFINE_enum(
+    "environment",
+    None,
+    _ENV_NAME_TO_ENV.keys(),
+    "Which environment we are using rollouts from.",
+)
 
+flags.DEFINE_string("learned_policy", None, "")
+flags.DEFINE_integer(
+    "learned_policy_in_size",
+    None,
+    "",
+    lower_bound=1,
+)
 
-class LinearPolicy(object):
-    @staticmethod
-    def from_flat_arrays(array, in_size, out_size):
-        array = np.array(array)
-        w, b = array[:, :-out_size], array[:, -out_size:]
-        w = np.reshape(w, [-1, out_size, in_size])
-        return LinearPolicy(w=w, b=b)
+flags.DEFINE_string("vision_model", "", None)
+flags.DEFINE_string("sequence_model", "", None)
 
-    def __init__(self, w, b):
-        self.w = w
-        self.b = b
-
-    def sample_action(self, inputs):
-        if isinstance(inputs, tf.Tensor):
-            inputs = inputs.numpy()
-        # action = np.matmul(self.w, inputs) + self.b
-        action = np.einsum("ijk,ik->ij", self.w, inputs) + self.b
-        action = np.reshape(action, [-1, 3])
-        return action
+flags.DEFINE_integer("sequence_length", 32, "", lower_bound=1)
 
 
-# TODO(mmatena): Make this cleaner.
-IP_FILE = "/pine/scr/m/m/mmatena/tmp/gym_server_ip.txt"
-with open(IP_FILE, "r") as f:
-    ip = f.read()
+flags.DEFINE_integer("cma_population_size", 8, "", lower_bound=1)
+flags.DEFINE_integer("cma_trials_per_member", 6, "", lower_bound=1)
+flags.DEFINE_integer("cma_steps", 250, "", lower_bound=1)
 
-# TODO(mmatena): Make this configurable.
-conn = rpyc.connect(ip, 18861, config={"allow_pickle": True})
-conn._config["sync_request_timeout"] = None
-gym_service = conn.root
+flags.DEFINE_integer("rollout_max_steps", 1000, "", lower_bound=1)
+
+flags.DEFINE_string(
+    "gym_server_ip_file",
+    "/pine/scr/m/m/mmatena/tmp/gym_server_ip.txt",
+    "",
+)
+flags.DEFINE_integer("gym_server_port", 18861, "")
+
+flags.mark_flag_as_required("learned_policy")
+flags.mark_flag_as_required("learned_policy_in_size")
 
 
-encoder = saved_models.raw_rollout_vae_32ld()
-# sequence_model = saved_models.encoded_rollout_transformer()
-sequence_model = transformer.base_deterministic_transformer()
-in_size = 256 + 32
-out_size = 3
-max_seqlen = 32
+def get_gym_ip():
+    with open(FLAGS.gym_server_ip_file, "r") as f:
+        ip = f.read()
+    return ip
+
+
+def get_gym_service():
+    conn = rpyc.connect(
+        get_gym_ip(), FLAGS.gym_server_port, config={"allow_pickle": True}
+    )
+    conn._config["sync_request_timeout"] = None
+    gym_service = conn.root
+    return conn, gym_service
+
+
+def get_environment():
+    return _ENV_NAME_TO_ENV[FLAGS.environment]
+
+
+def get_vision_model():
+    environment = get_environment()
+    model = locate(f"rl755.models.{environment.folder_name}.{FLAGS.vision_model}")
+    return model()
+
+
+def get_sequence_model():
+    environment = get_environment()
+    model = locate(f"rl755.models.{environment.folder_name}.{FLAGS.sequence_model}")
+    return model()
+
+
+def get_learned_policy_cls():
+    return locate(f"rl755.models.{FLAGS.learned_policy}")
 
 
 def batched_rollout(env, policy, max_steps, batch_size):
@@ -77,82 +104,94 @@ def batched_rollout(env, policy, max_steps, batch_size):
     dones = batch_size * [False]
     rollout = Rollout()
     for step in range(max_steps):
-        # step_start = time.time()
         if step == 0:
-            # TODO(mmatena): Support environments without a "state_pixels" render mode.
-            # start = time.time()
             whether_to_renders = pickle.dumps([not d for d in dones])
             obs = env.render(whether_to_renders)
-            # This might happen if we are running on a remote gym server using rpc.
+            # Happens when running on a remote gym server using rpc.
             if isinstance(obs, bytes):
                 obs = pickle.loads(obs)
-            # print(f"Render time: {time.time() - start} s")
             rollout.obs_l.append(obs)
 
         obs = rollout.obs_l[-1]
 
-        # start = time.time()
         action = policy.sample_action(obs=obs, step=step, rollout=rollout)
-        # print(f"Sample action time: {time.time() - start} s")
-
-        # start = time.time()
         step_infos = env.step(pickle.dumps(action))
-        # print(f"Env step time A: {time.time() - start} s")
-        # This might happen if we are running on a remote gym server using rpc.
         if isinstance(step_infos, bytes):
             step_infos = pickle.loads(step_infos)
-        # print(f"Env step time: {time.time() - start} s")
-
         rollout.obs_l.append(step_infos.observation)
         rollout.action_l.append(action)
         rollout.reward_l.append(step_infos.reward)
 
-        # print(f"Step time: {time.time() - step_start} s")
-
     return [sum(s) for s in np.array(rollout.reward_l).T.tolist()]
 
 
-def get_scores(solutions, max_steps):
-    linear_policy = LinearPolicy.from_flat_arrays(
+def get_scores(solutions, gym_service, vision_model, sequence_model, max_steps):
+    environment = get_environment()
+    LearnedPolicy = get_learned_policy_cls()
+    in_size = FLAGS.learned_policy_in_size
+    out_size = environment.action_shape[-1]
+
+    learned_policy = LearnedPolicy.from_flat_arrays(
         solutions, in_size=in_size, out_size=out_size
     )
-    policy = policies.CarRacingPolicy(
-        encoder=encoder,
+    policy = PolicyWrapper(
+        vision_model=vision_model,
         sequence_model=sequence_model,
-        policy=linear_policy,
-        max_seqlen=max_seqlen,
+        learned_policy=learned_policy,
+        max_seqlen=FLAGS.sequence_length,
     )
-    gym_service.make("CarRacing-v0", len(solutions))
-    # print("Increase MAX STEPS!!!!!")
+    gym_service.make(environment.open_ai_name, len(solutions))
     return batched_rollout(
         gym_service, policy, max_steps=max_steps, batch_size=len(solutions)
     )
 
 
-# POP_SIZE = 16
-# NUM_TRIALS = 3
-POP_SIZE = 8
-NUM_TRIALS = 6
-CMA_STEPS = 250
+def main(_):
+    environment = get_environment()
+    in_size = FLAGS.learned_policy_in_size
+    out_size = environment.action_shape[-1]
 
-es = cma.CMAEvolutionStrategy(
-    (in_size * out_size + out_size) * [0], 0.5, {"popsize": POP_SIZE}
-)
+    LearnedPolicy = get_learned_policy_cls()
+    params_to_learn = LearnedPolicy.get_parameter_count(
+        in_size=in_size, out_size=out_size
+    )
 
-for i in range(CMA_STEPS):
-    start = time.time()
-    solutions = es.ask()
+    num_trials = FLAGS.cma_trials_per_member
+    rollout_max_steps = FLAGS.rollout_max_steps
 
-    num_trials = NUM_TRIALS
-    args = functools.reduce(list.__add__, [num_trials * [s] for s in solutions])
+    vision_model = get_vision_model()
+    sequence_model = get_sequence_model()
 
-    scores = get_scores(args, max_steps=20 + 5 * i)
-    scores = misc.divide_chunks(scores, num_trials)
-    fitlist = [sum(s) / num_trials for s in scores]
+    conn, gym_service = get_gym_service()
 
-    # We take the negative since our CMA is trying to reduce a loss.
-    es.tell(solutions, (-np.array(fitlist)))
+    es = cma.CMAEvolutionStrategy(
+        params_to_learn * [0], 0.5, {"popsize": FLAGS.cma_population_size}
+    )
+    # TODO: Probably occasionally disconnect and reconnect to gym server as it crashes
+    # for some reason.
+    for step in range(FLAGS.cma_steps):
+        start = time.time()
+        solutions = es.ask()
+        args = functools.reduce(list.__add__, [num_trials * [s] for s in solutions])
 
-    print(f"CMA step time: {time.time() - start} s")
-    print(f"CMA max score: {max(fitlist)}")
-    print(f"CMA max score per step: {max(fitlist) / (20 + 5 * i)}")
+        scores = get_scores(
+            args,
+            gym_service=gym_service,
+            vision_model=vision_model,
+            sequence_model=sequence_model,
+            max_steps=rollout_max_steps,
+        )
+        scores = misc.divide_chunks(scores, num_trials)
+        fitlist = np.array([sum(s) / num_trials for s in scores])
+
+        # We take the negative since our CMA is trying to reduce a loss.
+        es.tell(solutions, -fitlist)
+
+        print(f"CMA step {step}:")
+        print(f"    time: {time.time() - start} s")
+        print(f"    max score: {max(fitlist)}")
+        # TODO: Save solutions somewhere.
+
+
+if __name__ == "__main__":
+    app.run(main)

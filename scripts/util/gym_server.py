@@ -23,7 +23,9 @@ from rpyc.core.channel import Channel
 from unittest import mock
 
 from rl755.common import misc
+from rl755.common.structs import StepInfo
 
+from rl755.environments import Environments
 from rl755.environments.car_racing import CarRacing
 
 import pyglet
@@ -39,26 +41,29 @@ Channel.COMPRESSION_LEVEL = 6
 FLAGS = flags.FLAGS
 
 flags.DEFINE_integer("port", 18861, "The port to listen on.")
-flags.DEFINE_integer("parallelism", 1, "")
-
-IP_FILE = "/pine/scr/m/m/mmatena/tmp/gym_server_ip.txt"
-
-
-# Information to be returned after we do a step.
-StepInfo = collections.namedtuple("StepInfo", ["reward", "done", "observation"])
+flags.DEFINE_string(
+    "gym_server_ip_file",
+    "/pine/scr/m/m/mmatena/tmp/gym_server_ip.txt",
+    "We write the ip address of our gym server here so that other programs can "
+    "read it and find our server.",
+)
 
 
 class GymEnvironments(object):
-    """Multiple synchornized gym environments."""
+    """Multiple synchronous gym environments."""
 
     def __init__(self, num_environments, env_name):
         self.num_environments = num_environments
         self.env_name = env_name
+        self.env_enum = Environments.environment_from_open_ai_name(env_name)
         self._create_envs()
 
     def _create_envs(self):
-        # self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
-        self.envs = [CarRacing() for _ in range(self.num_environments)]
+        if self.env_name == "CarRacing-v0":
+            # This version is significantly faster.
+            self.envs = [CarRacing() for _ in range(self.num_environments)]
+        else:
+            self.envs = [gym.make(self.env_name) for _ in range(self.num_environments)]
         for env in self.envs:
             env.reset()
 
@@ -68,8 +73,10 @@ class GymEnvironments(object):
 
     def step(self, actions):
         assert len(actions) == len(self.envs)
-        # TODO: support other shapes
-        observations = np.empty([self.num_environments, 96, 96, 3], dtype=np.uint8)
+        observations = np.empty(
+            [self.num_environments] + list(self.env_enum.observation_shape),
+            dtype=np.uint8,
+        )
         rewards = np.empty([self.num_environments], dtype=np.float32)
         for i, (action, env) in enumerate(zip(actions, self.envs)):
             obs, reward, done, _ = env.step(action)
@@ -83,6 +90,7 @@ class GymEnvironments(object):
         ret = []
         for should_render, env in zip(whether_to_renders, self.envs):
             if should_render:
+                # TODO: Support rendering through means other than state pixels.
                 ret.append(env.render("state_pixels"))
             else:
                 ret.append(None)
@@ -118,9 +126,7 @@ class OpenAiGymService(rpyc.Service):
 
     def exposed_step(self, actions):
         actions = pickle.loads(actions)
-        # start = time.time()
         ret = self.env.step(actions)
-        # logging.info(f"Step time: {time.time() - start}")
         return pickle.dumps(ret)
 
     def exposed_close(self):
@@ -132,7 +138,7 @@ def main(_):
     display.start()
 
     hostname = socket.gethostbyname(socket.gethostname())
-    with open(IP_FILE, "w+") as f:
+    with open(FLAGS.gym_server_ip_file, "w+") as f:
         f.write(hostname)
 
     t = ThreadedServer(

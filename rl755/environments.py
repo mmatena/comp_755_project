@@ -57,3 +57,10 @@ class Environments(Enum):
     @property
     def action_shape(self):
         return self.value.action_shape
+
+    @staticmethod
+    def environment_from_open_ai_name(name):
+        for _, env in Environments.__members__.items():
+            if env.open_ai_name == name:
+                return env
+        raise ValueError(f"No environment found with OpenAI name {name}")

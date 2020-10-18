@@ -3,6 +3,9 @@ from collections import namedtuple
 
 import tensorflow as tf
 
+# Information to be returned from gym server after we do a step.
+StepInfo = namedtuple("StepInfo", ["reward", "done", "observation"])
+
 # A rollout step containing an observation, action, and reward.
 RolloutStep = namedtuple("RolloutStep", ["o", "a", "r", "step"])
 

@@ -30,7 +30,7 @@ flags.DEFINE_enum(
     "Which environment we are using rollouts from.",
 )
 
-flags.DEFINE_string("learned_policy", None, "")
+flags.DEFINE_string("learned_policy", "common.learned_policy.LinearPolicy", "")
 flags.DEFINE_integer(
     "learned_policy_in_size",
     None,
@@ -58,7 +58,6 @@ flags.DEFINE_string(
 flags.DEFINE_integer("gym_server_port", 18861, "")
 
 flags.mark_flag_as_required("environment")
-flags.mark_flag_as_required("learned_policy")
 flags.mark_flag_as_required("learned_policy_in_size")
 
 

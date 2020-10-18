@@ -79,24 +79,24 @@ class GymEnvironments(object):
         )
         rewards = np.empty([self.num_environments], dtype=np.float32)
         for i, (action, env) in enumerate(zip(actions, self.envs)):
-            obs, reward, done, _ = env.step(action)
-            observations[i] = obs
-            rewards[i] = reward
-            # TODO(mmatena): Something with the dones
-        return StepInfo(reward=rewards, done=None, observation=observations)
+            if not self.dones[i]:
+                obs, reward, done, _ = env.step(action)
+                observations[i] = obs
+                rewards[i] = reward
+                self.dones[i] = done
+        return StepInfo(reward=rewards, done=self.dones, observation=observations)
 
-    def render(self, whether_to_renders):
-        assert len(whether_to_renders) == len(self.envs)
-        ret = []
-        for should_render, env in zip(whether_to_renders, self.envs):
-            if should_render:
-                # TODO: Support rendering through means other than state pixels.
-                ret.append(env.render("state_pixels"))
-            else:
-                ret.append(None)
-        return ret
+    def render(self):
+        observations = np.empty(
+            [self.num_environments] + list(self.env_enum.observation_shape),
+            dtype=np.uint8,
+        )
+        for i, env in enumerate(self.envs):
+            observations[i] = env.render("state_pixels")
+        return observations
 
     def reset(self):
+        self.dones = np.zeros([self.num_environments], dtype=np.bool)
         for env in self.envs:
             env.reset()
 
@@ -118,9 +118,8 @@ class OpenAiGymService(rpyc.Service):
             env_name=env_name,
         )
 
-    def exposed_render(self, whether_to_renders):
-        whether_to_renders = pickle.loads(whether_to_renders)
-        ret = self.env.render(whether_to_renders)
+    def exposed_render(self):
+        ret = self.env.render()
         return pickle.dumps(ret)
 
     def exposed_step(self, actions):

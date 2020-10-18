@@ -1,6 +1,7 @@
 """Learns a simple policy using CMA."""
 import collections
 import functools
+import os
 import pickle
 from pydoc import locate
 import time
@@ -28,6 +29,9 @@ flags.DEFINE_enum(
     None,
     _ENV_NAME_TO_ENV.keys(),
     "Which environment we are using rollouts from.",
+)
+flags.DEFINE_string(
+    "model_dir", None, "The directory to write checkpoints and logs to."
 )
 
 flags.DEFINE_string("learned_policy", "common.learned_policy.LinearPolicy", "")
@@ -58,6 +62,7 @@ flags.DEFINE_string(
 flags.DEFINE_integer("gym_server_port", 18861, "")
 
 flags.mark_flag_as_required("environment")
+flags.mark_flag_as_required("model_dir")
 flags.mark_flag_as_required("learned_policy_in_size")
 flags.mark_flag_as_required("vision_model")
 flags.mark_flag_as_required("sequence_model")
@@ -99,32 +104,35 @@ def get_learned_policy_cls():
 
 
 def batched_rollout(env, policy, max_steps, batch_size):
-    print("TODO: The handling for dones is incorrect!")
     env.reset()
     policy.initialize(env=env, max_steps=max_steps)
 
-    dones = batch_size * [False]
+    done_steps = max_steps * np.ones([batch_size], dtype=np.int32)
     rollout = Rollout()
     for step in range(max_steps):
         if step == 0:
-            whether_to_renders = pickle.dumps([not d for d in dones])
-            obs = env.render(whether_to_renders)
-            # Happens when running on a remote gym server using rpc.
-            if isinstance(obs, bytes):
-                obs = pickle.loads(obs)
+            obs = env.render()
+            obs = pickle.loads(obs)
             rollout.obs_l.append(obs)
 
         obs = rollout.obs_l[-1]
 
         action = policy.sample_action(obs=obs, step=step, rollout=rollout)
+
         step_infos = env.step(pickle.dumps(action))
-        if isinstance(step_infos, bytes):
-            step_infos = pickle.loads(step_infos)
+        step_infos = pickle.loads(step_infos)
+
         rollout.obs_l.append(step_infos.observation)
         rollout.action_l.append(action)
         rollout.reward_l.append(step_infos.reward)
 
-    return [sum(s) for s in np.array(rollout.reward_l).T.tolist()]
+        done_upper_bounds = step_infos.done * step + (1 - step_infos.done) * max_steps
+        done_steps = np.minimum(done_steps, done_upper_bounds)
+
+    rewards = np.array(rollout.reward_l).T.tolist()
+    done_steps = done_steps.tolist()
+
+    return [sum(r[:step]) for r, step in zip(rewards, done_steps)]
 
 
 def get_scores(solutions, gym_service, vision_model, sequence_model, max_steps):
@@ -146,6 +154,17 @@ def get_scores(solutions, gym_service, vision_model, sequence_model, max_steps):
     return batched_rollout(
         gym_service, policy, max_steps=max_steps, batch_size=len(solutions)
     )
+
+
+def save_checkpoint(step, solutions, fitlist):
+    obj = {
+        "step": step,
+        "solutions": solutions,
+        "fitlist": fitlist,
+    }
+    checkpoint_file = os.path.join(FLAGS.model_dir, f"checkpoint-{step:03d}.pickle")
+    with open(checkpoint_file, "wb") as f:
+        pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 def main(_):
@@ -186,13 +205,14 @@ def main(_):
         scores = misc.divide_chunks(scores, num_trials)
         fitlist = np.array([sum(s) / num_trials for s in scores])
 
+        save_checkpoint(step=step, solutions=solutions, fitlist=fitlist)
+
         # We take the negative since our CMA is trying to reduce a loss.
         es.tell(solutions, -fitlist)
 
         print(f"CMA step {step}:")
         print(f"    time: {time.time() - start} s")
         print(f"    max score: {max(fitlist)}")
-        # TODO: Save solutions somewhere.
 
 
 if __name__ == "__main__":

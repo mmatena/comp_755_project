@@ -13,7 +13,8 @@ saved parameters and architecture manually.
 from bert.transformer import TransformerEncoderLayer
 import tensorflow as tf
 
-from rl755.models.car_racing.vae import Vae
+from rl755.models.car_racing import vae
+from rl755.models.car_racing import transformer
 
 import config
 
@@ -27,9 +28,22 @@ def raw_rollout_vae_32ld():
         A rl755.models.car_racing.vae.Vae instance.
     """
     weights_path = config.vae_weights_path
-    vae = Vae(representation_size=32, beta=1.0)
-    vae.load_weights(weights_path)
-    return vae
+    model = vae.Vae(representation_size=32, beta=1.0)
+    model.load_weights(weights_path)
+    return model
+
+
+def base_transformer_off_vae():
+    # TODO: Add docs
+    print("TODO: Update checkpoint once training is finished.")
+    weights_path = "/pine/scr/m/m/mmatena/mse_ar_transformer_train/model-019.hdf5"
+    input_size = 32 + 3  # latent_dim + action_dim
+
+    model = transformer.base_deterministic_transformer()
+    # Build the model this way.
+    model(tf.ones([1, 32, input_size]))
+    model.load_weights(weights_path)
+    return model
 
 
 # def _get_transformer_params():

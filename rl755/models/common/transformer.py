@@ -7,7 +7,7 @@ unless explicitly stated otherwise.
 import functools
 
 from bert.attention import AttentionLayer
-from bert.transformer import TransformerEncoderLayer
+from bert.transformer import TransformerSelfAttentionLayer, TransformerEncoderLayer
 
 import tensorflow as tf
 from unittest import mock
@@ -32,6 +32,30 @@ def _our_create_attention_mask(from_shape, input_mask, mask):
     return mask
 
 
+class _RepresentationCatcher(tf.keras.layers.Layer):
+    def __init__(self, layer):
+        super().__init__()
+        self.layer = layer
+        self.representation = None
+
+    def build(self, *args, **kwargs):
+        self.layer.build(*args, **kwargs)
+        super().build(*args, **kwargs)
+
+    def call(self, *args, **kwargs):
+        output = self.layer(*args, **kwargs)
+        self.representation = output
+        return output
+
+
+_original_from_params = TransformerSelfAttentionLayer.from_params
+
+
+def _create_representation_catcher(*args, **kwargs):
+    layer = _original_from_params(*args, **kwargs)
+    return _RepresentationCatcher(layer)
+
+
 class ArTransformer(SequentialModel):
     def __init__(self, transformer_params, output_size, **kwargs):
         super().__init__(**kwargs)
@@ -50,11 +74,17 @@ class ArTransformer(SequentialModel):
         self.initial_layer = tf.keras.layers.Dense(units=hidden_size, activation=None)
         self.initial_layer.build(input_shape)
 
-        self.transformer = TransformerEncoderLayer.from_params(
-            self.transformer_params, name="transformer"
-        )
-        transformer_input_shape = list(input_shape[:-1]) + [hidden_size]
-        self.transformer.build(transformer_input_shape)
+        # Not really sure if this is needed here, but putting this here out of caution.
+        with mock.patch.object(
+            TransformerSelfAttentionLayer,
+            "from_params",
+            _create_representation_catcher,
+        ):
+            self.transformer = TransformerEncoderLayer.from_params(
+                self.transformer_params, name="transformer"
+            )
+            transformer_input_shape = list(input_shape[:-1]) + [hidden_size]
+            self.transformer.build(transformer_input_shape)
 
         self.final_layer = tf.keras.layers.Dense(
             units=self.output_size, activation=None
@@ -75,17 +105,21 @@ class ArTransformer(SequentialModel):
 
         inputs = self.initial_layer(inputs, training=training)
         inputs += self.pos_embeddings
-        # Have to do this hack as the mask in the original transformer just represents non-padded
-        # regions of the input. We need a different shape of the input mask to make the transformer
-        # autoregressive. The function `_our_create_attention_mask` justs passes through our mask
-        # unchanged.
         with mock.patch.object(
-            AttentionLayer,
-            "create_attention_mask",
-            functools.partial(_our_create_attention_mask, mask=mask),
+            TransformerSelfAttentionLayer,
+            "from_params",
+            _create_representation_catcher,
         ):
-            output = self.transformer(inputs, mask=orig_mask, training=training)
-        self.penultimate_activations = output
+            # Have to do this hack as the mask in the original transformer just represents non-padded
+            # regions of the input. We need a different shape of the input mask to make the transformer
+            # autoregressive. The function `_our_create_attention_mask` justs passes through our mask
+            # unchanged.
+            with mock.patch.object(
+                AttentionLayer,
+                "create_attention_mask",
+                functools.partial(_our_create_attention_mask, mask=mask),
+            ):
+                output = self.transformer(inputs, mask=orig_mask, training=training)
         output = self.final_layer(output, training=training)
         return output
 
@@ -95,6 +129,10 @@ class ArTransformer(SequentialModel):
 
     def get_hidden_representation(self, x, mask=None, training=None, position=-1):
         """Returns the hidden representation used to represent the positiion in the sequence.
+
+        Following https://openreview.net/pdf?id=HklBjCEKvH, we use the input to the final
+        feedwork layer (equivalently the output of the final self-attention layer) for our
+        representations.
 
         Args:
             x: a tf.Tensor with dtype float32 and shape [batch, sequence, model_input]
@@ -106,10 +144,10 @@ class ArTransformer(SequentialModel):
             A tf.Tensor of dtype float32 and shape [batch, hidden]
         """
         self(x, mask=mask, training=training)
-        # TODO(mmatena): This isn't the best layer to use, I'm just doing now for testing
-        # as its quick and easy.
-        print("TODO(mmatena): This isn't the best layer to use.")
-        return self.penultimate_activations[..., position, :]
+        representation = self.transformer.encoder_layers[
+            -1
+        ].self_attention_layer.representation
+        return representation[..., position, :]
 
 
 # Stuff below this line likely needs to be refactored.

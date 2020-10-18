@@ -1,4 +1,6 @@
 """Policies that are learned via CMA-ES."""
+import pickle
+
 import numpy as np
 import tensorflow as tf
 
@@ -14,6 +16,10 @@ class LearnedPolicy(object):
     def get_parameter_count(in_size, out_size):
         raise NotImplementedError()
 
+    @staticmethod
+    def deserialize(bytes_str):
+        raise NotImplementedError()
+
     def sample_action(self, inputs):
         raise NotImplementedError()
 
@@ -21,6 +27,9 @@ class LearnedPolicy(object):
         raise NotImplementedError()
 
     def out_size(self):
+        raise NotImplementedError()
+
+    def serialize(self):
         raise NotImplementedError()
 
 
@@ -35,6 +44,11 @@ class LinearPolicy(LearnedPolicy):
     @staticmethod
     def get_parameter_count(in_size, out_size):
         return in_size * out_size + out_size
+
+    @staticmethod
+    def deserialize(bytes_str):
+        w, b = pickle.loads(bytes_str)
+        return LinearPolicy(w=w, b=b)
 
     def __init__(self, w, b):
         self.w = w
@@ -54,6 +68,9 @@ class LinearPolicy(LearnedPolicy):
 
     def out_size(self):
         return self._out_size
+
+    def serialize(self):
+        return pickle.dumps((self.w, self.b))
 
 
 class PolicyWrapper(gym_rollouts.Policy):

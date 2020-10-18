@@ -107,7 +107,6 @@ class OpenAiGymService(rpyc.Service):
     def __init__(self):
         super().__init__()
         self.env = None
-        self.parallelism = FLAGS.parallelism
 
     def exposed_reset(self):
         if self.env:

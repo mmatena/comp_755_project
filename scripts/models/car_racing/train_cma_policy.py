@@ -59,6 +59,8 @@ flags.DEFINE_integer("gym_server_port", 18861, "")
 
 flags.mark_flag_as_required("environment")
 flags.mark_flag_as_required("learned_policy_in_size")
+flags.mark_flag_as_required("vision_model")
+flags.mark_flag_as_required("sequence_model")
 
 
 def get_gym_ip():

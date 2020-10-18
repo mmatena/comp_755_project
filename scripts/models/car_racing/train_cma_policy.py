@@ -38,8 +38,8 @@ flags.DEFINE_integer(
     lower_bound=1,
 )
 
-flags.DEFINE_string("vision_model", "", None)
-flags.DEFINE_string("sequence_model", "", None)
+flags.DEFINE_string("vision_model", None, "")
+flags.DEFINE_string("sequence_model", None, "")
 
 flags.DEFINE_integer("sequence_length", 32, "", lower_bound=1)
 

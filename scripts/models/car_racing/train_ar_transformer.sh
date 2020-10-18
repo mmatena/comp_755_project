@@ -10,14 +10,11 @@ PROJECT_DIR=~/projects/comp_755_project
 
 MODEL_DIR=/pine/scr/m/m/mmatena/mse_ar_transformer_train
 
-# TRAIN_STEPS=100000
-# TRAIN_STEPS=40000
-TRAIN_STEPS=25000
+TRAIN_STEPS=100000
 
-# NUM_GPUS=4
-NUM_GPUS=1
-NUM_CORES=16
-MEMORY=16g
+NUM_GPUS=4
+NUM_CORES=8
+MEMORY=8g
 TIME="2-"
 #############################################################
 
@@ -31,14 +28,17 @@ module add tensorflow_py3/2.1.0
 module add gcc/9.1.0
 
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/package_hacks/gcc/9.1.0/lib64
-# I copied the module to here since we can't access the original one in singularity.
 
 run_python() {
-  echo "python $PROJECT_DIR/scripts/models/car_racing/train_ar_transformer.py \
+  echo "python $PROJECT_DIR/scripts/models/train_sequential_model.py \
+      --environment=CAR_RACING \
       --model_dir=$MODEL_DIR \
       --train_steps=$TRAIN_STEPS \
-      --batch_size=128"
+      --model=transformer.base_deterministic_transformer \
+      --rollouts_dataset=VaeEncodedRollouts \
+      --sequence_length=32 \
+      --learning_rate=1e-4 \
+      --batch_size=256"
 }
 
 

@@ -347,12 +347,13 @@ class RawImageRolloutDatasetBuilder(RolloutDatasetBuilder):
         # TODO: Add docs
 
         def extract_observations(x):
-            obs = vision_model.compute_tensor_representation(
-                x["observations"], training=False
-            )
+            obs = x["observations"]
+            obs = tf.reshape(obs, (-1,) + self._observation_shape())
+            obs = vision_model.compute_tensor_representation(obs, training=False)
             # We probably don't need the stop gradient here, but I don't feel like
             # figuring it out.
-            return tf.stop_gradient(obs)
+            obs = tf.stop_gradient(obs)
+            return obs
 
         return self._get_autoregressive_slices(
             *args,

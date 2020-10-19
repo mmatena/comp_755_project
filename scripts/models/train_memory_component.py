@@ -83,17 +83,22 @@ def get_train_dataset():
     dsb_cls = locate(f"rl755.data.envs.{FLAGS.environment}.{FLAGS.rollouts_dataset}")
     dsb = dsb_cls()
 
-    # if is_encoded_dsb(dsb):
-    #     pass
-    # else:
-    #     vision_model = get_vision_model()
+    if is_encoded_dsb(dsb):
+        ds = dsb.get_autoregressive_slices(
+            sequence_length=FLAGS.sequence_length,
+            sample_observations=FLAGS.sample_observations,
+            difference_targets=FLAGS.difference_targets,
+            split="train",
+        )
+    else:
+        vision_model = get_vision_model()
+        ds = dsb.get_autoregressive_slices(
+            vision_model=vision_model,
+            sequence_length=FLAGS.sequence_length,
+            difference_targets=FLAGS.difference_targets,
+            split="train",
+        )
 
-    ds = dsb.get_autoregressive_slices(
-        sequence_length=FLAGS.sequence_length,
-        sample_observations=FLAGS.sample_observations,
-        difference_targets=FLAGS.difference_targets,
-        split="train",
-    )
     return processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
 
 

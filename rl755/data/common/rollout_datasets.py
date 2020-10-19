@@ -124,10 +124,10 @@ class RolloutDatasetBuilder(object):
             "rewards": tf.io.VarLenFeature(tf.float32),
             "done_step": tf.io.VarLenFeature(tf.int64),
         }
-        tf.print(x["done_step"])
         features.update(self._additional_features())
         _, x = tf.io.parse_single_sequence_example(x, sequence_features=features)
         x = {k: tf.sparse.to_dense(v) for k, v in x.items()}
+        tf.print(x["done_step"])
 
         x["rewards"] = tf.squeeze(x["rewards"])
         x["actions"] = tf.squeeze(x["actions"])

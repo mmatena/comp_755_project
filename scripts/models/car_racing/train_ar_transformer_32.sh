@@ -12,7 +12,7 @@ MODEL_DIR=/pine/scr/m/m/mmatena/mse_ar_transformer_32_train
 
 TRAIN_STEPS=100000
 
-NUM_GPUS=1
+NUM_GPUS=4
 NUM_CORES=8
 MEMORY=8g
 TIME="20:00:00"
@@ -55,7 +55,7 @@ launch() {
     --output="$MODEL_DIR/logs-%j.out" \
     --time=${TIME} \
     --mem=${MEMORY} \
-    --partition=volta-gpu \
+    --partition=gpu \
     --gres=gpu:${NUM_GPUS} \
     --qos=gpu_access \
     --wrap="\"$(run_singularity)\"")

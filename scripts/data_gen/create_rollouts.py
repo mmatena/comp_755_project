@@ -35,7 +35,7 @@ flags.mark_flag_as_required("out_dir")
 flags.mark_flag_as_required("out_name")
 
 
-def get_policy(environment):
+def get_policy():
     policy_cls = locate(f"rl755.models.{FLAGS.policy}")
     return policy_cls()
 

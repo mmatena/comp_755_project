@@ -120,7 +120,7 @@ class RolloutDatasetBuilder(object):
         """
         features = {
             "observations": tf.io.VarLenFeature(self._stored_observation_dtype()),
-            "actions": tf.io.VarLenFeature(tf.uint8),
+            "actions": tf.io.VarLenFeature(tf.int64),
             "rewards": tf.io.VarLenFeature(tf.float32),
             "done_step": tf.io.VarLenFeature(tf.int64),
         }
@@ -135,6 +135,7 @@ class RolloutDatasetBuilder(object):
         if process_observations:
             x["observations"] = self._process_observations(x["observations"])
         x["actions"] = tf.cast(x["actions"], tf.int32)
+        x["done_step"] = tf.cast(x["done_step"], tf.int32)
         x = self._process_rollout(x)
 
         return x

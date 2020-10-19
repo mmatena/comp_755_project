@@ -59,7 +59,7 @@ class RolloutState(object):
                 ),
                 "rewards": tfrecords.to_float_feature_list(self.rewards[:, i][:, None]),
                 "actions": tfrecords.to_int64_feature_list(self.actions[:, i][:, None]),
-                "done_steps": tfrecords.to_int64_feature_list([[self.done_steps[i]]]),
+                "done_step": tfrecords.to_int64_feature_list([[self.done_steps[i]]]),
             }
             example_proto = tf.train.SequenceExample(
                 feature_lists=tf.train.FeatureLists(feature_list=feature_list)

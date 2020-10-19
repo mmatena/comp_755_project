@@ -52,7 +52,7 @@ flags.mark_flag_as_required("model")
 
 
 def get_model():
-    model = locate(f"rl755.models.instances.{FLAGS.model}")
+    model = locate(f"rl755.models.vision.instances.{FLAGS.model}")
     return model()
 
 

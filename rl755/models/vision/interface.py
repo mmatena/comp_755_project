@@ -5,11 +5,12 @@ import tensorflow as tf
 class VisionComponent(tf.keras.Model):
     """Abstract class that models that encode observations should extend."""
 
-    def compute_full_representation(self, x):
+    def compute_full_representation(self, x, training=None):
         """Returns a representation given a batch of raw observations.
 
         Args:
             x: a tf.Tensor containing a batch of raw observations
+            training: a bool or None saying whether we are training
         Returns:
             Either a single tf.Tensor or a 2-tuple of a tf.Tensor and dict
             mapping strings to tf.Tensors.
@@ -24,9 +25,9 @@ class VisionComponent(tf.keras.Model):
         """
         raise NotImplementedError()
 
-    def compute_tensor_representation(self, x):
+    def compute_tensor_representation(self, x, training=None):
         # TODO: Add docs
-        full_representation = self.compute_full_representation(x)
+        full_representation = self.compute_full_representation(x, training=training)
         if isinstance(full_representation, tf.Tensor):
             return full_representation
         elif isinstance(full_representation, (tuple, list)):

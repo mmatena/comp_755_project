@@ -61,7 +61,7 @@ def get_final_ds_representation(x):
 
 
 def get_train_dataset():
-    dsb_cls = locate(f"rl755.data.envs.{FLAGS}.raw_rollouts.RawRollouts")
+    dsb_cls = locate(f"rl755.data.envs.{FLAGS.environment}.RawRollouts")
     ds = dsb_cls().random_rollout_observations(
         obs_sampled_per_rollout=FLAGS.obs_sampled_per_rollout
     )

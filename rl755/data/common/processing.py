@@ -9,6 +9,7 @@ def standard_dataset_prep(ds, batch_size, repeat=True, shuffle_buffer_size=1000)
     if repeat:
         ds = ds.repeat()
     ds = ds.batch(batch_size, drop_remainder=True)
+    ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
     return ds
 
 

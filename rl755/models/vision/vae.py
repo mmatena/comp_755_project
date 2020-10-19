@@ -87,17 +87,19 @@ class Vae(VisionComponent):
             tf.zeros(representation_size), tf.ones(representation_size)
         )
 
-    def encode(self, x):
-        mean, prevar = tf.split(self.encoder(x), num_or_size_splits=2, axis=-1)
+    def encode(self, x, training=None):
+        mean, prevar = tf.split(
+            self.encoder(x, training=training), num_or_size_splits=2, axis=-1
+        )
         return tfd.MultivariateNormalDiag(loc=mean, scale_diag=tf.nn.softplus(prevar))
 
     @tf.function
-    def compute_full_representation(self, x):
-        posterior = self.encode(x)
+    def compute_full_representation(self, x, training=None):
+        posterior = self.encode(x, training=training)
         return posterior.mean(), {"obs_std_devs": posterior.stddev()}
 
-    def decode(self, z):
-        logits = self.decoder(z)
+    def decode(self, z, training=None):
+        logits = self.decoder(z, training=training)
         return logits
 
     def sample_unconditionally(self, num_samples=1):
@@ -105,8 +107,8 @@ class Vae(VisionComponent):
         return self.decode(z)
 
     def call(self, x, training=None):
-        self.posterior = self.encode(x)
-        return self.decode(self.posterior.sample())
+        self.posterior = self.encode(x, training=training)
+        return self.decode(self.posterior.sample(), training=training)
 
     def get_loss_fn(self):
         return VaeLoss(self)

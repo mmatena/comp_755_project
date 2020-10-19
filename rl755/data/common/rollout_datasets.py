@@ -255,6 +255,56 @@ class RolloutDatasetBuilder(object):
         ds = ds.map(set_shape, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         return ds
 
+    def _get_autoregressive_slices(
+        self,
+        representation_size,
+        extract_observations,
+        sequence_length,
+        difference_targets=False,
+        split="train",
+    ):
+        """Returns a dataset for training autoregressive models.
+
+        The goal of an autoregressive moded is to predict the next observation given
+        a history of states, a history of actions, and the action taken at the current state.
+        Essentially the task is to learn a mapping:
+            (actions[:t], observations[:t]) --> observations[t]
+
+        Args:
+            representation_size: a positive int, the size of the representation. To be overiden in
+                subclasses.
+            extract_observations: a function taking in an example and returning a 2-d float
+                tensor with shape [batch, representation_size]. To be overiden in subclasses.
+            sequence_length: a positive int, the length of the rollout slices
+            difference_targets: bool, whether to predict the difference between the next observation
+                and the current observation or whether to predict the next observation directly
+            split: str, either "train" or "validation"
+        Returns:
+            A tf.data.Dataset with 2-tuples as examples. The first item is concatenated observations
+            and actions while the second item is the observations shifted in time by one.
+        """
+        action_size = self.action_size()
+
+        def map_fn(x):
+            a = tf.one_hot(x["actions"], depth=action_size, axis=-1)
+            o = extract_observations(x)
+            inputs = tf.concat(
+                [o[:-1], a[:-1]],
+                axis=-1,
+            )
+            if difference_targets:
+                targets = o[1:] - o[:-1]
+            else:
+                targets = o[1:]
+            inputs = tf.reshape(
+                inputs, [sequence_length, representation_size + action_size]
+            )
+            targets = tf.reshape(targets, [sequence_length, representation_size])
+            return inputs, targets
+
+        ds = self.random_rollout_slices_ds(slice_size=sequence_length + 1, split=split)
+        return ds.map(map_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+
 
 class RawImageRolloutDatasetBuilder(RolloutDatasetBuilder):
     """Abstract base class for rollout datasets coming from raw images.
@@ -292,6 +342,24 @@ class RawImageRolloutDatasetBuilder(RolloutDatasetBuilder):
         # Convert to floats in the range [0, 1]
         observations = tf.cast(observations, tf.float32) / 255.0
         return observations
+
+    def get_autoregressive_slices(self, vision_model, *args, **kwargs):
+        # TODO: Add docs
+
+        def extract_observations(x):
+            obs = vision_model.compute_tensor_representation(
+                x["observations"], training=False
+            )
+            # We probably don't need the stop gradient here, but I don't feel like
+            # figuring it out.
+            return tf.stop_gradient(obs)
+
+        return self._get_autoregressive_slices(
+            *args,
+            representation_size=vision_model.get_representation_size(),
+            extract_observations=extract_observations,
+            **kwargs
+        )
 
 
 class EncodedRolloutDatasetBuilder(RolloutDatasetBuilder):
@@ -344,54 +412,20 @@ class EncodedRolloutDatasetBuilder(RolloutDatasetBuilder):
 
     # Public interface.
 
-    def get_autoregressive_slices(
-        self,
-        sequence_length,
-        sample_observations=False,
-        difference_targets=False,
-        split="train",
-    ):
-        """Returns a dataset for training autoregressive models.
+    def get_autoregressive_slices(self, sample_observations=False, *args, **kwargs):
+        # TODO: Add docs
+        # sample_observations: bool, whether or not to sample from probabilistic representations.
+        #     Has no effective for deterministic representations
 
-        The goal of an autoregressive moded is to predict the next observation given
-        a history of states, a history of actions, and the action taken at the current state.
-        Essentially the task is to learn a mapping:
-            (actions[:t], observations[:t]) --> observations[t]
-
-        Args:
-            sequence_length: a positive int, the length of the rollout slices
-            sample_observations: bool, whether or not to sample from probabilistic representations.
-                Has no effective for deterministic representations
-            difference_targets: bool, whether to predict the difference between the next observation
-                and the current observation or whether to predict the next observation directly
-            split: str, either "train" or "validation"
-        Returns:
-            A tf.data.Dataset with 2-tuples as examples. The first item is concatenated observations
-            and actions while the second item is the observations shifted in time by one.
-        """
-        raise NotImplementedError(
-            "TODO: The observations might be misaligned with the actions (and rewards)"
-        )
-        rep_size = self.representation_size()
-        action_size = self.action_size()
-
-        def map_fn(x):
-            a = tf.one_hot(x["actions"], depth=action_size, axis=-1)
+        def extract_observations(x):
             if sample_observations:
-                o = self._sample_observations(x)
+                return self._sample_observations(x)
             else:
-                o = x["observations"]
-            inputs = tf.concat(
-                [o[:-1], a[:-1]],
-                axis=-1,
-            )
-            if difference_targets:
-                targets = o[1:] - o[:-1]
-            else:
-                targets = o[1:]
-            inputs = tf.reshape(inputs, [sequence_length, rep_size + action_size])
-            targets = tf.reshape(targets, [sequence_length, rep_size])
-            return inputs, targets
+                return x["observations"]
 
-        ds = self.random_rollout_slices_ds(slice_size=sequence_length + 1, split=split)
-        return ds.map(map_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        return self._get_autoregressive_slices(
+            *args,
+            representation_size=self.representation_size(),
+            extract_observations=extract_observations,
+            **kwargs
+        )

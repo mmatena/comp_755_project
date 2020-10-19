@@ -1,4 +1,4 @@
-"""Some general classes/interfaces around encoders."""
+"""Some general interfaces around vison components."""
 import tensorflow as tf
 
 
@@ -23,6 +23,18 @@ class VisionComponent(tf.keras.Model):
             standard deviation of the posterior distribution for a VAE.
         """
         raise NotImplementedError()
+
+    def compute_tensor_representation(self, x):
+        # TODO: Add docs
+        full_representation = self.compute_full_representation(x)
+        if isinstance(full_representation, tf.Tensor):
+            return full_representation
+        elif isinstance(full_representation, (tuple, list)):
+            return full_representation[0]
+        else:
+            raise ValueError(
+                f"The full representation was an invalid type: {full_representation}"
+            )
 
     def get_loss_fn(self):
         """Returns the loss function that will be used to train the encoder.

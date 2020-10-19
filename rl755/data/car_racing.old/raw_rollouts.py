@@ -13,6 +13,7 @@ class RawRollouts(RawImageRolloutDatasetBuilder):
         return Environments.CAR_RACING
 
     def _tfrecords_pattern(self):
+
         return (
             config.dataset_dir
             + "/car_racing/"

@@ -126,7 +126,9 @@ def batched_rollout(env, policy, max_steps, batch_size):
         rollout.action_l.append(action)
         rollout.reward_l.append(step_infos.reward)
 
-        done_upper_bounds = step_infos.done * step + (1 - step_infos.done) * max_steps
+        done_upper_bounds = (
+            step_infos.done * (step + 1) + (1 - step_infos.done) * max_steps
+        )
         done_steps = np.minimum(done_steps, done_upper_bounds)
 
     rewards = np.array(rollout.reward_l).T.tolist()

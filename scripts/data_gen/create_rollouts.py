@@ -1,5 +1,6 @@
 """Create and save a bunch of rollouts."""
 from pydoc import locate
+import time
 
 from absl import app
 from absl import flags
@@ -55,7 +56,9 @@ def main(_):
     ) as record_writer:
 
         rollouts_remaining = FLAGS.num_rollouts
+        step = 0
         while rollouts_remaining > 0:
+            step_start_time = time.time()
             num_envs = min(max_simul_envs, rollouts_remaining)
 
             rollout_state = gym_rollouts.perform_rollouts(
@@ -65,7 +68,10 @@ def main(_):
             serialized_records = rollout_state.to_serialized_tfrecords()
             record_writer.write(serialized_records)
 
+            print(f"Step {step} took {time.time() - step_start_time} s")
+
             rollouts_remaining -= max_simul_envs
+            step += 1
 
 
 if __name__ == "__main__":

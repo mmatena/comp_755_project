@@ -97,7 +97,11 @@ class FixedSizeShardedWriter(object):
             self.current_shard_writer.close()
 
     def __enter__(self):
-        pass
+        return self
 
-    def __exit__(self):
+    def __exit__(self, exc_type, exc_value, tb):
         self.close()
+        if exc_type is not None:
+            # Just raise the exception. IDK if I'm doing that here.
+            raise exc_value
+        return True

@@ -7,9 +7,6 @@ from absl import flags
 import tensorflow as tf
 
 from rl755.data.common import processing
-from rl755.environments import Environments
-
-_ENV_NAME_TO_ENV = Environments.__members__
 
 FLAGS = flags.FLAGS
 
@@ -27,8 +24,8 @@ flags.DEFINE_string(
 flags.DEFINE_string(
     "model",
     None,
-    "The name of the model to use. Should be accessable via rl755.models.instances.$model."
-    "It should subclass rl755.models.vision.interface.VisionComponent or be a function returning such an object."
+    "The name of the model to use. Should be accessable via rl755.models.instances.$model. "
+    "It should subclass rl755.models.vision.interface.VisionComponent or be a function returning such an object. "
     "It will be called with no arguments.",
 )
 

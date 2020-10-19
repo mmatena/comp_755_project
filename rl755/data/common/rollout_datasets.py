@@ -99,7 +99,7 @@ class RolloutDatasetBuilder(object):
     def action_size(self):
         """Returns the dimensionality of the action space.
 
-        Note that the action will be encoded as a uint8. The action size here refers
+        Note that the action will be encoded as an int. The action size here refers
         to the number of values the action can take.
         """
         return 15
@@ -122,7 +122,7 @@ class RolloutDatasetBuilder(object):
             "observations": tf.io.VarLenFeature(self._stored_observation_dtype()),
             "actions": tf.io.VarLenFeature(tf.uint8),
             "rewards": tf.io.VarLenFeature(tf.float32),
-            "done_step": tf.io.VarLenFeature(tf.int32),
+            "done_step": tf.io.VarLenFeature(tf.int64),
         }
         features.update(self._additional_features())
         _, x = tf.io.parse_single_sequence_example(x, sequence_features=features)

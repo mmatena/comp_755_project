@@ -70,6 +70,11 @@ class RolloutState(object):
 
 def perform_rollouts(env_name, num_envs, policy, max_steps, **env_kwargs):
     # TODO(mmatena): Add docs
+    if "start_level" not in env_kwargs:
+        env_kwargs["start_level"] = 0
+    if "num_levels" not in env_kwargs:
+        env_kwargs["num_levels"] = 1
+
     env = ProcgenGym3Env(env_name=env_name, num=num_envs, **env_kwargs)
 
     rollout_state = RolloutState(num_envs=num_envs, max_steps=max_steps)

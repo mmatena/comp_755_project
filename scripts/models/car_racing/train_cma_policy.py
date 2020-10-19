@@ -28,7 +28,7 @@ flags.DEFINE_enum(
     "environment",
     None,
     _ENV_NAME_TO_ENV.keys(),
-    "Which environment we are using rollouts from.",
+    "The environment we are training on.",
 )
 flags.DEFINE_string(
     "model_dir", None, "The directory to write checkpoints and logs to."

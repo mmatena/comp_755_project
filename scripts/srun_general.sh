@@ -23,7 +23,7 @@ run_shell() {
 
 launch() {
   CMD=$(echo srun \
-    --ntasks=4 \
+    --ntasks=8 \
     --time=2:30:00 \
     --mem=4g \
     --partition=general \

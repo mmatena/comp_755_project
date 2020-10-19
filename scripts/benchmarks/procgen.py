@@ -23,6 +23,7 @@ FLAGS = flags.FLAGS
 
 # run_gym3("coinrun", steps=1000, num=128)
 # 4 cpu: 6.3 s
+# 8 cpu: 5.9 s
 
 
 def run_gym(env_name, steps=100):

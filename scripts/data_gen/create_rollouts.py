@@ -43,7 +43,7 @@ def get_policy(environment):
 def main(_):
     max_simul_envs = FLAGS.max_simul_envs
     max_steps = FLAGS.max_steps
-    env_name = f"procgen:procgen-{FLAGS.env_name}-v0"
+    env_name = f"procgen:procgen-{FLAGS.environment}-v0"
 
     policy = get_policy()
 

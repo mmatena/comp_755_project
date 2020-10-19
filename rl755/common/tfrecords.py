@@ -58,9 +58,7 @@ class FixedSizeShardedWriter(object):
         if self.item_mb is not None:
             return
         self.item_mb = len(record) / 1024 ** 2
-        self.items_per_shard = int(
-            min(1, math.round(self.desired_shard_mb / self.item_mb))
-        )
+        self.items_per_shard = min(1, round(self.desired_shard_mb / self.item_mb))
         self.shard_count = int(math.ceil(self.total_count / self.items_per_shard))
 
     def _next_shard(self):

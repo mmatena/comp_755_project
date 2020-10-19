@@ -1,118 +1,84 @@
 """Script for generating many rollouts of a given policy."""
-import time
-
-import gym
 import numpy as np
-import pickle
-import ray
+from procgen import ProcgenGym3Env
+import tensorflow as tf
 
-from rl755.common.misc import evenly_partition
-from rl755.common.structs import Rollout
-
-
-class Policy(object):
-    """Abstract base class for policies"""
-
-    def initialize(self, env, max_steps, **kwargs):
-        """Initializes the policy upon starting a new episode.
-
-        Please add a (potentially) unused **kwargs to subclasses to prevent breakage
-        if we need to expose more information for some policies in the future.
-
-        Args:
-            env: the OpenAI Gym environment we will be running on
-            max_steps: a postive integer, the maximum number of steps the
-                rollout will go on for
-        """
-        raise NotImplementedError()
-
-    def sample_action(self, obs, step, rollout, **kwargs):
-        """Generate an action.
-
-        Please add a (potentially) unused **kwargs to subclasses to prevent breakage
-        if we need to expose more information for some policies in the future.
-
-        Args:
-            obs: the observation at the current time step, whose exact format depends
-                on the environment you are running on
-            step: non-negative integer, the 0-based index of the current time step
-            rollout: the Rollout object corresponding to this run
-        Returns:
-            A action compatible with the `env.step(action)` method.
-        """
-        raise NotImplementedError()
+from rl755.common import tfrecords
 
 
-def single_rollout(env, policy, max_steps):
-    """Runs a single rollout.
+class RolloutState(object):
+    # TODO: Add docs
 
-    The rollout will end when either the environment says we are done or we have
-    executed for `max_steps`.
+    def __init__(self, num_envs, max_steps, obs_shape=(64, 64, 3)):
+        # TODO: Add docs
+        obs_shape = list(obs_shape)
+        self.num_envs = num_envs
+        self.max_steps = max_steps
+        self.obs_shape = obs_shape
 
-    Args:
-        env: an OpenAI Gym environment
-        policy: a subclass of rl755.data_gen.gym_rollouts.Policy
-        max_steps: a positive integer, the maximum number of steps the rollout
-            will go on for
-    Returns:
-        A rl755.common.structs.Rollout instance.
-    """
-    env.reset()
-    policy.initialize(env=env, max_steps=max_steps)
+        self.step = 0
 
-    rollout = Rollout()
+        # TODO: Document these (and done_steps):
+        self.observations = np.empty(
+            [max_steps + 1, num_envs] + obs_shape, dtype=np.uint8
+        )
+        self.rewards = np.empty([max_steps, num_envs], dtype=np.float32)
+        self.actions = np.empty([max_steps, num_envs], dtype=np.uint8)
+
+        # observation[:ds+1], rewards[:ds], actions[:ds] are the first rollout.
+        self.done_steps = max_steps * np.ones([num_envs], dtype=np.int32)
+
+    def set_initial_observation(self, env):
+        assert self.step == 0, "Must be at step 0 to set the initial observation."
+        _, obs, _ = env.observe()
+        self.observations[0] = obs["rgb"]
+
+    def get_current_observation(self):
+        return self.observations[self.step]
+
+    def perform_step(self, env, action):
+        env.act(action)
+        rew, obs, firsts = env.observe()
+
+        self.observations[self.step + 1] = obs["rgb"]
+        self.rewards[self.step] = rew
+        self.actions[self.step] = action
+
+        self.step += 1
+
+        first_dones = np.logical_and(self.done_steps >= self.step, firsts)
+        self.done_steps[first_dones] = self.step
+
+    def to_serialized_tfrecords(self):
+        # TODO: Add docs
+        records = []
+        for i in range(self.num_envs):
+            feature_list = {
+                "observations": tfrecords.to_bytes_feature_list(
+                    self.observations[:, i]
+                ),
+                "rewards": tfrecords.to_float_feature_list(self.rewards[:, i][:, None]),
+                "actions": tfrecords.to_int64_feature_list(self.actions[:, i][:, None]),
+                "done_steps": tfrecords.to_int64_feature_list([[self.done_steps[i]]]),
+            }
+            example_proto = tf.train.SequenceExample(
+                feature_lists=tf.train.FeatureLists(feature_list=feature_list)
+            )
+            records.append(example_proto.SerializeToString())
+        return records
+
+
+def perform_rollouts(env_name, num_envs, policy, max_steps, **env_kwargs):
+    # TODO(mmatena): Add docs
+    env = ProcgenGym3Env(env_name=env_name, num=num_envs, **env_kwargs)
+
+    rollout_state = RolloutState(num_envs=num_envs, max_steps=max_steps)
+    rollout_state.set_initial_observation(env)
+
+    policy.initialize(env, max_steps=max_steps)
+
     for step in range(max_steps):
-        # TODO(mmatena): Support environments without a "state_pixels" render mode.
-        # start = time.time()
-        obs = env.render("state_pixels")
-        # print(f"Render time: {time.time() - start} s")
+        action = policy.sample_action(rollout_state)
+        rollout_state.perform_step(env, action)
 
-        # This might happen if we are running on a remote gym server using rpc.
-        if isinstance(obs, bytes):
-            obs = pickle.loads(obs)
-
-        # start = time.time()
-        action = policy.sample_action(obs=obs.tolist(), step=step, rollout=rollout)
-        # print(f"Sample action time: {time.time() - start} s")
-
-        # start = time.time()
-        _, reward, done, _ = env.step(action)
-        # print(f"Env step time: {time.time() - start} s")
-
-        rollout.obs_l.append(obs)
-        rollout.action_l.append(action)
-        rollout.reward_l.append(reward)
-
-        if done:
-            rollout.done = True
-            break
-
-    return rollout
-
-
-def serial_rollouts(env_name, policy, max_steps, num_rollouts, process_rollout_fn):
-    """Runs `num_rollouts` and applies `process_rollout_fn` to each generated Rollout object."""
-    if isinstance(env_name, str):
-        env = gym.make(env_name)
-    else:
-        env = env_name
-    for _ in range(num_rollouts):
-        rollout = single_rollout(env, policy=policy, max_steps=max_steps)
-        process_rollout_fn(rollout)
-    env.close()
-
-
-def parallel_rollouts(
-    env_name, policy, max_steps, num_rollouts, process_rollout_fn, parallelism=1
-):
-    """Runs `num_rollouts` with up to `parallelism` rollouts occuring concurrently."""
-    fn = ray.remote(serial_rollouts)
-    do_rollouts = lambda num_serial: fn.remote(
-        env_name=env_name,
-        policy=policy,
-        max_steps=max_steps,
-        num_rollouts=num_serial,
-        process_rollout_fn=process_rollout_fn,
-    )
-    futures = [do_rollouts(num) for num in evenly_partition(num_rollouts, parallelism)]
-    return ray.get(futures)
+    return rollout_state

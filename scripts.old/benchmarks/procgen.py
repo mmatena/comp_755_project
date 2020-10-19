@@ -48,7 +48,9 @@ def run_gym3(env_name, num=1, steps=100):
     for _ in range(steps):
         env.act(gym3.types_np.sample(env.ac_space, bshape=(env.num,)))
         rew, obs, first = env.observe()
+        print(f"{obs['rgb'].shape} reward {rew} first {first}")
     print(f"{time.time() - start} s")
+    return obs.keys()
 
 
 def main(_):

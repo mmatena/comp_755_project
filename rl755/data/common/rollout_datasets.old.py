@@ -15,7 +15,7 @@ class RolloutDatasetBuilder(object):
         """The environment used to generate the rollouts.
 
         Returns:
-            A string.
+            A rl755.environments.Environments enum.
         """
         raise NotImplementedError()
 
@@ -97,12 +97,10 @@ class RolloutDatasetBuilder(object):
     # Public interface.
 
     def action_size(self):
-        """Returns the dimensionality of the action space.
-
-        Note that the action will be encoded as a uint8. The action size here refers
-        to the number of values the action can take.
-        """
-        return 15
+        """Returns the dimensionality of the action space."""
+        action_shape = self._environment().action_shape
+        assert len(action_shape) == 1
+        return action_shape[0]
 
     def parse_tfrecord(self, x, process_observations=True):
         """Parses a raw tfrecord byte string.
@@ -120,23 +118,16 @@ class RolloutDatasetBuilder(object):
         """
         features = {
             "observations": tf.io.VarLenFeature(self._stored_observation_dtype()),
-            "actions": tf.io.VarLenFeature(tf.uint8),
+            "actions": tf.io.VarLenFeature(tf.float32),
             "rewards": tf.io.VarLenFeature(tf.float32),
-            "done_step": tf.io.VarLenFeature(tf.int32),
         }
         features.update(self._additional_features())
         _, x = tf.io.parse_single_sequence_example(x, sequence_features=features)
         x = {k: tf.sparse.to_dense(v) for k, v in x.items()}
-
         x["rewards"] = tf.squeeze(x["rewards"])
-        x["actions"] = tf.squeeze(x["actions"])
-        x["done_step"] = tf.squeeze(x["done_step"])
-
         if process_observations:
             x["observations"] = self._process_observations(x["observations"])
-        x["actions"] = tf.cast(x["actions"], tf.int32)
         x = self._process_rollout(x)
-
         return x
 
     def get_tfrecords_pattern(self, split):
@@ -235,7 +226,6 @@ class RolloutDatasetBuilder(object):
 
         def random_obs(x):
             rollout_length = tf.shape(x["observations"])[0]
-            rollout_length = tf.minimum(rollout_length, x["done_step"] + 1)
             index = tf.random.uniform(
                 [obs_sampled_per_rollout], 0, rollout_length, dtype=tf.int32
             )
@@ -277,7 +267,7 @@ class RawImageRolloutDatasetBuilder(RolloutDatasetBuilder):
     # Private methods.
 
     def _observation_shape(self):
-        return (64, 64, 3)
+        return self._environment().observation_shape
 
     def _stored_observation_dtype(self):
         return tf.string
@@ -368,14 +358,11 @@ class EncodedRolloutDatasetBuilder(RolloutDatasetBuilder):
             A tf.data.Dataset with 2-tuples as examples. The first item is concatenated observations
             and actions while the second item is the observations shifted in time by one.
         """
-        raise NotImplementedError(
-            "TODO: The observations might be misaligned with the actions (and rewards)"
-        )
         rep_size = self.representation_size()
         action_size = self.action_size()
 
         def map_fn(x):
-            a = tf.one_hot(x["actions"], depth=action_size, axis=-1)
+            a = x["actions"][:, :action_size]
             if sample_observations:
                 o = self._sample_observations(x)
             else:

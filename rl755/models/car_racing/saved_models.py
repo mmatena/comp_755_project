@@ -13,7 +13,8 @@ saved parameters and architecture manually.
 from bert.transformer import TransformerEncoderLayer
 import tensorflow as tf
 
-from rl755.models.car_racing.vae import Vae
+from rl755.models.car_racing import vae
+from rl755.models.car_racing import transformer
 
 import config
 
@@ -27,38 +28,23 @@ def raw_rollout_vae_32ld():
         A rl755.models.car_racing.vae.Vae instance.
     """
     weights_path = config.vae_weights_path
-    vae = Vae(representation_size=32, beta=1.0)
-    vae.load_weights(weights_path)
-    return vae
+    model = vae.Vae(representation_size=32, beta=1.0)
+    model.load_weights(weights_path)
+    return model
 
 
-# def _get_transformer_params():
-#     num_attention_heads = 4
-#     hidden_size = 256
-#     transformer_params = TransformerEncoderLayer.Params(
-#         num_layers=6,
-#         hidden_size=hidden_size,
-#         hidden_dropout=0.1,
-#         intermediate_size=4 * hidden_size,
-#         intermediate_activation="gelu",
-#         num_heads=num_attention_heads,
-#         size_per_head=int(hidden_size / num_attention_heads),
-#     )
-#     return transformer_params
+def base_transformer_off_vae_32ld():
+    # TODO: Add docs
+    print("TODO: Update checkpoint once training is finished.")
+    weights_path = "/pine/scr/m/m/mmatena/mse_ar_transformer_train/model-019.hdf5"
+    input_size = 32 + 3  # latent_dim + action_dim
+    sequence_length = 32  # Idk if it matters here.
 
-
-# def encoded_rollout_transformer():
-#     # TODO(mmatena): Add docs explaing all the parameters this was trained with.
-#     weights_path = "/pine/scr/m/m/mmatena/mse_ar_transformer_train/model.hdf5"
-#     seqlen = 32
-#     input_size = 32 + 3  # latent_dim + action_dim
-#     output_size = 32
-#     model = AutoregressiveTransformer(
-#         _get_transformer_params(), output_size=output_size
-#     )
-#     model.build(input_shape=(None, seqlen, input_size))
-#     model.load_weights(weights_path)
-#     return model
+    model = transformer.base_deterministic_transformer()
+    # Build the model this way.
+    model(tf.ones([1, sequence_length, input_size]))
+    model.load_weights(weights_path)
+    return model
 
 
 # def encoded_knn_rollout_transformer(k, corpus_size, lambda_knn):

@@ -51,6 +51,7 @@ class RolloutState(object):
 
     def to_serialized_tfrecords(self):
         # TODO: Add docs
+        print(self.done_steps)
         records = []
         for i in range(self.num_envs):
             feature_list = {

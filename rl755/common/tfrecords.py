@@ -61,10 +61,7 @@ class FixedSizeShardedWriter(object):
         self.items_per_shard = min(1, round(self.desired_shard_mb / self.item_mb))
         self.shard_count = int(math.ceil(self.total_count / self.items_per_shard))
 
-    def _next_shard(self):
-        self.current_shard_index += 1
-        self.current_shard_items = 0
-
+    def _create_shard_writer(self):
         base_name = misc.sharded_filename(
             self.filename,
             shard_index=self.current_shard_index,
@@ -76,7 +73,15 @@ class FixedSizeShardedWriter(object):
             self.current_shard_writer.close()
         self.current_shard_writer = tf.io.TFRecordWriter(file_shard)
 
+    def _next_shard(self):
+        self.current_shard_index += 1
+        self.current_shard_items = 0
+        self._create_shard_writer()
+
     def _write_record(self, record):
+        if not self.current_shard_writer:
+            self._create_shard_writer()
+
         if self.current_shard_items >= self.items_per_shard:
             self._next_shard()
 

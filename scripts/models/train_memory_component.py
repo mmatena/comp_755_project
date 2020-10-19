@@ -64,7 +64,9 @@ def get_model():
 
 
 def get_vision_model():
-    model = locate(f"rl755.models.vision.trained.{FLAGS.environment}.{FLAGS.model}")
+    model = locate(
+        f"rl755.models.vision.trained.{FLAGS.environment}.{FLAGS.vision_model}"
+    )
     return model()
 
 

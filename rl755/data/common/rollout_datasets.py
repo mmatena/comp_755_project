@@ -188,7 +188,7 @@ class RolloutDatasetBuilder(object):
             num_parallel_calls=tf.data.experimental.AUTOTUNE,
         )
 
-    def random_rollout_slices_ds(self, slice_size, split="train"):
+    def random_rollout_slices_ds(self, slice_size, split="train", slices_per_rollout=1):
         """Returns a dataset with random temporal slices of rollouts.
 
         The returned dataset will be similar to `rollouts_ds` except that every
@@ -213,6 +213,10 @@ class RolloutDatasetBuilder(object):
             return x
 
         ds = self.rollouts_ds(split=split, process_observations=False)
+        if slices_per_rollout > 1:
+            ds = ds.interleave(
+                lambda x: tf.data.Dataset.from_tensors(x).repeat(slices_per_rollout)
+            )
         return ds.map(map_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
     def random_rollout_observations(self, split="train", obs_sampled_per_rollout=100):
@@ -262,6 +266,7 @@ class RolloutDatasetBuilder(object):
         sequence_length,
         difference_targets=False,
         split="train",
+        slices_per_rollout=1,
     ):
         """Returns a dataset for training autoregressive models.
 
@@ -302,7 +307,11 @@ class RolloutDatasetBuilder(object):
             targets = tf.reshape(targets, [sequence_length, representation_size])
             return inputs, targets
 
-        ds = self.random_rollout_slices_ds(slice_size=sequence_length + 1, split=split)
+        ds = self.random_rollout_slices_ds(
+            slice_size=sequence_length + 1,
+            split=split,
+            slices_per_rollout=slices_per_rollout,
+        )
         return ds.map(map_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
 

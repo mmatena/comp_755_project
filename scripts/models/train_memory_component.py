@@ -41,6 +41,7 @@ flags.DEFINE_integer(
 
 flags.DEFINE_float("learning_rate", 1e-4, "")
 
+flags.DEFINE_integer("slices_per_rollout", 1, "", lower_bound=1)
 
 flags.DEFINE_boolean("sample_observations", False, "")
 flags.DEFINE_boolean("difference_targets", False, "")
@@ -91,6 +92,7 @@ def get_train_dataset():
             sample_observations=FLAGS.sample_observations,
             difference_targets=FLAGS.difference_targets,
             split="train",
+            slices_per_rollout=FLAGS.slices_per_rollout,
         )
     else:
         vision_model = get_vision_model()
@@ -99,6 +101,7 @@ def get_train_dataset():
             sequence_length=FLAGS.sequence_length,
             difference_targets=FLAGS.difference_targets,
             split="train",
+            slices_per_rollout=FLAGS.slices_per_rollout,
         )
 
     return processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)

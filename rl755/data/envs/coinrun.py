@@ -4,10 +4,14 @@
 from rl755.data.envs import coinrun
 from itertools import islice
 dsb = coinrun.RawRollouts()
+
+
 ds = dsb.rollouts_ds()
-
-
 for x in islice(ds.as_numpy_iterator(), 10): print(x['done_step'])
+
+
+ds = dsb.random_rollout_slices_ds(slice_size=32)
+for x in islice(ds.as_numpy_iterator(), 10): print(x)
 
 
 """

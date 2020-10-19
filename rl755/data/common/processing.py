@@ -27,5 +27,9 @@ def slice_example(x, slice_size):
     rollout_length = tf.shape(next(iter(x.values())))[0]
     rollout_length = tf.minimum(rollout_length, x["done_step"] + 1)
     slice_start = tf.random.uniform([], 0, rollout_length - slice_size, dtype=tf.int32)
-    x = {k: v[slice_start : slice_start + slice_size] for k, v in x.items()}
+    x = {
+        k: v[slice_start : slice_start + slice_size]
+        for k, v in x.items()
+        if k != "done_step"
+    }
     return x

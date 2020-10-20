@@ -34,7 +34,8 @@ run_python() {
     --environment=bigfish \
     --batch_size=256 \
     --model=deterministic_transformer_32dm_32di \
-    --rollouts_dataset=EncodedRolloutsVae32d
+    --rollouts_dataset=EncodedRolloutsVae32d \
+    --slices_per_rollout=2
 }
 
 

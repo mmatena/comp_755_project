@@ -130,10 +130,7 @@ def main(_):
         for rollout in ds:
             encoded = encode_rollout(model, rollout)
             encoded = {k: v.numpy() for k, v in encoded.items()}
-            step_start = time.time()
             serialized_record = serialize_encoded_rollout(encoded)
-            print(f"Step took {time.time() - step_start} s")
-            print(len(serialized_record))
             record_writer.write(serialized_record)
 
     end = time.time()

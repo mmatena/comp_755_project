@@ -96,6 +96,7 @@ def get_vision_model():
     return model()
 
 
+@tf.function
 def encode_map_fn(x, model):
     raw_observations = tf.reshape(x["observations"], (-1,) + OBSERVATION_SHAPE)
     rep = model.compute_full_representation(raw_observations)

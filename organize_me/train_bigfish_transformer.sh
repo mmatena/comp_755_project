@@ -12,9 +12,9 @@ MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/memory/deterministic_tra
 
 TRAIN_STEPS=100000
 
-NUM_CORES=8
-MEMORY=8g
-TIME="8:30:00"
+NUM_CORES=4
+MEMORY=4g
+TIME="3:30:00"
 #############################################################
 
 
@@ -53,7 +53,7 @@ launch() {
     --time=${TIME} \
     --mem=${MEMORY} \
     --partition=volta-gpu \
-    --gres=gpu:2 \
+    --gres=gpu:1 \
     --qos=gpu_access \
     --wrap="\"$(run_singularity)\"")
   eval $CMD

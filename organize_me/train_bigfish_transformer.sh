@@ -8,7 +8,7 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/memory/deterministic_transformer_32dm_32di
+MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/memory/deterministic_transformer_32dm_32di_2
 
 TRAIN_STEPS=100000
 
@@ -52,7 +52,7 @@ launch() {
     --output="$MODEL_DIR/logs-%j.out" \
     --time=${TIME} \
     --mem=${MEMORY} \
-    --partition=volta-gpu \
+    --partition=gpu \
     --gres=gpu:1 \
     --qos=gpu_access \
     --wrap="\"$(run_singularity)\"")

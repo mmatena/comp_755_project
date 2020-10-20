@@ -59,13 +59,13 @@ class PolicyWrapper(Policy):
     def initialize(self, env, max_steps):
         # TODO: Probably make this into a np array, need to change parts that use it.
         self.encoded_obs = np.empty(
-            [max_steps, env.num, self.vision_model.get_representation_size()],
+            [env.num, max_steps, self.vision_model.get_representation_size()],
             dtype=np.float32,
         )
 
     def get_window_of_preceding_observations(self, step):
         start_index = max(0, step - self.max_seqlen)
-        return self.encoded_obs[start_index:step]
+        return self.encoded_obs[:, start_index:step]
 
     def _ensure_sequence_length(self, x):
         x = x[..., -self.max_seqlen :, :]
@@ -84,11 +84,10 @@ class PolicyWrapper(Policy):
     def _create_memory_model_inputs(self, rollout_state):
         observations = self.get_window_of_preceding_observations(rollout_state.step)
         actions = rollout_state.get_window_of_preceding_actions(self.max_seqlen)
-        nonpadding_seqlen = observations.shape[0]
+        nonpadding_seqlen = observations.shape[1]
 
         actions = tf.one_hot(actions.T, depth=ACTION_SIZE, axis=-1)
-
-        inputs = tf.concat([observations.T, actions], axis=-1)
+        inputs = tf.concat([observations, actions], axis=-1)
         inputs, mask = self._ensure_sequence_length(inputs)
         return inputs, mask, nonpadding_seqlen
 
@@ -98,7 +97,7 @@ class PolicyWrapper(Policy):
         obs = tf.cast(obs, tf.float32) / 255.0
         enc_obs = self.vision_model.compute_tensor_representation(obs, training=False)
         if step == 0:
-            self.encoded_obs[step] = enc_obs
+            self.encoded_obs[:, step] = enc_obs
             # TODO(mmatena): Handle this case better.
             return self.learned_policy.sample_action(
                 np.zeros([enc_obs.shape[0], self.learned_policy.in_size()])
@@ -109,7 +108,7 @@ class PolicyWrapper(Policy):
         hidden_state = self.memory_model.get_hidden_representation(
             inputs, mask=mask, training=False, position=nonpadding_seqlen - 1
         )
-        self.encoded_obs[step] = enc_obs
+        self.encoded_obs[:, step] = enc_obs
         policy_input = tf.concat([enc_obs, hidden_state], axis=-1)
         action = self.learned_policy.sample_action(policy_input)
         return action

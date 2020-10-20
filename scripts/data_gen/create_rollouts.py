@@ -26,14 +26,13 @@ flags.DEFINE_integer("max_simul_envs", 256, "")
 flags.DEFINE_integer("desired_shard_mb", 100, "")
 
 flags.DEFINE_string("out_dir", None, "The directory to write the tfrecords to.")
-flags.DEFINE_string("out_name", None, "Prefix to give the generated tfrecord files.")
+flags.DEFINE_string("out_name", "data", "Prefix to give the generated tfrecord files.")
 
 
 flags.mark_flag_as_required("environment")
 flags.mark_flag_as_required("num_rollouts")
 flags.mark_flag_as_required("max_steps")
 flags.mark_flag_as_required("out_dir")
-flags.mark_flag_as_required("out_name")
 
 
 def get_policy():

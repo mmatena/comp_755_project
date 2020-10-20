@@ -23,9 +23,9 @@ run_shell() {
 
 launch() {
   CMD=$(echo srun \
-    --ntasks=16 \
+    --ntasks=8 \
     --time=8:30:00 \
-    --mem=12g \
+    --mem=8g \
     --partition=general \
     --pty \
     $(run_shell))

@@ -1,6 +1,4 @@
 """Script for generating many rollouts of a given policy."""
-import time
-
 import numpy as np
 from procgen import ProcgenGym3Env
 import tensorflow as tf
@@ -95,11 +93,7 @@ def perform_rollouts(env_name, num_envs, policy, max_steps, **env_kwargs):
     policy.initialize(env, max_steps=max_steps)
 
     for step in range(max_steps):
-        start = time.time()
         action = policy.sample_action(rollout_state)
-        print(f"Sample action: {time.time() - start} s")
-        start = time.time()
         rollout_state.perform_step(env, action)
-        print(f"Perform step: {time.time() - start} s")
 
     return rollout_state

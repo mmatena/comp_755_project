@@ -82,16 +82,22 @@ class PolicyWrapper(Policy):
             return x, None
 
     def _create_memory_model_inputs(self, rollout_state):
+        import time
+
         observations = self.get_window_of_preceding_observations(rollout_state.step)
         actions = rollout_state.get_window_of_preceding_actions(self.max_seqlen)
         nonpadding_seqlen = observations.shape[1]
 
         actions = tf.one_hot(actions.T, depth=ACTION_SIZE, axis=-1)
         inputs = tf.concat([observations, actions], axis=-1)
+        start = time.time()
         inputs, mask = self._ensure_sequence_length(inputs)
+        print(f"ensure seq len: {time.time() - start} s")
         return inputs, mask, nonpadding_seqlen
 
     def sample_action(self, rollout_state):
+        import time
+
         step = rollout_state.step
         obs = rollout_state.get_current_observation()
         obs = tf.cast(obs, tf.float32) / 255.0
@@ -105,12 +111,16 @@ class PolicyWrapper(Policy):
         inputs, mask, nonpadding_seqlen = self._create_memory_model_inputs(
             rollout_state
         )
+        start = time.time()
         hidden_state = self.memory_model.get_hidden_representation(
             inputs, mask=mask, training=False, position=nonpadding_seqlen - 1
         )
+        print(f"mem hidden rep: {time.time() - start} s")
         self.encoded_obs[:, step] = enc_obs
         policy_input = tf.concat([enc_obs, hidden_state], axis=-1)
+        start = time.time()
         action = self.learned_policy.sample_action(policy_input)
+        print(f"linear sample action: {time.time() - start} s\n")
         return action
 
 

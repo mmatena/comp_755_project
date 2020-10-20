@@ -127,6 +127,7 @@ class ArTransformer(MemoryComponent):
         """Train using a MSE loss."""
         return tf.keras.losses.MeanSquaredError()
 
+    @tf.function
     def get_hidden_representation(self, x, mask=None, training=None, position=-1):
         """Returns the hidden representation used to represent the positiion in the sequence.
 

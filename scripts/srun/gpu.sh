@@ -30,7 +30,7 @@ launch() {
     --ntasks=12 \
     --time=2:30:00 \
     --mem=8g \
-    --partition=gpu \
+    --partition=volta-gpu \
     --gres=gpu:1 \
     --qos=gpu_access \
     --pty \

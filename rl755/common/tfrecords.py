@@ -55,6 +55,9 @@ class FixedSizeShardedWriter(object):
         self.shard_count = None
 
     def _set_item_mb(self, record):
+        print(
+            "TODO: It looks like we might always be 1 item per shard, which is wrong."
+        )
         if self.item_mb is not None:
             return
         self.item_mb = len(record) / 1024 ** 2

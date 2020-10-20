@@ -46,9 +46,9 @@ class UniformRandomPolicy(Policy):
 
 class PolicyWrapper(Policy):
     # Note: TODO: Add docs
-    def __init__(self, vision_model, sequence_model, learned_policy, max_seqlen):
+    def __init__(self, vision_model, memory_model, learned_policy, max_seqlen):
         self.vision_model = vision_model
-        self.sequence_model = sequence_model
+        self.memory_model = memory_model
         self.learned_policy = learned_policy
         self.max_seqlen = max_seqlen
 
@@ -69,7 +69,7 @@ class PolicyWrapper(Policy):
         else:
             return x, None
 
-    def _create_sequence_model_inputs(self, rollout):
+    def _create_memory_model_inputs(self, rollout):
         observations = self.encoded_obs[-self.max_seqlen :]
         actions = rollout.action_l[-self.max_seqlen :]
         nonpadding_seqlen = len(observations)
@@ -91,8 +91,8 @@ class PolicyWrapper(Policy):
             return self.learned_policy.sample_action(
                 np.zeros([enc_obs.shape[0], self.learned_policy.in_size()])
             )
-        inputs, mask, nonpadding_seqlen = self._create_sequence_model_inputs(rollout)
-        hidden_state = self.sequence_model.get_hidden_representation(
+        inputs, mask, nonpadding_seqlen = self._create_memory_model_inputs(rollout)
+        hidden_state = self.memory_model.get_hidden_representation(
             inputs, mask=mask, position=nonpadding_seqlen - 1
         )
         self.encoded_obs.append(enc_obs)

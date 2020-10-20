@@ -85,6 +85,8 @@ def perform_rollouts(env_name, num_envs, policy, max_steps, **env_kwargs):
         env_kwargs["start_level"] = 0
     if "num_levels" not in env_kwargs:
         env_kwargs["num_levels"] = 1
+    if "distribution_mode" not in env_kwargs:
+        env_kwargs["distribution_mode"] = "easy"
 
     env = ProcgenGym3Env(env_name=env_name, num=num_envs, **env_kwargs)
 

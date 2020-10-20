@@ -357,6 +357,8 @@ class RawImageRolloutDatasetBuilder(RolloutDatasetBuilder):
 
     def get_autoregressive_slices(self, vision_model, *args, **kwargs):
         # TODO: Add docs
+
+        # Usually though reading full rollouts from disk is a bigger bottleneck.
         print(
             "WARNING: The image encoding will not use GPU and thus be relatively slow."
         )

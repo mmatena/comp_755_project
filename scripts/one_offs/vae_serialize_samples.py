@@ -34,9 +34,7 @@ def float_to_uint(x):
 
 
 def get_model():
-    model = locate(
-        f"rl755.models.vision.trained.{FLAGS.environment}.{FLAGS.vision_model}"
-    )
+    model = locate(f"rl755.models.vision.trained.{FLAGS.environment}.{FLAGS.model}")
     return model()
 
 

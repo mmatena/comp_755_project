@@ -36,6 +36,10 @@ class RolloutState(object):
     def get_current_observation(self):
         return self.observations[self.step]
 
+    def get_window_of_preceding_actions(self, size):
+        start_index = max(0, self.step - size)
+        return self.actions[start_index : self.step]
+
     def perform_step(self, env, action):
         env.act(action)
         rew, obs, firsts = env.observe()

@@ -52,7 +52,8 @@ class PolicyWrapper(Policy):
         self.learned_policy = learned_policy
         self.max_seqlen = max_seqlen
 
-    def initialize(self, env, max_steps, **kwargs):
+    def initialize(self, env, max_steps):
+        # TODO: Probably make this into a np array, need to change parts that use it.
         self.encoded_obs = []
 
     def _ensure_sequence_length(self, x):
@@ -69,9 +70,9 @@ class PolicyWrapper(Policy):
         else:
             return x, None
 
-    def _create_memory_model_inputs(self, rollout):
+    def _create_memory_model_inputs(self, rollout_state):
         observations = self.encoded_obs[-self.max_seqlen :]
-        actions = rollout.action_l[-self.max_seqlen :]
+        actions = rollout_state.get_window_of_preceding_actions(self.max_seqlen)
         nonpadding_seqlen = len(observations)
 
         observations = tf.stack(observations, axis=-2)
@@ -82,16 +83,19 @@ class PolicyWrapper(Policy):
         inputs, mask = self._ensure_sequence_length(inputs)
         return inputs, mask, nonpadding_seqlen
 
-    def sample_action(self, obs, step, rollout, **kwargs):
+    def sample_action(self, rollout_state):
+        obs = rollout_state.get_current_observation()
         obs = tf.cast(obs, tf.float32) / 255.0
         enc_obs = self.vision_model.encode_tensor(obs)
-        if step == 0:
+        if rollout_state.step == 0:
             self.encoded_obs.append(enc_obs)
             # TODO(mmatena): Handle this case better.
             return self.learned_policy.sample_action(
                 np.zeros([enc_obs.shape[0], self.learned_policy.in_size()])
             )
-        inputs, mask, nonpadding_seqlen = self._create_memory_model_inputs(rollout)
+        inputs, mask, nonpadding_seqlen = self._create_memory_model_inputs(
+            rollout_state
+        )
         hidden_state = self.memory_model.get_hidden_representation(
             inputs, mask=mask, position=nonpadding_seqlen - 1
         )

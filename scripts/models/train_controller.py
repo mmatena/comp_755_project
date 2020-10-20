@@ -31,7 +31,7 @@ flags.DEFINE_string(
     "model_dir", None, "The directory to write checkpoints and logs to."
 )
 
-flags.DEFINE_string("controller", "LinearPolicy", "")
+flags.DEFINE_string("controller", "LinearController", "")
 
 flags.DEFINE_string("vision_model", None, "")
 flags.DEFINE_string("memory_model", None, "")
@@ -91,6 +91,8 @@ def get_scores(solutions, vision_model, memory_model, max_steps):
         learned_policy=learned_policy,
         max_seqlen=FLAGS.sequence_length,
     )
+    # TODO: Maybe add some form of stopping if all are complete. IDK if this happens
+    # often enough to be a benefit.
     rollout_state = gym_rollouts.perform_rollouts(
         env_name=FLAGS.environment,
         num_envs=len(solutions),

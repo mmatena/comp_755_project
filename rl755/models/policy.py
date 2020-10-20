@@ -106,7 +106,10 @@ class PolicyWrapper(Policy):
             rollout_state
         )
         hidden_state = self.memory_model.get_hidden_representation(
-            inputs, mask=mask, training=False, position=nonpadding_seqlen - 1
+            inputs,
+            mask=mask,
+            training=tf.constant(False),
+            position=tf.constant(nonpadding_seqlen - 1),
         )
         self.encoded_obs[:, step] = enc_obs
         policy_input = tf.concat([enc_obs, hidden_state], axis=-1)

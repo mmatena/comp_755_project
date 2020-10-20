@@ -25,6 +25,7 @@ class VisionComponent(tf.keras.Model):
         """
         raise NotImplementedError()
 
+    @tf.function
     def compute_tensor_representation(self, x, training=None):
         # TODO: Add docs
         full_representation = self.compute_full_representation(x, training=training)

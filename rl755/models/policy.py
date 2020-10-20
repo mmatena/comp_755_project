@@ -86,7 +86,7 @@ class PolicyWrapper(Policy):
     def sample_action(self, rollout_state):
         obs = rollout_state.get_current_observation()
         obs = tf.cast(obs, tf.float32) / 255.0
-        enc_obs = self.vision_model.encode_tensor(obs)
+        enc_obs = self.vision_model.compute_tensor_representation(obs, training=False)
         if rollout_state.step == 0:
             self.encoded_obs.append(enc_obs)
             # TODO(mmatena): Handle this case better.
@@ -97,7 +97,7 @@ class PolicyWrapper(Policy):
             rollout_state
         )
         hidden_state = self.memory_model.get_hidden_representation(
-            inputs, mask=mask, position=nonpadding_seqlen - 1
+            inputs, mask=mask, training=False, position=nonpadding_seqlen - 1
         )
         self.encoded_obs.append(enc_obs)
         policy_input = tf.concat([enc_obs, hidden_state], axis=-1)

@@ -12,7 +12,7 @@ def _sample_from_logits(logits):
     # TODO: Add docs
     probs = special.softmax(logits, axis=-1)
     cum_prob = np.cumsum(probs, axis=-1)
-    r = np.random.uniform(size=cum_prob.shape + (1,))
+    r = np.random.uniform(size=cum_prob.shape[:-1] + (1,))
     return np.argmax(cum_prob > r, axis=-1)
 
 

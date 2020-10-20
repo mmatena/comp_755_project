@@ -128,10 +128,11 @@ def main(_):
         desired_shard_mb=FLAGS.desired_shard_mb,
     ) as record_writer:
         for rollout in ds:
-            encoded = encode_rollout(model, rollout)
+            encoded = encode_rollout(model, rollout).numpy()
             step_start = time.time()
             serialized_record = serialize_encoded_rollout(encoded)
             print(f"Step took {time.time() - step_start} s")
+            print(len(serialized_record))
             record_writer.write(serialized_record)
 
     end = time.time()

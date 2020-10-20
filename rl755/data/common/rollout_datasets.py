@@ -357,6 +357,9 @@ class RawImageRolloutDatasetBuilder(RolloutDatasetBuilder):
 
     def get_autoregressive_slices(self, vision_model, *args, **kwargs):
         # TODO: Add docs
+        print(
+            "WARNING: The image encoding will not use GPU and thus be relatively slow."
+        )
 
         def extract_observations(x):
             obs = x["observations"]

@@ -88,7 +88,7 @@ class PolicyWrapper(Policy):
 
         actions = tf.one_hot(actions.T, depth=ACTION_SIZE, axis=-1)
 
-        inputs = tf.concat([observations, actions], axis=-1)
+        inputs = tf.concat([observations.T, actions], axis=-1)
         inputs, mask = self._ensure_sequence_length(inputs)
         return inputs, mask, nonpadding_seqlen
 

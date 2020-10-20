@@ -10,8 +10,6 @@ PROJECT_DIR=~/projects/comp_755_project
 
 MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/data/bigfish/vae_32d_rollouts/train
 
-TRAIN_STEPS=100000
-
 NUM_CORES=8
 MEMORY=8g
 TIME="8:30:00"
@@ -30,7 +28,6 @@ export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 run_python() {
   echo python $PROJECT_DIR/scripts/data_gen/encode_raw_rollouts.py \
     --out_dir=$MODEL_DIR \
-    --train_steps=$TRAIN_STEPS \
     --environment=bigfish \
     --vision_model=vae_32d \
     --estimated_num_rollouts=10000 \

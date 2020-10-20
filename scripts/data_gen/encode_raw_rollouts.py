@@ -153,9 +153,9 @@ def run_shard(
 
 
 def main(_):
-    gpus = tf.config.experimental.list_physical_devices("GPU")
-    tf.config.experimental.set_visible_devices(gpus[FLAGS.gpu_index], "GPU")
-    tf.config.experimental.set_memory_growth(gpus[FLAGS.gpu_index], True)
+    # gpus = tf.config.experimental.list_physical_devices("GPU")
+    # tf.config.experimental.set_visible_devices(gpus[FLAGS.gpu_index], "GPU")
+    # tf.config.experimental.set_memory_growth(gpus[FLAGS.gpu_index], True)
 
     model = get_vision_model()
 

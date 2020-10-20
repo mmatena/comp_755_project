@@ -97,7 +97,6 @@ def get_vision_model():
 
 
 def encode_map_fn(x, model):
-    print("TODO: Probably move out of data pipeline so it can use GPU.")
     raw_observations = tf.reshape(x["observations"], (-1,) + OBSERVATION_SHAPE)
     rep = model.compute_full_representation(raw_observations)
     if isinstance(rep, tuple):

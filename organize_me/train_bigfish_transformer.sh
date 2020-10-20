@@ -12,8 +12,8 @@ MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/memory/deterministic_tra
 
 TRAIN_STEPS=100000
 
-NUM_CORES=4
-MEMORY=4g
+NUM_CORES=6
+MEMORY=8g
 TIME="3:30:00"
 #############################################################
 

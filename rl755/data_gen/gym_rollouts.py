@@ -73,7 +73,9 @@ class RolloutState(object):
 
     def get_first_rollout_total_reward(self):
         # TODO: Add docs
-        return np.sum(self.rewards[: self.done_steps], axis=0)
+        mask = np.arange(self.max_steps)[:, None] < self.done_steps[None, :]
+        mask = mask.astype(np.int32)
+        return np.sum(self.rewards * mask, axis=0)
 
 
 def perform_rollouts(env_name, num_envs, policy, max_steps, **env_kwargs):

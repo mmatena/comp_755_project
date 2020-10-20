@@ -10,6 +10,4 @@ class RawRollouts(RawImageRolloutDatasetBuilder):
         return ENVIRONMENT
 
     def _tfrecords_pattern(self):
-        print("TODO: THIS IS JUST A TEST VERSION OF RAW ROLLOUTS!!!")
-
         return "/pine/scr/m/m/mmatena/comp_755_project/data/bigfish/raw_rollouts/{split}/data.tfrecord*"

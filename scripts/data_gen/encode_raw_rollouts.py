@@ -100,7 +100,7 @@ def serialize_encoded_rollout(rollout):
         "observations": tfrecords.to_float_feature_list(rollout["observations"]),
         "rewards": tfrecords.to_float_feature_list(rollout["rewards"][:, None]),
         "actions": tfrecords.to_int64_feature_list(rollout["actions"][:, None]),
-        "done_step": tfrecords.to_int64_feature_list([[rollout["done_steps"]]]),
+        "done_step": tfrecords.to_int64_feature_list([[rollout["done_step"]]]),
     }
 
     extra_features = {

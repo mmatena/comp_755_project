@@ -96,6 +96,9 @@ class RolloutDatasetBuilder(object):
 
     # Public interface.
 
+    def get_observation_shape(self):
+        return self._observation_shape()
+
     def action_size(self):
         """Returns the dimensionality of the action space.
 

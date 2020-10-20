@@ -80,6 +80,7 @@ class RolloutState(object):
 
 def perform_rollouts(env_name, num_envs, policy, max_steps, **env_kwargs):
     # TODO(mmatena): Add docs
+    # TODO(mmatena): Other options
     if "start_level" not in env_kwargs:
         env_kwargs["start_level"] = 0
     if "num_levels" not in env_kwargs:

@@ -15,3 +15,11 @@ class MemoryComponent(tf.keras.Model):
 
     def get_hidden_representation(self, x, mask=None, training=None, position=-1):
         raise NotImplementedError()
+
+    def get_representation_size(self):
+        """Returns the size of the representation.
+
+        Returns:
+            A positive integer.
+        """
+        raise NotImplementedError()

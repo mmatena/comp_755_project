@@ -67,6 +67,10 @@ class RolloutState(object):
             records.append(example_proto.SerializeToString())
         return records
 
+    def get_first_rollout_total_reward(self):
+        # TODO: Add docs
+        return np.sum(self.rewards[: self.done_steps], axis=0)
+
 
 def perform_rollouts(env_name, num_envs, policy, max_steps, **env_kwargs):
     # TODO(mmatena): Add docs

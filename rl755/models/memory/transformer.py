@@ -149,6 +149,9 @@ class ArTransformer(MemoryComponent):
         ].self_attention_layer.representation
         return representation[..., position, :]
 
+    def get_representation_size(self):
+        return self.transformer_params.hidden_size
+
 
 # Stuff below this line likely needs to be refactored.
 ##############################################################################################

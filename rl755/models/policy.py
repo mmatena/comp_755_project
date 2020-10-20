@@ -112,6 +112,3 @@ class PolicyWrapper(Policy):
         policy_input = tf.concat([enc_obs, hidden_state], axis=-1)
         action = self.learned_policy.sample_action(policy_input)
         return action
-
-
-# Sample action: 0.07143139839172363 s

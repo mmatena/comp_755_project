@@ -28,7 +28,7 @@ launch() {
   # causes it fail to launch.
   CMD=$(echo srun \
     --ntasks=8 \
-    --time=2:30:00 \
+    --time=1:00:00 \
     --mem=8g \
     --partition=gpu \
     --gres=gpu:1 \

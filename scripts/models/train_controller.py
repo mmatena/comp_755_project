@@ -130,8 +130,6 @@ def main(_):
     es = cma.CMAEvolutionStrategy(
         controller_params_count * [0], 0.5, {"popsize": FLAGS.cma_population_size}
     )
-    # TODO: Probably occasionally disconnect and reconnect to gym server as it crashes
-    # for some reason.
     for step in range(FLAGS.cma_steps):
         start = time.time()
         solutions = es.ask()

@@ -91,6 +91,9 @@ class FixedSizeShardedWriter(object):
 
     def write(self, records):
         # TODO: Add docs
+        if not isinstance(records, (list, tuple)):
+            records = [records]
+
         for record in records:
             self._set_item_mb(record)
             self._write_record(record)

@@ -106,9 +106,9 @@ def encode_map_fn(x, model):
         extra = {}
     ret = {
         "observations": rep,
-        "actions": tf.reshape(x["actions"], (-1, 1)),
-        "rewards": tf.reshape(x["rewards"], (-1, 1)),
-        "done_step": tf.reshape(x["done_step"], (1, 1)),
+        "actions": x["actions"],
+        "rewards": x["rewards"],
+        "done_step": x["done_step"],
     }
     ret.update(extra)
     return ret

@@ -10,7 +10,6 @@ import tensorflow as tf
 
 from rl755.common import misc
 
-ACTION_SIZE = 15
 OBSERVATION_SHAPE = (64, 64, 3)
 
 FLAGS = flags.FLAGS
@@ -107,7 +106,7 @@ def encode_map_fn(x, model):
         extra = {}
     ret = {
         "observations": rep,
-        "actions": tf.reshape(x["actions"], (-1, ACTION_SIZE)),
+        "actions": tf.reshape(x["actions"], (-1, 1)),
         "rewards": tf.reshape(x["rewards"], (-1, 1)),
         "done_step": tf.reshape(x["done_step"], (1, 1)),
     }

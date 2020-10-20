@@ -8,12 +8,12 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/memory/deterministic_transformer_32dm_32di_2
+MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/memory/deterministic_transformer_32dm_32di
 
 TRAIN_STEPS=100000
 
-NUM_CORES=4
-MEMORY=4g
+NUM_CORES=8
+MEMORY=8g
 TIME="3:30:00"
 #############################################################
 
@@ -28,7 +28,7 @@ module add tensorflow_py3/2.1.0
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 
 run_python() {
-  echo python $PROJECT_DIR/scripts/models/train_vision_component.py \
+  echo python $PROJECT_DIR/scripts/models/train_memory_component.py \
     --model_dir=$MODEL_DIR \
     --train_steps=$TRAIN_STEPS \
     --environment=bigfish \
@@ -53,7 +53,7 @@ launch() {
     --time=${TIME} \
     --mem=${MEMORY} \
     --partition=gpu \
-    --gres=gpu:4 \
+    --gres=gpu:8 \
     --qos=gpu_access \
     --wrap="\"$(run_singularity)\"")
   eval $CMD

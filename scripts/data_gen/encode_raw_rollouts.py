@@ -120,6 +120,8 @@ def main(_):
     ds = get_dataset()
     start = time.time()
 
+    count = 0
+
     with tfrecords.FixedSizeShardedWriter(
         directory=FLAGS.out_dir,
         filename=f"{FLAGS.out_name}.tfrecord",
@@ -131,6 +133,10 @@ def main(_):
             encoded = {k: v.numpy() for k, v in encoded.items()}
             serialized_record = serialize_encoded_rollout(encoded)
             record_writer.write(serialized_record)
+            count += 1
+
+            if not (count % 1000):
+                print(f"{count} rollouts processed")
 
     end = time.time()
     print("Took", end - start, "seconds to run.")

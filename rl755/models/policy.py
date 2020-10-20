@@ -7,6 +7,8 @@ import gym3
 import numpy as np
 import tensorflow as tf
 
+ACTION_SIZE = 15
+
 
 class Policy(object):
     """Abstract base class for policies"""
@@ -76,8 +78,7 @@ class PolicyWrapper(Policy):
         nonpadding_seqlen = len(observations)
 
         observations = tf.stack(observations, axis=-2)
-        actions = tf.stack(actions, axis=-2)
-        actions = tf.cast(actions, tf.float32)
+        actions = tf.one_hot(actions.T, depth=ACTION_SIZE, axis=-1)
 
         inputs = tf.concat([observations, actions], axis=-1)
         inputs, mask = self._ensure_sequence_length(inputs)

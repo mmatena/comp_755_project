@@ -9,6 +9,7 @@ import zlib
 
 from absl import app
 from absl import flags
+from absl import logging
 import cma
 import numpy as np
 import rpyc
@@ -149,9 +150,9 @@ def main(_):
         # We take the negative since our CMA is trying to reduce a loss.
         es.tell(solutions, -fitlist)
 
-        print(f"CMA step {step}:")
-        print(f"    time: {time.time() - start} s")
-        print(f"    max score: {max(fitlist)}")
+        logging.info(f"CMA step {step}:")
+        logging.info(f"    time: {time.time() - start} s")
+        logging.info(f"    max score: {max(fitlist)}")
 
 
 if __name__ == "__main__":

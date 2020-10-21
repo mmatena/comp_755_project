@@ -8,7 +8,7 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-MODEL_DIR=/pine/scr/m/m/mmatena/tmp/bigfish_controller_test
+MODEL_DIR=/pine/scr/m/m/mmatena/tmp/bigfish_controller_test2
 
 NUM_CORES=12
 MEMORY=12g
@@ -32,9 +32,9 @@ run_python() {
     --memory_model=deterministic_transformer_32dm_32di \
     --vision_model=vae_32d \
     --rollout_max_steps=1000 \
-    --cma_population_size=16 \
-    --cma_trials_per_member=8 \
-    --cma_steps=4000
+    --cma_population_size=64 \
+    --cma_trials_per_member=16 \
+    --cma_steps=1000
 }
 
 

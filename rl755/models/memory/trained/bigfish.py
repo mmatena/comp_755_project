@@ -12,6 +12,7 @@ def deterministic_transformer_32dm_32di():
     weights_path = "/pine/scr/m/m/mmatena/comp_755_project/models/memory/deterministic_transformer_32dm_32di/model-075.hdf5"
     model = instances.deterministic_transformer_32dm_32di()
     # Build the model.
-    model(tf.zeros([384, 32, 32 + ACTION_SIZE]))
+    print("TODO: Figure out how to do this without knowing batch or sequence length.")
+    model(tf.zeros([128, 32, 32 + ACTION_SIZE]))
     model.load_weights(weights_path)
     return model

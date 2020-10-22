@@ -84,7 +84,8 @@ def perform_rollouts(env_name, num_envs, policy, max_steps, **env_kwargs):
     if "start_level" not in env_kwargs:
         env_kwargs["start_level"] = 0
     if "num_levels" not in env_kwargs:
-        env_kwargs["num_levels"] = 1
+        # Use unlimited levels.
+        env_kwargs["num_levels"] = 0
     if "distribution_mode" not in env_kwargs:
         env_kwargs["distribution_mode"] = "easy"
 

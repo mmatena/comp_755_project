@@ -2,8 +2,11 @@
 from .. import instances
 
 
-def vae_32d():
-    # TODO: Add docs
-    print("TODO: THIS MODEL ISN'T TRAINED. LOAD WEIGHTS!!!")
-    model = instances.vae_32d()
-    return model
+# def vae_32d():
+#     # TODO: Add docs
+#     weights_path = (
+#         "/pine/scr/m/m/mmatena/comp_755_project/models/vision/vae_32d/model-100.hdf5"
+#     )
+#     model = instances.vae_32d()
+#     model.load_weights(weights_path)
+#     return model

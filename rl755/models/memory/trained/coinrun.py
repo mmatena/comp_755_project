@@ -1,4 +1,4 @@
-"""Trained vision memory for the coinrun environment."""
+"""Trained memory models for the coinrun environment."""
 from .. import instances
 
 

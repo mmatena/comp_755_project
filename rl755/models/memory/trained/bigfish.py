@@ -15,3 +15,7 @@ def deterministic_transformer_32dm_32di():
     model(tf.zeros([128, 32, 32 + ACTION_SIZE]))
     model.load_weights(weights_path)
     return model
+
+
+def no_mem():
+    return instances.no_mem()

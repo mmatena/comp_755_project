@@ -10,7 +10,7 @@ PROJECT_DIR=~/projects/comp_755_project
 
 MODEL_DIR=/pine/scr/m/m/mmatena/tmp/bigfish_controller_no_mem_test
 
-NUM_CORES=16
+NUM_CORES=32
 MEMORY=16g
 TIME="1-"
 #############################################################

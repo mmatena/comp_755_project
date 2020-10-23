@@ -9,7 +9,7 @@ class EpisodicRetriever(MemoryComponent):
 
     def __init__(self, prediction_network, lookup_network, key_size, **kwargs):
         # TODO: Add docs, prediction_network and lookup_network are
-        # MemoryComponents/ArTransformerrs themselves.
+        # MemoryComponents/ArTransformers themselves.
         super().__init__(**kwargs)
         self.prediction_network = prediction_network
         self.lookup_network = lookup_network

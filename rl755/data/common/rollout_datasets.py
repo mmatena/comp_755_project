@@ -215,7 +215,11 @@ class RolloutDatasetBuilder(object):
             x["observations"] = self._process_observations(x["observations"])
             return x
 
+        def filter_short_rollouts(x):
+            return x["done_step"] >= slice_size
+
         ds = self.rollouts_ds(split=split, process_observations=False)
+        ds = ds.filter(filter_short_rollouts)
         if slices_per_rollout > 1:
             ds = ds.interleave(
                 lambda x: tf.data.Dataset.from_tensors(x).repeat(slices_per_rollout)

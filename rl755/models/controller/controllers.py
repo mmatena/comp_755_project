@@ -54,3 +54,11 @@ class LinearController(Controller):
 
     def serialize(self):
         return pickle.dumps((self.w, self.b))
+
+    def slice_batch(self, start, end=None):
+        if end is None:
+            end = start + 1
+        return LinearController(w=self.w[start:end], b=self.b[start:end])
+
+    def batch_size(self):
+        return self.w.shape[0]

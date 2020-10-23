@@ -25,3 +25,9 @@ class Controller(object):
 
     def serialize(self):
         raise NotImplementedError()
+
+    def slice_batch(self, start, end=None):
+        raise NotImplementedError()
+
+    def batch_size(self):
+        return self.w.shape[0]

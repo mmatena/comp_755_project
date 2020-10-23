@@ -8,9 +8,10 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-MODEL_DIR=/pine/scr/m/m/mmatena/tmp/bigfish_controller_test
+# MODEL_DIR=/pine/scr/m/m/mmatena/tmp/bigfish_controller_test
+MODEL_DIR=/pine/scr/m/m/mmatena/tmp/bigfish_controller_det_test
 
-NUM_CORES=14
+NUM_CORES=16
 MEMORY=16g
 TIME="1-"
 #############################################################

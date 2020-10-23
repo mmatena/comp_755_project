@@ -33,18 +33,22 @@ class LinearController(Controller):
         w, b = pickle.loads(bytes_str)
         return LinearController(w=w, b=b)
 
-    def __init__(self, w, b):
+    def __init__(self, w, b, deterministic=True):
         self.w = w
         self.b = b
         self._out_size = b.shape[-1]
         self._in_size = w.shape[-1]
+        self.deterministic = deterministic
 
     def sample_action(self, inputs):
         if isinstance(inputs, tf.Tensor):
             inputs = inputs.numpy()
         logits = np.einsum("...jk,...k->...j", self.w, inputs) + self.b
         logits = np.reshape(logits, [-1, self._out_size])
-        return _sample_from_logits(logits)
+        if self.deterministic:
+            return np.argmax(logits, axis=-1)
+        else:
+            return _sample_from_logits(logits)
 
     def in_size(self):
         return self._in_size

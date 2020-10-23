@@ -24,7 +24,8 @@ run_python() {
     --out_dir=$MODEL_DIR \
     --num_rollouts=10000 \
     --environment=bigfish \
-    --max_steps=1000
+    --max_steps=1000 \
+    --max_simul_envs=64
 }
 
 

@@ -176,7 +176,6 @@ class RolloutDatasetBuilder(object):
             A tf.data.Dataset.
         """
         files = self.get_tfrecord_files(split=split)
-
         files = tf.data.Dataset.from_tensor_slices(files)
         ds = files.interleave(
             tf.data.TFRecordDataset,
@@ -220,6 +219,9 @@ class RolloutDatasetBuilder(object):
             ds = ds.interleave(
                 lambda x: tf.data.Dataset.from_tensors(x).repeat(slices_per_rollout)
             )
+        def filter_fn(x):
+            return x["done_step"] > slice_size
+        ds = ds.filter(filter_fn)
         return ds.map(map_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
     def random_rollout_observations(self, split="train", obs_sampled_per_rollout=100):

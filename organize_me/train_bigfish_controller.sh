@@ -11,7 +11,7 @@ PROJECT_DIR=~/projects/comp_755_project
 MODEL_DIR=/pine/scr/m/m/mmatena/tmp/bigfish_controller_test2
 
 NUM_CORES=14
-MEMORY=32g
+MEMORY=16g
 TIME="1-"
 #############################################################
 
@@ -34,6 +34,7 @@ run_python() {
     --rollout_max_steps=1000 \
     --cma_population_size=64 \
     --cma_trials_per_member=16 \
+    --max_simul_envs=128 \
     --cma_steps=1000
 }
 

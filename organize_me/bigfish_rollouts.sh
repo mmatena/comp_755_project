@@ -37,7 +37,9 @@ launch() {
     --ntasks=8 \
     --time=2:30:00 \
     --mem=8g \
-    --partition=general \
+    --partition=volta-gpu \
+    --gres=gpu:1 \
+    --qos=gpu_access \
     --wrap="\"$(run_python)\"")
   eval $CMD
 }

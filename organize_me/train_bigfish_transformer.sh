@@ -53,7 +53,7 @@ launch() {
     --time=${TIME} \
     --mem=${MEMORY} \
     --partition=gpu \
-    --gres=gpu:4 \
+    --gres=gpu:8 \
     --qos=gpu_access \
     --wrap="\"$(run_singularity)\"")
   eval $CMD

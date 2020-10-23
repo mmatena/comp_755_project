@@ -8,7 +8,7 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/memory/deterministic_transformer_32dm_32di
+MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/memory/bigfish/deterministic_transformer_32dm_32di
 
 TRAIN_STEPS=100000
 

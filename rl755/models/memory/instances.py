@@ -3,8 +3,9 @@
 from bert.transformer import TransformerEncoderLayer
 import tensorflow as tf
 
-from . import transformer
 from . import lstm
+from . import null
+from . import transformer
 
 ###############################################################################
 # Transformers
@@ -80,3 +81,12 @@ def deterministic_lstm_64dm_32di():
 def deterministic_lstm_32dm_32di():
     """Returns a deterministic lstm with a model size of 32 and input size of 32."""
     return lstm.Lstm(hidden_size=32, output_size=32)
+
+
+###############################################################################
+# No memory
+###############################################################################
+
+
+def no_mem():
+    return null.NullMemory()

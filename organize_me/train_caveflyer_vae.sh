@@ -8,7 +8,7 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/vision/bigfish/vae_32d
+MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/vision/caveflyer/vae_32d
 
 TRAIN_STEPS=100000
 
@@ -31,7 +31,7 @@ run_python() {
   echo python $PROJECT_DIR/scripts/models/train_vision_component.py \
     --model_dir=$MODEL_DIR \
     --train_steps=$TRAIN_STEPS \
-    --environment=bigfish \
+    --environment=caveflyer \
     --model=vae_32d
 }
 

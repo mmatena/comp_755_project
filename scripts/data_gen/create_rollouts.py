@@ -23,7 +23,7 @@ flags.DEFINE_string(
 
 flags.DEFINE_integer("max_steps", None, "The maximum number of steps in each rollout.")
 
-flags.DEFINE_integer("max_simul_envs", 256, "")
+flags.DEFINE_integer("max_simul_envs", 64, "")
 flags.DEFINE_integer("desired_shard_mb", 100, "")
 
 flags.DEFINE_string("out_dir", None, "The directory to write the tfrecords to.")

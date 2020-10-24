@@ -2,6 +2,7 @@
 this work on longleaf's notebook."""
 import itertools
 from pydoc import locate
+import os
 
 from absl import app
 from absl import flags
@@ -60,7 +61,10 @@ def main(_):
         # print(tf.io.serialize_tensor(float_to_uint(inputs)).numpy())
         images = float_to_uint(inputs).numpy()
         image = Image.fromarray(images[0])
-        image.show()
+        # image.show()
+        image.save("/tmp/tmp.png")
+        os.system("xdg-open /tmp/tmp.png")
+
         for _ in range(10):
             print("_")
 

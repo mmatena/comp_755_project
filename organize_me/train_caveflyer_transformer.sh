@@ -8,13 +8,15 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/memory/caveflyer/deterministic_transformer_32dm_32di
+# MODEL=deterministic_transformer_32dm_32di
+MODEL=deterministic_transformer_64dm_32di
+MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/memory/caveflyer/$MODEL
 
 TRAIN_STEPS=100000
 
 NUM_CORES=6
 MEMORY=8g
-TIME="9:30:00"
+TIME="22:30:00"
 #############################################################
 
 
@@ -33,7 +35,7 @@ run_python() {
     --train_steps=$TRAIN_STEPS \
     --environment=caveflyer \
     --batch_size=256 \
-    --model=deterministic_transformer_32dm_32di \
+    --model=$MODEL \
     --rollouts_dataset=EncodedRolloutsVae32d \
     --slices_per_rollout=2
 }

@@ -5,6 +5,7 @@ from pydoc import locate
 
 from absl import app
 from absl import flags
+from PIL import Image
 import tensorflow as tf
 
 FLAGS = flags.FLAGS
@@ -56,7 +57,10 @@ def main(_):
         z = vae.encode(inputs).mean()
         images = vae.decode(z)
 
-        print(tf.io.serialize_tensor(float_to_uint(inputs)).numpy())
+        # print(tf.io.serialize_tensor(float_to_uint(inputs)).numpy())
+        images = float_to_uint(inputs).numpy()
+        image = Image.fromarray(images[0])
+        image.show()
         for _ in range(10):
             print("_")
 

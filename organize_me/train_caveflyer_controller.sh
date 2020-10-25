@@ -10,7 +10,8 @@ PROJECT_DIR=~/projects/comp_755_project
 
 # MODEL_DIR=/pine/scr/m/m/mmatena/tmp/caveflyer_controller_test
 # MODEL_DIR=/pine/scr/m/m/mmatena/tmp/caveflyer_controller_det_test2
-MODEL_DIR=/pine/scr/m/m/mmatena/tmp/caveflyer_controller_64_det_test2
+# MODEL_DIR=/pine/scr/m/m/mmatena/tmp/caveflyer_controller_64_det_test2
+MODEL_DIR=/pine/scr/m/m/mmatena/tmp/caveflyer_controller_32_lstm_det_test2
 
 NUM_CORES=16
 MEMORY=16g
@@ -31,7 +32,7 @@ run_python() {
   echo python $PROJECT_DIR/scripts/models/train_controller.py \
     --environment=caveflyer \
     --model_dir=$MODEL_DIR \
-    --memory_model=deterministic_transformer_64dm_32di \
+    --memory_model=deterministic_lstm_32dm_32di \
     --vision_model=vae_32d \
     --rollout_max_steps=1000 \
     --cma_population_size=64 \

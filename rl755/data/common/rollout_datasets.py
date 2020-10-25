@@ -430,6 +430,7 @@ class EncodedRolloutDatasetBuilder(RolloutDatasetBuilder):
         return (self.representation_size(),)
 
     def _create_ar_inputs(self, observations, actions, sequence_length):
+        actions = tf.one_hot(actions, depth=self.action_size(), axis=-1)
         inputs = tf.concat([observations, actions], axis=-1)
         inputs = tf.reshape(
             inputs, [sequence_length, self.representation_size() + self.action_size()]

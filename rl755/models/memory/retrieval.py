@@ -23,6 +23,7 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         )
 
 
+# from rl755.models.memory import retrieval
 if True:
     from rl755.data.envs.caveflyer import EncodedRolloutsVae32d
     from itertools import islice

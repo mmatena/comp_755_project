@@ -21,3 +21,15 @@ class EpisodicRetriever(MemoryComponent):
         self.key_proj = tf.keras.layers.Dense(
             units=key_size, activation=None, name="key_proj"
         )
+
+
+if False:
+    from rl755.data.envs.caveflyer import EncodedRolloutsVae32d
+    from itertools import islice
+
+    dsb = EncodedRolloutsVae32d()
+    ds = dsb.get_autoregressive_slices_with_full_history(
+        sequence_length=32, history_size=1024
+    )
+    for x in islice(ds.as_numpy_iterator(), 10):
+        print(x)

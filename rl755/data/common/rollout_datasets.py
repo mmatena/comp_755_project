@@ -300,10 +300,7 @@ class RolloutDatasetBuilder(object):
         def map_fn(x):
             a = tf.one_hot(x["actions"], depth=action_size, axis=-1)
             o = extract_observations(x)
-            inputs = tf.concat(
-                [o[:-1], a[:-1]],
-                axis=-1,
-            )
+            inputs = tf.concat([o[:-1], a[:-1]], axis=-1)
             if difference_targets:
                 targets = o[1:] - o[:-1]
             else:
@@ -432,6 +429,13 @@ class EncodedRolloutDatasetBuilder(RolloutDatasetBuilder):
     def _observation_shape(self):
         return (self.representation_size(),)
 
+    def _create_ar_inputs(self, observations, actions, sequence_length):
+        inputs = tf.concat([observations, actions], axis=-1)
+        inputs = tf.reshape(
+            inputs, [sequence_length, self.representation_size() + self.action_size()]
+        )
+        return inputs
+
     # Public interface.
 
     def get_autoregressive_slices(self, sample_observations=False, *args, **kwargs):
@@ -451,3 +455,62 @@ class EncodedRolloutDatasetBuilder(RolloutDatasetBuilder):
             extract_observations=extract_observations,
             **kwargs
         )
+
+    def get_autoregressive_slices_with_full_history(
+        self, sequence_length, history_size, split="train"
+    ):
+        # TODO: Add docs.
+        slice_size = sequence_length + 1
+        representation_size = self.representation_size()
+        action_size = self.action_size()
+
+        def pad_history(history):
+            d_history = representation_size + action_size
+
+            # If the history is too long, retain only the most recent events.
+            history = history[-history_size:]
+
+            # If the history is too short, pad it.
+            diff = history_size - tf.shape(history)[0]
+            padding = tf.zeros([diff, d_history])
+            history = tf.concat([history, padding], axis=0)
+
+            # Ensure the shape.
+            return tf.reshape(history, [history_size, d_history])
+
+        def map_fn(x):
+            rollout_length = tf.shape(x["actions"])[0]
+            rollout_length = tf.minimum(rollout_length, x["done_step"] + 1)
+            slice_start = tf.random.uniform(
+                [], 0, rollout_length - slice_size, dtype=tf.int32
+            )
+            slice_end = slice_start + slice_size
+
+            action_inputs = x["actions"][slice_start:slice_end]
+            obs_inputs = x["observations"][slice_start:slice_end]
+            targets = x["observations"][slice_start + 1 : slice_end + 1]
+
+            inputs = self._create_ar_inputs(obs_inputs, action_inputs, sequence_length)
+            targets = tf.reshape(targets, [sequence_length, representation_size])
+
+            history_actions = x["actions"][:slice_end]
+            history_obs = x["observations"][:slice_end]
+
+            history = self._create_ar_inputs(history_obs, history_actions, slice_end)
+            history = pad_history(history)
+
+            history_length = tf.minimum(slice_end, history_size)
+
+            full_inputs = {
+                "inputs": inputs,
+                "history": history,
+                "history_length": history_length,
+            }
+
+            return full_inputs, history_length
+
+        def filter_short_rollouts(x):
+            return x["done_step"] >= slice_size
+
+        ds = self.rollouts_ds(split=split)
+        ds = ds.filter(filter_short_rollouts)

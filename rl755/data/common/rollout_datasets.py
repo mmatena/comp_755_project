@@ -485,7 +485,7 @@ class EncodedRolloutDatasetBuilder(RolloutDatasetBuilder):
             slice_start = tf.random.uniform(
                 [], 0, rollout_length - slice_size, dtype=tf.int32
             )
-            slice_end = slice_start + slice_size
+            slice_end = slice_start + sequence_length
 
             action_inputs = x["actions"][slice_start:slice_end]
             obs_inputs = x["observations"][slice_start:slice_end]

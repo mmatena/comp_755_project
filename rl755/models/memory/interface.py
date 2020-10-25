@@ -27,5 +27,7 @@ class MemoryComponent(tf.keras.Model):
 
 
 class MemoryComponentWithHistory(MemoryComponent):
-    # TODO: Add docs, maybe some more methods.
+    """Memory component models with access to full history should extend this."""
+
+    # TODO: Add maybe some more methods.
     pass

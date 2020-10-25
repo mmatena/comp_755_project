@@ -10,7 +10,7 @@ PROJECT_DIR=~/projects/comp_755_project
 
 # MODEL_DIR=/pine/scr/m/m/mmatena/tmp/caveflyer_controller_test
 # MODEL_DIR=/pine/scr/m/m/mmatena/tmp/caveflyer_controller_det_test2
-MODEL_DIR=/pine/scr/m/m/mmatena/tmp/caveflyer_controller_64_det_test
+MODEL_DIR=/pine/scr/m/m/mmatena/tmp/caveflyer_controller_64_det_test2
 
 NUM_CORES=16
 MEMORY=16g
@@ -54,7 +54,7 @@ launch() {
     --output="$MODEL_DIR/logs-%j.out" \
     --time=${TIME} \
     --mem=${MEMORY} \
-    --partition=gpu \
+    --partition=volta-gpu \
     --gres=gpu:1 \
     --qos=gpu_access \
     --wrap="\"$(run_singularity)\"")

@@ -514,3 +514,5 @@ class EncodedRolloutDatasetBuilder(RolloutDatasetBuilder):
 
         ds = self.rollouts_ds(split=split)
         ds = ds.filter(filter_short_rollouts)
+        ds = ds.map(map_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        return ds

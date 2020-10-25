@@ -24,3 +24,8 @@ class MemoryComponent(tf.keras.Model):
             A positive integer.
         """
         raise NotImplementedError()
+
+
+class MemoryComponentWithHistory(MemoryComponent):
+    # TODO: Add docs, maybe some more methods.
+    pass

@@ -1,10 +1,10 @@
 """Models that explicitly retrieve experiences."""
 import tensorflow as tf
 
-from .interface import MemoryComponent
+from .interface import MemoryComponentWithHistory
 
 
-class EpisodicRetriever(MemoryComponent):
+class EpisodicRetriever(MemoryComponentWithHistory):
     """Not as good as a golden retriever. Woof!"""
 
     def __init__(self, prediction_network, lookup_network, key_size, **kwargs):
@@ -23,7 +23,7 @@ class EpisodicRetriever(MemoryComponent):
         )
 
 
-if False:
+if True:
     from rl755.data.envs.caveflyer import EncodedRolloutsVae32d
     from itertools import islice
 

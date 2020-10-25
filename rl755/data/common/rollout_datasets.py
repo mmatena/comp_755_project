@@ -508,7 +508,7 @@ class EncodedRolloutDatasetBuilder(RolloutDatasetBuilder):
                 "history_length": history_length,
             }
 
-            return full_inputs, history_length
+            return full_inputs, targets
 
         def filter_short_rollouts(x):
             return x["done_step"] >= slice_size

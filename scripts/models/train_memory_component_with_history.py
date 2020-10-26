@@ -60,12 +60,9 @@ def get_model():
     from rl755.models.memory.trained import caveflyer
 
     print("TODO: configure all this with flags and stuff")
-    with tf.name_scope("prediction"):
-        prediction_network = caveflyer.deterministic_transformer_32dm_32di()
-    with tf.name_scope("query"):
-        query_network = caveflyer.deterministic_transformer_32dm_32di()
-    with tf.name_scope("key"):
-        key_network = caveflyer.deterministic_transformer_32dm_32di()
+    prediction_network = caveflyer.deterministic_transformer_32dm_32di()
+    query_network = caveflyer.deterministic_transformer_32dm_32di()
+    key_network = caveflyer.deterministic_transformer_32dm_32di()
 
     sequence_length = 32
     key_size = 16
@@ -118,13 +115,17 @@ def main(_):
             learning_rate=FLAGS.learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9
         )
 
-        model_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
-            filepath=os.path.join(model_dir, "model-{epoch:03d}.hdf5"),
-            save_best_only=False,
-            save_weights_only=True,
-        )
+        print("TODO: Add model checkpoint callback.")
+        # model_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
+        #     filepath=os.path.join(model_dir, "model-{epoch:03d}.hdf5"),
+        #     save_best_only=False,
+        #     save_weights_only=True,
+        # )
         tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=model_dir)
-        callbacks = [model_checkpoint_cb, tensorboard_cb]
+        callbacks = [
+            # model_checkpoint_cb,
+            tensorboard_cb
+        ]
 
         model.compile(optimizer=optimizer, loss=model.get_loss_fn())
 

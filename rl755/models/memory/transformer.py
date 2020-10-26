@@ -61,19 +61,20 @@ def _create_representation_catcher(*args, **kwargs):
 
 
 class ArTransformer(MemoryComponent):
-    def __init__(self, transformer_params, output_size, **kwargs):
+    def __init__(self, transformer_params, output_size, max_sequence_length, **kwargs):
         super().__init__(**kwargs)
         self.transformer_params = transformer_params
         self.output_size = output_size
-
-    def build(self, input_shape):
-        hidden_size = self.transformer_params.hidden_size
+        self.max_sequence_length = max_sequence_length
 
         self.pos_embeddings = self.add_weight(
-            shape=[input_shape[-2], hidden_size],
+            shape=[max_sequence_length, transformer_params.hidden_size],
             initializer="random_normal",
             trainable=True,
         )
+
+    def build(self, input_shape):
+        hidden_size = self.transformer_params.hidden_size
 
         self.initial_layer = tf.keras.layers.Dense(units=hidden_size, activation=None)
         self.initial_layer.build(input_shape)
@@ -90,11 +91,11 @@ class ArTransformer(MemoryComponent):
             transformer_input_shape = list(input_shape[:-1]) + [hidden_size]
             self.transformer.build(transformer_input_shape)
 
-            self.final_layer = tf.keras.layers.Dense(
-                units=self.output_size, activation=None
-            )
-            self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
-            super().build(input_shape)
+        self.final_layer = tf.keras.layers.Dense(
+            units=self.output_size, activation=None
+        )
+        self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
+        super().build(input_shape)
 
     def call(self, inputs, mask=None, training=None):
         orig_mask = mask
@@ -108,7 +109,7 @@ class ArTransformer(MemoryComponent):
             mask *= ar_mask
 
         inputs = self.initial_layer(inputs, training=training)
-        inputs += self.pos_embeddings
+        inputs += self.pos_embeddings[..., :seqlen, :]
         with mock.patch.object(
             TransformerSelfAttentionLayer,
             "from_params",

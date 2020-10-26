@@ -8,10 +8,11 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-MODEL=deterministic_lstm_32dm_32di
+# MODEL=deterministic_lstm_32dm_32di
+MODEL=deterministic_lstm_64dm_32di
 MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/memory/caveflyer/$MODEL
 
-TRAIN_STEPS=100000
+TRAIN_STEPS=150000
 
 NUM_CORES=6
 MEMORY=8g

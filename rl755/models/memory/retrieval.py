@@ -140,7 +140,7 @@ class EpisodicRetriever(MemoryComponentWithHistory):
             tf.range(tf.shape(scores)[-1], dtype=tf.int32) + 1
         )
         valid_mask = tf.cast(
-            tf.less_equal(value_ends[None, :], history_length[:, None]),
+            tf.less_equal(value_ends[None, :], history_length),
             dtype=tf.float32,
         )
         scores = scores * valid_mask + _NEG_VALUE * (1.0 - valid_mask)
@@ -245,7 +245,7 @@ class EpisodicRetriever(MemoryComponentWithHistory):
 #     def fn():
 #         inputs = tf.random.normal([2, 32, 32 + 15])
 #         history = tf.random.normal([2, 512, 32 + 15])
-#         history_length = tf.constant([311, 432], dtype=tf.int32)
+#         history_length = tf.constant([[311], [432]], dtype=tf.int32)
 
 #         full_input = {
 #             "inputs": inputs,

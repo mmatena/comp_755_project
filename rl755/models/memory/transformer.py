@@ -36,7 +36,11 @@ class _RepresentationCatcher(tf.keras.layers.Layer):
     def __init__(self, layer):
         super().__init__()
         self.layer = layer
-        self.representation = None
+        self.representations = {}
+        self.key = "default"
+
+    def set_key(self, key):
+        self.key = key
 
     def build(self, *args, **kwargs):
         self.layer.build(*args, **kwargs)
@@ -44,7 +48,7 @@ class _RepresentationCatcher(tf.keras.layers.Layer):
 
     def call(self, *args, **kwargs):
         output = self.layer(*args, **kwargs)
-        self.representation = output
+        self.representations[self.key] = output
         return output
 
 
@@ -86,15 +90,15 @@ class ArTransformer(MemoryComponent):
             transformer_input_shape = list(input_shape[:-1]) + [hidden_size]
             self.transformer.build(transformer_input_shape)
 
-        self.final_layer = tf.keras.layers.Dense(
-            units=self.output_size, activation=None
-        )
-        self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
-        super().build(input_shape)
+            self.final_layer = tf.keras.layers.Dense(
+                units=self.output_size, activation=None
+            )
+            self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
+            super().build(input_shape)
 
     def call(self, inputs, mask=None, training=None):
         orig_mask = mask
-        seqlen = tf.shape(inputs)[1]
+        seqlen = tf.shape(inputs)[-2]
         ar_mask = _create_ar_mask(seqlen)
         if mask is None:
             mask = ar_mask
@@ -128,7 +132,9 @@ class ArTransformer(MemoryComponent):
         return tf.keras.losses.MeanSquaredError()
 
     @tf.function
-    def get_hidden_representation(self, x, mask=None, training=None, position=-1):
+    def get_hidden_representation(
+        self, x, mask=None, training=None, position=-1, key="default"
+    ):
         """Returns the hidden representation used to represent the positiion in the sequence.
 
         Following https://openreview.net/pdf?id=HklBjCEKvH, we use the input to the final
@@ -144,10 +150,10 @@ class ArTransformer(MemoryComponent):
         Returns:
             A tf.Tensor of dtype float32 and shape [batch, hidden]
         """
+        representation_layer = self.transformer.encoder_layers[-1].self_attention_layer
+        representation_layer.set_key(key)
         self(x, mask=mask, training=training)
-        representation = self.transformer.encoder_layers[
-            -1
-        ].self_attention_layer.representation
+        representation = representation_layer.representations[key]
         return representation[..., position, :]
 
     def get_representation_size(self):

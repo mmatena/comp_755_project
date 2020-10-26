@@ -9,7 +9,8 @@
 PROJECT_DIR=~/projects/comp_755_project
 
 # MODEL=deterministic_transformer_32dm_32di
-MODEL=deterministic_transformer_64dm_32di
+# MODEL=deterministic_transformer_64dm_32di
+MODEL=deterministic_transformer_256dm_32di
 MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/memory/caveflyer/$MODEL
 
 TRAIN_STEPS=100000

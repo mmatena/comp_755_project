@@ -458,7 +458,11 @@ class EncodedRolloutDatasetBuilder(RolloutDatasetBuilder):
         )
 
     def get_autoregressive_slices_with_full_history(
-        self, sequence_length, history_size, split="train"
+        self,
+        sequence_length,
+        max_history_length,
+        sequential_targets=False,
+        split="train",
     ):
         # TODO: Add docs.
         slice_size = sequence_length + 1
@@ -469,15 +473,15 @@ class EncodedRolloutDatasetBuilder(RolloutDatasetBuilder):
             d_history = representation_size + action_size
 
             # If the history is too long, retain only the most recent events.
-            history = history[-history_size:]
+            history = history[-max_history_length:]
 
             # If the history is too short, pad it.
-            diff = history_size - tf.shape(history)[0]
+            diff = max_history_length - tf.shape(history)[0]
             padding = tf.zeros([diff, d_history])
             history = tf.concat([history, padding], axis=0)
 
             # Ensure the shape.
-            return tf.reshape(history, [history_size, d_history])
+            return tf.reshape(history, [max_history_length, d_history])
 
         def map_fn(x):
             rollout_length = tf.shape(x["actions"])[0]
@@ -489,18 +493,21 @@ class EncodedRolloutDatasetBuilder(RolloutDatasetBuilder):
 
             action_inputs = x["actions"][slice_start:slice_end]
             obs_inputs = x["observations"][slice_start:slice_end]
-            targets = x["observations"][slice_start + 1 : slice_end + 1]
-
             inputs = self._create_ar_inputs(obs_inputs, action_inputs, sequence_length)
-            targets = tf.reshape(targets, [sequence_length, representation_size])
+
+            if sequential_targets:
+                targets = x["observations"][slice_start + 1 : slice_end + 1]
+                targets = tf.reshape(targets, [sequence_length, representation_size])
+            else:
+                targets = x["observations"][slice_end + 1]
+                targets = tf.reshape(targets, [representation_size])
 
             history_actions = x["actions"][:slice_end]
             history_obs = x["observations"][:slice_end]
-
             history = self._create_ar_inputs(history_obs, history_actions, slice_end)
             history = pad_history(history)
 
-            history_length = tf.minimum(slice_end, history_size)
+            history_length = tf.minimum(slice_end, max_history_length)
 
             full_inputs = {
                 "inputs": inputs,

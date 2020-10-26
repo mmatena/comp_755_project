@@ -182,9 +182,17 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         prediction_inputs = tf.reshape(
             prediction_inputs, [-1, 2 * sequence_length, tf.shape(inputs)[-1]]
         )
-        predictions = self.prediction_network.get_hidden_representation(
-            prediction_inputs, training=training, position=-1
-        )
+
+        #
+        #
+        #
+        #
+        #
+        #
+
+        predictions = self.prediction_network(prediction_inputs, training=training)[
+            ..., -1, :
+        ]
         predictions = tf.reshape(
             predictions, [batch_size, actual_num_retrieved, tf.shape(predictions)[-1]]
         )
@@ -192,10 +200,21 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         weights = tf.nn.softmax(scores, axis=-1)
 
         weighted_predictions = tf.einsum("bvi,bv->bi", predictions, weights)
-        weighted_predictions = self.prediction_network.prediction_from_representation(
-            weighted_predictions, training=training
-        )
         return weighted_predictions
+        # predictions = self.prediction_network.get_hidden_representation(
+        #     prediction_inputs, training=training, position=-1
+        # )
+        # predictions = tf.reshape(
+        #     predictions, [batch_size, actual_num_retrieved, tf.shape(predictions)[-1]]
+        # )
+
+        # weights = tf.nn.softmax(scores, axis=-1)
+
+        # weighted_predictions = tf.einsum("bvi,bv->bi", predictions, weights)
+        # weighted_predictions = self.prediction_network.prediction_from_representation(
+        #     weighted_predictions, training=training
+        # )
+        # return weighted_predictions
 
     def get_loss_fn(self):
         """Train using a MSE loss."""

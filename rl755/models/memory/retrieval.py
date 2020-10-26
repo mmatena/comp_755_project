@@ -202,6 +202,13 @@ class EpisodicRetriever(MemoryComponentWithHistory):
 
         return weighted_predictions
 
+    def get_loss_fn(self):
+        """Train using a MSE loss."""
+        return tf.keras.losses.MeanSquaredError()
+
+    def get_representation_size(self):
+        return self.prediction_network.get_representation_size()
+
 
 # from rl755.models.memory.retrieval import *
 # if True:

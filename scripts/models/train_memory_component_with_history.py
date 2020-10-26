@@ -41,8 +41,6 @@ flags.DEFINE_integer("max_history_length", 512, "", lower_bound=1)
 
 flags.DEFINE_float("learning_rate", 1e-4, "")
 
-flags.DEFINE_integer("slices_per_rollout", 1, "", lower_bound=1)
-
 
 flags.DEFINE_integer(
     "save_every_n_steps",
@@ -93,9 +91,8 @@ def get_train_dataset():
 
     ds = dsb.get_autoregressive_slices_with_full_history(
         sequence_length=FLAGS.sequence_length,
-        split="train",
         max_history_length=FLAGS.max_history_length,
-        slices_per_rollout=FLAGS.slices_per_rollout,
+        split="train",
     )
 
     return processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)

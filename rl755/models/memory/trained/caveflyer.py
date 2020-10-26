@@ -12,11 +12,11 @@ _WEIGHTS_PATTERN = (
 
 def deterministic_transformer_32dm_32di(**kwargs):
     # TODO: Add docs
-    # weights_path = _WEIGHTS_PATTERN.format("deterministic_transformer_32dm_32di", "100")
+    weights_path = _WEIGHTS_PATTERN.format("deterministic_transformer_32dm_32di", "100")
     model = instances.deterministic_transformer_32dm_32di(**kwargs)
     # Build the model.
     model(tf.keras.Input([None, 32 + ACTION_SIZE]))
-    # model.load_weights(weights_path)
+    model.load_weights(weights_path)
     return model
 
 

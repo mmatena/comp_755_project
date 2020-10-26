@@ -69,7 +69,7 @@ def get_model():
     sequence_length = 32
     key_size = 16
     history_stride = sequence_length // 2
-    num_retrieved = 4
+    num_retrieved = 1
 
     prediction_network.use_position_embeddings = False
 

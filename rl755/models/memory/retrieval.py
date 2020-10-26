@@ -192,7 +192,9 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         weights = tf.nn.softmax(scores, axis=-1)
 
         weighted_predictions = tf.einsum("bvi,bv->bi", predictions, weights)
-
+        weighted_predictions = self.prediction_network.final_layer(
+            weighted_predictions, training=training
+        )
         return weighted_predictions
 
     def get_loss_fn(self):

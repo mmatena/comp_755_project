@@ -67,7 +67,7 @@ def get_model():
     key_network = caveflyer.deterministic_transformer_32dm_32di(name="key")
 
     sequence_length = 32
-    key_size = 16
+    key_size = 32
     history_stride = sequence_length // 2
     num_retrieved = 4
 

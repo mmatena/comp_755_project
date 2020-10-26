@@ -156,15 +156,12 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         )
 
         retrieved_scores = tf.einsum("bvi,bi->bv", retrieved_keys, queries)
-        print(value_ends)
-        print(history_length)
         ignore_mask = tf.cast(
             tf.equal(retrieved_scores_no_grad, _NEG_VALUE), dtype=tf.float32
         )
         retrieved_scores = (
             1.0 - ignore_mask
         ) * retrieved_scores + ignore_mask * _NEG_VALUE
-        print(retrieved_scores)
 
         return retrieved_values, retrieved_scores
 

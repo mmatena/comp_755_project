@@ -60,10 +60,12 @@ def get_model():
     from rl755.models.memory.trained import caveflyer
 
     print("TODO: configure all this with flags and stuff")
-
-    prediction_network = caveflyer.deterministic_transformer_32dm_32di()
-    query_network = caveflyer.deterministic_transformer_32dm_32di()
-    key_network = caveflyer.deterministic_transformer_32dm_32di()
+    with tf.name_scope("prediction"):
+        prediction_network = caveflyer.deterministic_transformer_32dm_32di()
+    with tf.name_scope("query"):
+        query_network = caveflyer.deterministic_transformer_32dm_32di()
+    with tf.name_scope("key"):
+        key_network = caveflyer.deterministic_transformer_32dm_32di()
 
     sequence_length = 32
     key_size = 16

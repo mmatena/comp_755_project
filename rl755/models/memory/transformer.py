@@ -162,6 +162,9 @@ class ArTransformer(MemoryComponent):
     def prediction_from_representation(self, representation, training=None):
         # TODO: Add docs, basically go from a represenation to an autoregressive prediction.
 
+        # Fake a sequence dimension.
+        representation = tf.expand_dims(representation, axis=-2)
+
         # Mimic the remainder of the processing within the transformer.
         last_layer = self.transformer.encoder_layers[-1]
         intermediate_output = last_layer.intermediate_layer(representation)
@@ -169,7 +172,9 @@ class ArTransformer(MemoryComponent):
             [intermediate_output, representation]
         )
 
-        return self.final_layer(layer_output, training=training)
+        prediction = self.final_layer(layer_output, training=training)
+        # Remove our fake sequence dimension.
+        return tf.squeeze(prediction, axis=-2)
 
     def get_representation_size(self):
         return self.transformer_params.hidden_size

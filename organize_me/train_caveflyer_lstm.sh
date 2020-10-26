@@ -12,6 +12,7 @@ PROJECT_DIR=~/projects/comp_755_project
 MODEL=deterministic_lstm_64dm_32di
 MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/memory/caveflyer/$MODEL
 
+# Changing to 150k since it looked like the 32dm version didn't fully converge at 100k.
 TRAIN_STEPS=150000
 
 NUM_CORES=6

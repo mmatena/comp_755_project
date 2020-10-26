@@ -159,6 +159,18 @@ class ArTransformer(MemoryComponent):
         representation = representation_layer.representations[key]
         return representation[..., position, :]
 
+    def prediction_from_representation(self, representation, training=None):
+        # TODO: Add docs, basically go from a represenation to an autoregressive prediction.
+
+        # Mimic the remainder of the processing within the transformer.
+        last_layer = self.transformer.encoder_layers[-1]
+        intermediate_output = last_layer.intermediate_layer(representation)
+        layer_output = last_layer.output_projector(
+            [intermediate_output, representation]
+        )
+
+        return self.final_layer(layer_output, training=training)
+
     def get_representation_size(self):
         return self.transformer_params.hidden_size
 

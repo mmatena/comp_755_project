@@ -63,6 +63,7 @@ def _create_representation_catcher(*args, **kwargs):
 class ArTransformer(MemoryComponent):
     def __init__(self, transformer_params, output_size, max_sequence_length, **kwargs):
         super().__init__(**kwargs)
+        self._has_custom_name = "name" in kwargs
         self.transformer_params = transformer_params
         self.output_size = output_size
         self.max_sequence_length = max_sequence_length
@@ -86,7 +87,8 @@ class ArTransformer(MemoryComponent):
             _create_representation_catcher,
         ):
             self.transformer = TransformerEncoderLayer.from_params(
-                self.transformer_params, name="transformer"
+                self.transformer_params,
+                name=self.name if self._has_custom_name else "transformer",
             )
             transformer_input_shape = list(input_shape[:-1]) + [hidden_size]
             self.transformer.build(transformer_input_shape)

@@ -12,7 +12,7 @@ from . import transformer
 ###############################################################################
 
 
-def deterministic_transformer_256dm_32di():
+def deterministic_transformer_256dm_32di(**kwargs):
     """Returns a deterministic transformer with a model size of 256 and input size of 32."""
     max_sequence_length = 32
     output_size = 32
@@ -31,10 +31,11 @@ def deterministic_transformer_256dm_32di():
         transformer_params,
         output_size=output_size,
         max_sequence_length=max_sequence_length,
+        **kwargs,
     )
 
 
-def deterministic_transformer_64dm_32di():
+def deterministic_transformer_64dm_32di(**kwargs):
     """Returns a deterministic transformer with a model size of 64 and input size of 32."""
     max_sequence_length = 32
     output_size = 32
@@ -53,10 +54,11 @@ def deterministic_transformer_64dm_32di():
         transformer_params,
         output_size=output_size,
         max_sequence_length=max_sequence_length,
+        **kwargs,
     )
 
 
-def deterministic_transformer_32dm_32di():
+def deterministic_transformer_32dm_32di(**kwargs):
     """Returns a deterministic transformer with a model size of 32 and input size of 32."""
     max_sequence_length = 32
     output_size = 32
@@ -75,6 +77,7 @@ def deterministic_transformer_32dm_32di():
         transformer_params,
         output_size=output_size,
         max_sequence_length=max_sequence_length,
+        **kwargs,
     )
 
 

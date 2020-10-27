@@ -197,7 +197,7 @@ def deterministic_transformer_64dm_32di_short_skinny(**kwargs):
         transformer_params,
         output_size=output_size,
         max_sequence_length=max_sequence_length,
-        # **kwargs,
+        **kwargs,
     )
 
 

@@ -53,8 +53,8 @@ launch() {
     --output="$MODEL_DIR/logs-%j.out" \
     --time=${TIME} \
     --mem=${MEMORY} \
-    --partition=gpu \
-    --gres=gpu:4 \
+    --partition=volta-gpu \
+    --gres=gpu:2 \
     --qos=gpu_access \
     --wrap="\"$(run_singularity)\"")
   eval $CMD

@@ -5,6 +5,7 @@ from pydoc import locate
 
 from absl import app
 from absl import flags
+from absl import logging
 
 import tensorflow as tf
 
@@ -115,6 +116,8 @@ def main(_):
 
     train_ds = get_train_dataset()
 
+    logging.info(tf.version.VERSION)
+
     mirrored_strategy = tf.distribute.MirroredStrategy()
     with mirrored_strategy.scope():
 
@@ -135,13 +138,13 @@ def main(_):
 
         model.compile(optimizer=optimizer, loss=model.get_loss_fn())
 
-        steps_per_epoch = FLAGS.save_every_n_steps
-        model.fit(
-            train_ds,
-            epochs=FLAGS.train_steps // steps_per_epoch,
-            steps_per_epoch=steps_per_epoch,
-            callbacks=callbacks,
-        )
+    steps_per_epoch = FLAGS.save_every_n_steps
+    model.fit(
+        train_ds,
+        epochs=FLAGS.train_steps // steps_per_epoch,
+        steps_per_epoch=steps_per_epoch,
+        callbacks=callbacks,
+    )
 
 
 if __name__ == "__main__":

@@ -135,13 +135,13 @@ def main(_):
 
         model.compile(optimizer=optimizer, loss=model.get_loss_fn())
 
-    steps_per_epoch = FLAGS.save_every_n_steps
-    model.fit(
-        train_ds,
-        epochs=FLAGS.train_steps // steps_per_epoch,
-        steps_per_epoch=steps_per_epoch,
-        callbacks=callbacks,
-    )
+        steps_per_epoch = FLAGS.save_every_n_steps
+        model.fit(
+            train_ds,
+            epochs=FLAGS.train_steps // steps_per_epoch,
+            steps_per_epoch=steps_per_epoch,
+            callbacks=callbacks,
+        )
 
 
 if __name__ == "__main__":

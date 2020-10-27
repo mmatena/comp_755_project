@@ -133,7 +133,7 @@ def main(_):
         tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=model_dir)
         callbacks = [model_checkpoint_cb, tensorboard_cb]
 
-        model.compile(optimizer=optimizer, loss=model.get_loss_fn())
+    model.compile(optimizer=optimizer, loss=model.get_loss_fn())
 
     steps_per_epoch = FLAGS.save_every_n_steps
     model.fit(

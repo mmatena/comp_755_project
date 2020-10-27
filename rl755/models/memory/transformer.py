@@ -94,7 +94,8 @@ class ArTransformer(MemoryComponent):
         ):
             self.transformer = TransformerEncoderLayer.from_params(
                 self.transformer_params,
-                name=self.name if self._has_custom_name else "transformer",
+                # name=self.name if self._has_custom_name else "transformer",
+                name="transformer",
             )
             transformer_input_shape = list(input_shape[:-1]) + [hidden_size]
             self.transformer.build(transformer_input_shape)

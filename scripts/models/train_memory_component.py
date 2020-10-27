@@ -115,25 +115,25 @@ def main(_):
 
     train_ds = get_train_dataset()
 
-    # mirrored_strategy = tf.distribute.MirroredStrategy()
-    # with mirrored_strategy.scope():
+    mirrored_strategy = tf.distribute.MirroredStrategy()
+    with mirrored_strategy.scope():
 
-    model = get_model()
+        model = get_model()
 
-    # Hardcoded parameters taken from the "Attention is all you need" paper.
-    optimizer = tf.keras.optimizers.Adam(
-        learning_rate=FLAGS.learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9
-    )
+        # Hardcoded parameters taken from the "Attention is all you need" paper.
+        optimizer = tf.keras.optimizers.Adam(
+            learning_rate=FLAGS.learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9
+        )
 
-    model_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
-        filepath=os.path.join(model_dir, "model-{epoch:03d}.hdf5"),
-        save_best_only=False,
-        save_weights_only=True,
-    )
-    tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=model_dir)
-    callbacks = [model_checkpoint_cb, tensorboard_cb]
+        model_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
+            filepath=os.path.join(model_dir, "model-{epoch:03d}.hdf5"),
+            save_best_only=False,
+            save_weights_only=True,
+        )
+        tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=model_dir)
+        callbacks = [model_checkpoint_cb, tensorboard_cb]
 
-    model.compile(optimizer=optimizer, loss=model.get_loss_fn())
+        model.compile(optimizer=optimizer, loss=model.get_loss_fn())
 
     steps_per_epoch = FLAGS.save_every_n_steps
     model.fit(

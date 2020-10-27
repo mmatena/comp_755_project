@@ -81,6 +81,149 @@ def deterministic_transformer_32dm_32di(**kwargs):
     )
 
 
+###################################
+# d_m = 64, various widths / depths
+###################################
+
+
+def deterministic_transformer_64dm_32di_long(**kwargs):
+    """Returns a deterministic transformer with a model size of 64 and input size of 32."""
+    max_sequence_length = 32
+    output_size = 32
+    num_attention_heads = 2
+    hidden_size = 64
+    transformer_params = TransformerEncoderLayer.Params(
+        num_layers=12,
+        hidden_size=hidden_size,
+        hidden_dropout=0.1,
+        intermediate_size=4 * hidden_size,
+        intermediate_activation="gelu",
+        num_heads=num_attention_heads,
+        size_per_head=int(hidden_size / num_attention_heads),
+    )
+    return transformer.ArTransformer(
+        transformer_params,
+        output_size=output_size,
+        max_sequence_length=max_sequence_length,
+        **kwargs,
+    )
+
+
+def deterministic_transformer_64dm_32di_short(**kwargs):
+    """Returns a deterministic transformer with a model size of 64 and input size of 32."""
+    max_sequence_length = 32
+    output_size = 32
+    num_attention_heads = 2
+    hidden_size = 64
+    transformer_params = TransformerEncoderLayer.Params(
+        num_layers=3,
+        hidden_size=hidden_size,
+        hidden_dropout=0.1,
+        intermediate_size=4 * hidden_size,
+        intermediate_activation="gelu",
+        num_heads=num_attention_heads,
+        size_per_head=int(hidden_size / num_attention_heads),
+    )
+    return transformer.ArTransformer(
+        transformer_params,
+        output_size=output_size,
+        max_sequence_length=max_sequence_length,
+        **kwargs,
+    )
+
+
+def deterministic_transformer_64dm_32di_skinny(**kwargs):
+    """Returns a deterministic transformer with a model size of 64 and input size of 32."""
+    max_sequence_length = 32
+    output_size = 32
+    num_attention_heads = 2
+    hidden_size = 64
+    transformer_params = TransformerEncoderLayer.Params(
+        num_layers=6,
+        hidden_size=hidden_size,
+        hidden_dropout=0.1,
+        intermediate_size=2 * hidden_size,
+        intermediate_activation="gelu",
+        num_heads=num_attention_heads,
+        size_per_head=int(hidden_size / num_attention_heads),
+    )
+    return transformer.ArTransformer(
+        transformer_params,
+        output_size=output_size,
+        max_sequence_length=max_sequence_length,
+        **kwargs,
+    )
+
+
+def deterministic_transformer_64dm_32di_wide(**kwargs):
+    """Returns a deterministic transformer with a model size of 64 and input size of 32."""
+    max_sequence_length = 32
+    output_size = 32
+    num_attention_heads = 2
+    hidden_size = 64
+    transformer_params = TransformerEncoderLayer.Params(
+        num_layers=6,
+        hidden_size=hidden_size,
+        hidden_dropout=0.1,
+        intermediate_size=8 * hidden_size,
+        intermediate_activation="gelu",
+        num_heads=num_attention_heads,
+        size_per_head=int(hidden_size / num_attention_heads),
+    )
+    return transformer.ArTransformer(
+        transformer_params,
+        output_size=output_size,
+        max_sequence_length=max_sequence_length,
+        **kwargs,
+    )
+
+
+def deterministic_transformer_64dm_32di_short_skinny(**kwargs):
+    """Returns a deterministic transformer with a model size of 64 and input size of 32."""
+    max_sequence_length = 32
+    output_size = 32
+    num_attention_heads = 2
+    hidden_size = 64
+    transformer_params = TransformerEncoderLayer.Params(
+        num_layers=3,
+        hidden_size=hidden_size,
+        hidden_dropout=0.1,
+        intermediate_size=2 * hidden_size,
+        intermediate_activation="gelu",
+        num_heads=num_attention_heads,
+        size_per_head=int(hidden_size / num_attention_heads),
+    )
+    return transformer.ArTransformer(
+        transformer_params,
+        output_size=output_size,
+        max_sequence_length=max_sequence_length,
+        **kwargs,
+    )
+
+
+def deterministic_transformer_64dm_32di_long_wide(**kwargs):
+    """Returns a deterministic transformer with a model size of 64 and input size of 32."""
+    max_sequence_length = 32
+    output_size = 32
+    num_attention_heads = 2
+    hidden_size = 64
+    transformer_params = TransformerEncoderLayer.Params(
+        num_layers=12,
+        hidden_size=hidden_size,
+        hidden_dropout=0.1,
+        intermediate_size=8 * hidden_size,
+        intermediate_activation="gelu",
+        num_heads=num_attention_heads,
+        size_per_head=int(hidden_size / num_attention_heads),
+    )
+    return transformer.ArTransformer(
+        transformer_params,
+        output_size=output_size,
+        max_sequence_length=max_sequence_length,
+        **kwargs,
+    )
+
+
 ###############################################################################
 # LSTMs
 ###############################################################################

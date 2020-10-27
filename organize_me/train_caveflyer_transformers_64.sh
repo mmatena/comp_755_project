@@ -8,7 +8,7 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-MODEL=deterministic_transformer_64dm_32di_skinny
+MODEL=deterministic_transformer_64dm_32di_wide
 MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/memory/caveflyer/$MODEL
 
 TRAIN_STEPS=100000

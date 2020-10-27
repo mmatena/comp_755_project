@@ -78,7 +78,7 @@ class ArTransformer(MemoryComponent):
         hidden_size = self.transformer_params.hidden_size
 
         self.pos_embeddings = self.add_weight(
-            shape=[self.max_sequence_length, hidden_size],
+            shape=[input_shape[-2], hidden_size],
             initializer="random_normal",
             trainable=True,
         )

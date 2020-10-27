@@ -5,7 +5,6 @@ from pydoc import locate
 
 from absl import app
 from absl import flags
-from absl import logging
 
 import tensorflow as tf
 
@@ -115,8 +114,6 @@ def main(_):
     file_writer.set_as_default()
 
     train_ds = get_train_dataset()
-
-    logging.info(tf.version.VERSION)
 
     mirrored_strategy = tf.distribute.MirroredStrategy()
     with mirrored_strategy.scope():

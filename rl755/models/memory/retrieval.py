@@ -29,12 +29,12 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         self.history_stride = history_stride
         self.num_retrieved = num_retrieved
 
-        # self.query_proj = tf.keras.layers.Dense(
-        #     units=key_size, activation=None, name="query_proj"
-        # )
-        # self.key_proj = tf.keras.layers.Dense(
-        #     units=key_size, activation=None, name="key_proj"
-        # )
+        self.query_proj = tf.keras.layers.Dense(
+            units=key_size, activation=None, name="query_proj"
+        )
+        self.key_proj = tf.keras.layers.Dense(
+            units=key_size, activation=None, name="key_proj"
+        )
 
         hidden_size = self.prediction_network.transformer_params.hidden_size
         self.value_type_embedding = self.add_weight(
@@ -82,11 +82,8 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         keys = self.key_network.get_hidden_representation(
             flat_values, training=training, position=position, key=rep_key
         )
-        # keys = self.key_proj(keys)
-        # keys = tf.reshape(keys, [batch_size, values_per_history, self.key_size])
-        keys = tf.reshape(
-            keys, [batch_size, values_per_history, self.get_representation_size()]
-        )
+        keys = self.key_proj(keys)
+        keys = tf.reshape(keys, [batch_size, values_per_history, self.key_size])
         return keys
 
     def _extract_valid_values_func(self, history, history_length, sequence_length):
@@ -133,7 +130,7 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         queries = self.query_network.get_hidden_representation(
             inputs, training=training, position=position
         )
-        # queries = self.query_proj(queries)
+        queries = self.query_proj(queries)
         return queries
 
     def _retrieve_train(self, inputs, history, history_length, training):

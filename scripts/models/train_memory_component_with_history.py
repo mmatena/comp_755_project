@@ -93,6 +93,10 @@ def get_model():
         def call(self, inputs, mask=None, training=None):
             return self.net(inputs, mask=mask, training=training)[..., -1, :]
 
+        def get_loss_fn(self):
+            """Train using a MSE loss."""
+            return tf.keras.losses.MeanSquaredError()
+
     return Model(prediction_network)
 
 

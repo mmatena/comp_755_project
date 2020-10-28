@@ -72,6 +72,7 @@ class ArTransformer(MemoryComponent):
             shape=[max_sequence_length, transformer_params.hidden_size],
             initializer="random_normal",
             trainable=True,
+            name="position_embeddings",
         )
 
     def build(self, input_shape):

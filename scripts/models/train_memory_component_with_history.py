@@ -1,6 +1,7 @@
 """Trains an autoregressive model on encoded rollouts with access to the full history
    of an episode.
 """
+import collections
 import functools
 import os
 from pydoc import locate
@@ -137,6 +138,12 @@ def main(_):
         epochs=FLAGS.train_steps // steps_per_epoch,
         steps_per_epoch=steps_per_epoch,
         callbacks=callbacks,
+    )
+
+    # Just for testing:
+    a = [v.name for v in model.trainable_variables]
+    print(
+        [(item, count) for item, count in collections.Counter(a).items() if count > 1]
     )
 
 

@@ -150,7 +150,13 @@ class ArTransformer(MemoryComponent):
 
     @tf.function
     def get_hidden_representation(
-        self, x, mask=None, training=None, position=-1, key="default"
+        self,
+        x,
+        mask=None,
+        training=None,
+        position=-1,
+        key="default",
+        pos_embeddings=None,
     ):
         """Returns the hidden representation used to represent the positiion in the sequence.
 
@@ -169,7 +175,7 @@ class ArTransformer(MemoryComponent):
         """
         representation_layer = self.transformer.encoder_layers[-1].self_attention_layer
         representation_layer.set_key(key)
-        self(x, mask=mask, training=training)
+        self(x, mask=mask, training=training, pos_embeddings=pos_embeddings)
         representation = representation_layer.representations[key]
         return representation[..., position, :]
 

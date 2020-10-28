@@ -29,15 +29,29 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         self.history_stride = history_stride
         self.num_retrieved = num_retrieved
 
-        self._original_prediction_pos_embeddings = prediction_network.pos_embeddings
-        print("TODO: It looks like we don't get gradients from these.")
-        prediction_network.pos_embeddings = self._create_prediction_pos_embeddings()
+        # self._original_prediction_pos_embeddings = prediction_network.pos_embeddings
+        # print("TODO: It looks like we don't get gradients from these.")
+        # prediction_network.pos_embeddings = self._create_prediction_pos_embeddings()
 
         self.query_proj = tf.keras.layers.Dense(
             units=key_size, activation=None, name="query_proj"
         )
         self.key_proj = tf.keras.layers.Dense(
             units=key_size, activation=None, name="key_proj"
+        )
+
+        hidden_size = self.prediction_network.transformer_params.hidden_size
+        self.value_type_embedding = self.add_weight(
+            shape=[hidden_size],
+            initializer="random_normal",
+            trainable=True,
+            name="value_type_embedding",
+        )
+        self.input_type_embedding = self.add_weight(
+            shape=[hidden_size],
+            initializer="zeros",
+            trainable=True,
+            name="input_type_embedding",
         )
 
     def build(self, input_shape):
@@ -56,23 +70,30 @@ class EpisodicRetriever(MemoryComponentWithHistory):
             name="empty_value",
         )
 
-    def _create_prediction_pos_embeddings(self):
-        # Actually also includes type embeddings.
-        hidden_size = self.prediction_network.transformer_params.hidden_size
-        self.value_type_embedding = self.add_weight(
-            shape=[hidden_size],
-            initializer="random_normal",
-            trainable=True,
-            name="value_type_embedding",
-        )
-        self.input_type_embedding = self.add_weight(
-            shape=[hidden_size],
-            initializer="zeros",
-            trainable=True,
-            name="input_type_embedding",
-        )
+    # def _create_prediction_pos_embeddings(self):
+    #     # Actually also includes type embeddings.
+    #     hidden_size = self.prediction_network.transformer_params.hidden_size
+    #     self.value_type_embedding = self.add_weight(
+    #         shape=[hidden_size],
+    #         initializer="random_normal",
+    #         trainable=True,
+    #         name="value_type_embedding",
+    #     )
+    #     self.input_type_embedding = self.add_weight(
+    #         shape=[hidden_size],
+    #         initializer="zeros",
+    #         trainable=True,
+    #         name="input_type_embedding",
+    #     )
 
-        pos_embeddings = self._original_prediction_pos_embeddings
+    #     pos_embeddings = self._original_prediction_pos_embeddings
+    #     embedding_1 = pos_embeddings + self.value_type_embedding
+    #     embedding_2 = pos_embeddings + self.input_type_embedding
+    #     return tf.concat([embedding_1, embedding_2], axis=-2)
+
+    def _get_prediction_pos_embeddings(self):
+        # Actually also includes type embeddings.
+        pos_embeddings = self.prediction_network.pos_embeddings
         embedding_1 = pos_embeddings + self.value_type_embedding
         embedding_2 = pos_embeddings + self.input_type_embedding
         return tf.concat([embedding_1, embedding_2], axis=-2)
@@ -197,7 +218,10 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         )
 
         predictions = self.prediction_network.get_hidden_representation(
-            prediction_inputs, training=training, position=-1
+            prediction_inputs,
+            training=training,
+            position=-1,
+            pos_embeddings=self._get_prediction_pos_embeddings(),
         )
         predictions = tf.reshape(
             predictions, [batch_size, actual_num_retrieved, tf.shape(predictions)[-1]]

@@ -111,7 +111,7 @@ class ArTransformer(MemoryComponent):
             self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
         super().build(input_shape)
 
-    def call(self, inputs, mask=None, training=None):
+    def call(self, inputs, mask=None, training=None, pos_embeddings=None):
         orig_mask = mask
         seqlen = tf.shape(inputs)[-2]
         ar_mask = _create_ar_mask(seqlen)
@@ -123,7 +123,9 @@ class ArTransformer(MemoryComponent):
             mask *= ar_mask
 
         inputs = self.initial_layer(inputs, training=training)
-        inputs += self.pos_embeddings[..., :seqlen, :]
+        if pos_embeddings is None:
+            pos_embeddings = self.pos_embeddings
+        inputs += pos_embeddings[..., :seqlen, :]
         with mock.patch.object(
             TransformerSelfAttentionLayer,
             "from_params",

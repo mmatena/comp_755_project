@@ -71,8 +71,6 @@ def get_model():
     history_stride = sequence_length // 2
     num_retrieved = 4
 
-    prediction_network.use_position_embeddings = False
-
     model = EpisodicRetriever(
         prediction_network=prediction_network,
         key_network=key_network,

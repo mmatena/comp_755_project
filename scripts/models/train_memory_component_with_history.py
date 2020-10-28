@@ -62,21 +62,11 @@ def get_model():
     from rl755.models.memory import instances
 
     print("TODO: configure all this with flags and stuff")
-    # prediction_network = caveflyer.deterministic_transformer_64dm_32di(
-    #     name="prediction"
-    # )
-    # query_network = caveflyer.deterministic_transformer_64dm_32di(name="query")
-    # key_network = caveflyer.deterministic_transformer_64dm_32di(name="key")
-
-    print("TODO: Use the trained versinos instead of instances.")
-    prediction_network = instances.deterministic_transformer_64dm_32di(
+    prediction_network = caveflyer.deterministic_transformer_64dm_32di(
         name="prediction"
     )
-    query_network = instances.deterministic_transformer_64dm_32di(name="query")
-    key_network = instances.deterministic_transformer_64dm_32di(name="key")
-    prediction_network(tf.keras.Input([None, 32 + 15]))
-    query_network(tf.keras.Input([None, 32 + 15]))
-    key_network(tf.keras.Input([None, 32 + 15]))
+    query_network = caveflyer.deterministic_transformer_64dm_32di(name="query")
+    key_network = caveflyer.deterministic_transformer_64dm_32di(name="key")
 
     sequence_length = 32
     key_size = 32

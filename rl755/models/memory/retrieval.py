@@ -166,6 +166,10 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         return retrieved_values, retrieved_scores
 
     def call_train(self, inputs, history, history_length, mask=None, training=None):
+        if True:
+            print("TODO: REMOVE THIS AS IT IS ONLY FOR TESTING.")
+            return self.prediction_network(inputs, training=training)
+
         assert mask is None, "Not handling masks when training the retrieval model."
         sequence_length = tf.shape(inputs)[-2]
         batch_size = tf.shape(inputs)[0]
@@ -183,24 +187,6 @@ class EpisodicRetriever(MemoryComponentWithHistory):
             prediction_inputs, [-1, 2 * sequence_length, tf.shape(inputs)[-1]]
         )
 
-        #
-        #
-        #
-        #
-        #
-        #
-
-        # predictions = self.prediction_network(prediction_inputs, training=training)[
-        #     ..., -1, :
-        # ]
-        # predictions = tf.reshape(
-        #     predictions, [batch_size, actual_num_retrieved, tf.shape(predictions)[-1]]
-        # )
-
-        # weights = tf.nn.softmax(scores, axis=-1)
-
-        # weighted_predictions = tf.einsum("bvi,bv->bi", predictions, weights)
-        # return weighted_predictions
         predictions = self.prediction_network.get_hidden_representation(
             prediction_inputs, training=training, position=-1
         )

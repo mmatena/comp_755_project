@@ -78,15 +78,24 @@ class ArTransformer(MemoryComponent):
             name=pos_embeddings_name,
         )
 
+        # self.initial_layer = tf.keras.layers.Dense(
+        #     units=transformer_params.hidden_size, activation=None, name="initial_dense"
+        # )
+        # self.final_layer = tf.keras.layers.Dense(
+        #     units=self.output_size, activation=None, name="final_dense"
+        # )
+
+    def build(self, input_shape):
+        hidden_size = self.transformer_params.hidden_size
+
         self.initial_layer = tf.keras.layers.Dense(
-            units=transformer_params.hidden_size, activation=None, name="initial_dense"
+            units=self.transformer_params.hidden_size,
+            activation=None,
+            name="initial_dense",
         )
         self.final_layer = tf.keras.layers.Dense(
             units=self.output_size, activation=None, name="final_dense"
         )
-
-    def build(self, input_shape):
-        hidden_size = self.transformer_params.hidden_size
 
         self.initial_layer.build(input_shape)
 

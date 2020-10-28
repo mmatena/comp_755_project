@@ -119,6 +119,7 @@ def get_train_dataset():
     ds = dsb.get_autoregressive_slices(
         sequence_length=FLAGS.sequence_length,
         split="train",
+        slices_per_rollout=2,
     )
 
     return processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)

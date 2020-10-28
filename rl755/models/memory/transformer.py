@@ -68,14 +68,20 @@ class ArTransformer(MemoryComponent):
         self.output_size = output_size
         self.max_sequence_length = max_sequence_length
 
-        self.pos_embeddings = self.add_weight(
-            shape=[max_sequence_length, transformer_params.hidden_size],
-            initializer="random_normal",
-            trainable=True,
-        )
+        # self.pos_embeddings = self.add_weight(
+        #     shape=[max_sequence_length, transformer_params.hidden_size],
+        #     initializer="random_normal",
+        #     trainable=True,
+        # )
 
     def build(self, input_shape):
         hidden_size = self.transformer_params.hidden_size
+
+        self.pos_embeddings = self.add_weight(
+            shape=[self.max_sequence_length, self.transformer_params.hidden_size],
+            initializer="random_normal",
+            trainable=True,
+        )
 
         self.initial_layer = tf.keras.layers.Dense(units=hidden_size, activation=None)
         self.initial_layer.build(input_shape)
@@ -111,7 +117,9 @@ class ArTransformer(MemoryComponent):
             mask *= ar_mask
 
         inputs = self.initial_layer(inputs, training=training)
-        inputs += self.pos_embeddings[..., :seqlen, :]
+        print("CHANGE BACK!")
+        inputs += self.pos_embeddings
+        # inputs += self.pos_embeddings[..., :seqlen, :]
         with mock.patch.object(
             TransformerSelfAttentionLayer,
             "from_params",

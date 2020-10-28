@@ -55,33 +55,44 @@ flags.mark_flag_as_required("environment")
 flags.mark_flag_as_required("model")
 
 
+# def get_model():
+#     from rl755.models.memory.retrieval import EpisodicRetriever
+#     from rl755.models.memory.trained import caveflyer
+
+#     print("TODO: configure all this with flags and stuff")
+#     prediction_network = caveflyer.deterministic_transformer_32dm_32di(
+#         name="prediction"
+#     )
+#     query_network = caveflyer.deterministic_transformer_32dm_32di(name="query")
+#     key_network = caveflyer.deterministic_transformer_32dm_32di(name="key")
+
+#     sequence_length = 32
+#     key_size = 32
+#     history_stride = sequence_length // 2
+#     num_retrieved = 4
+
+#     model = EpisodicRetriever(
+#         prediction_network=prediction_network,
+#         key_network=key_network,
+#         query_network=query_network,
+#         key_size=key_size,
+#         history_stride=history_stride,
+#         num_retrieved=num_retrieved,
+#     )
+#     return model
 def get_model():
-    from rl755.models.memory.retrieval import EpisodicRetriever
     from rl755.models.memory.trained import caveflyer
 
-    print("TODO: configure all this with flags and stuff")
-    prediction_network = caveflyer.deterministic_transformer_32dm_32di(
-        name="prediction"
-    )
-    query_network = caveflyer.deterministic_transformer_32dm_32di(name="query")
-    key_network = caveflyer.deterministic_transformer_32dm_32di(name="key")
+    prediction_network = caveflyer.deterministic_transformer_32dm_32di()
 
-    sequence_length = 32
-    key_size = 32
-    history_stride = sequence_length // 2
-    num_retrieved = 4
+    class Model(tf.keras.Model):
+        def __init__(self, net):
+            self.net = net
 
-    model = EpisodicRetriever(
-        prediction_network=prediction_network,
-        key_network=key_network,
-        query_network=query_network,
-        key_size=key_size,
-        history_stride=history_stride,
-        num_retrieved=num_retrieved,
-    )
-    return model
-    # model = locate(f"rl755.models.memory.instances.{FLAGS.model}")
-    # return model()
+        def call(self, inputs, mask=None, training=None):
+            return self.net(inputs, mask=mask, training=training)[..., -1, :]
+
+    return Model(prediction_network)
 
 
 def get_train_dataset():

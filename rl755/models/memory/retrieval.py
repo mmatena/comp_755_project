@@ -30,10 +30,8 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         self.num_retrieved = num_retrieved
 
         self._original_prediction_pos_embeddings = prediction_network.pos_embeddings
-        print("TODO: It looks like these don't get used.")
-        prediction_network.pos_embeddings.assign(
-            self._create_prediction_pos_embeddings()
-        )
+        print("TODO: It looks like we don't get gradients from these.")
+        prediction_network.pos_embeddings = self._create_prediction_pos_embeddings()
 
         self.query_proj = tf.keras.layers.Dense(
             units=key_size, activation=None, name="query_proj"

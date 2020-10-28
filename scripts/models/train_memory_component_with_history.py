@@ -87,6 +87,7 @@ def get_model():
 
     class Model(tf.keras.Model):
         def __init__(self, net):
+            super().__init__()
             self.net = net
 
         def call(self, inputs, mask=None, training=None):

@@ -29,8 +29,8 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         self.history_stride = history_stride
         self.num_retrieved = num_retrieved
 
-        # self._original_prediction_pos_embeddings = prediction_network.pos_embeddings
-        # prediction_network.pos_embeddings = self._create_prediction_pos_embeddings()
+        self._original_prediction_pos_embeddings = prediction_network.pos_embeddings
+        prediction_network.pos_embeddings = self._create_prediction_pos_embeddings()
 
         self.query_proj = tf.keras.layers.Dense(
             units=key_size, activation=None, name="query_proj"
@@ -54,10 +54,16 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         # Actually also includes type embeddings.
         hidden_size = self.prediction_network.transformer_params.hidden_size
         self.value_type_embedding = self.add_weight(
-            shape=[hidden_size], initializer="random_normal", trainable=True
+            shape=[hidden_size],
+            initializer="random_normal",
+            trainable=True,
+            name="value_type_embedding",
         )
         self.input_type_embedding = self.add_weight(
-            shape=[hidden_size], initializer="zeros", trainable=True
+            shape=[hidden_size],
+            initializer="zeros",
+            trainable=True,
+            name="input_type_embedding",
         )
 
         pos_embeddings = self._original_prediction_pos_embeddings

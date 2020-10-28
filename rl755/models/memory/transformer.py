@@ -111,7 +111,7 @@ class ArTransformer(MemoryComponent):
             mask *= ar_mask
 
         inputs = self.initial_layer(inputs, training=training)
-        inputs += self.pos_embeddings[..., :seqlen, :]
+        # inputs += self.pos_embeddings[..., :seqlen, :]
         with mock.patch.object(
             TransformerSelfAttentionLayer,
             "from_params",

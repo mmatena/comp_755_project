@@ -68,11 +68,14 @@ class ArTransformer(MemoryComponent):
         self.output_size = output_size
         self.max_sequence_length = max_sequence_length
 
+        pos_embeddings_name = "position_embeddings"
+        if self._has_custom_name:
+            pos_embeddings_name = f"{kwargs['name']}/{pos_embeddings_name}"
         self.pos_embeddings = self.add_weight(
             shape=[max_sequence_length, transformer_params.hidden_size],
             initializer="random_normal",
             trainable=True,
-            name="position_embeddings",
+            name=pos_embeddings_name,
         )
 
     def build(self, input_shape):

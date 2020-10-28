@@ -85,28 +85,39 @@ def get_model():
 
     prediction_network = caveflyer.deterministic_transformer_32dm_32di()
 
-    class Model(tf.keras.Model):
-        def __init__(self, net):
-            super().__init__()
-            self.net = net
+    # class Model(tf.keras.Model):
+    #     def __init__(self, net):
+    #         super().__init__()
+    #         self.net = net
 
-        def call(self, inputs, mask=None, training=None):
-            return self.net(inputs["inputs"], mask=mask, training=training)[..., -1, :]
+    #     def call(self, inputs, mask=None, training=None):
+    #         return self.net(inputs["inputs"], mask=mask, training=training)[..., -1, :]
 
-        def get_loss_fn(self):
-            """Train using a MSE loss."""
-            return tf.keras.losses.MeanSquaredError()
+    #     def get_loss_fn(self):
+    #         """Train using a MSE loss."""
+    #         return tf.keras.losses.MeanSquaredError()
 
-    return Model(prediction_network)
+    # return Model(prediction_network)
+    return prediction_network
 
 
+# def get_train_dataset():
+#     dsb_cls = locate(f"rl755.data.envs.{FLAGS.environment}.{FLAGS.rollouts_dataset}")
+#     dsb = dsb_cls()
+
+#     ds = dsb.get_autoregressive_slices_with_full_history(
+#         sequence_length=FLAGS.sequence_length,
+#         max_history_length=FLAGS.max_history_length,
+#         split="train",
+#     )
+
+#     return processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
 def get_train_dataset():
     dsb_cls = locate(f"rl755.data.envs.{FLAGS.environment}.{FLAGS.rollouts_dataset}")
     dsb = dsb_cls()
 
-    ds = dsb.get_autoregressive_slices_with_full_history(
+    ds = dsb.get_autoregressive_slices(
         sequence_length=FLAGS.sequence_length,
-        max_history_length=FLAGS.max_history_length,
         split="train",
     )
 

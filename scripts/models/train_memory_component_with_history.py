@@ -126,9 +126,6 @@ def main(_):
             model_checkpoint_cb,
             tensorboard_cb,
         ]
-        # 'prediction/kernel:0', 'prediction/bias:0',
-        # 'key/kernel:0', 'key/bias:0',
-        # 'query/kernel:0', 'query/bias:0'
 
         model.compile(optimizer=optimizer, loss=model.get_loss_fn())
 
@@ -138,12 +135,6 @@ def main(_):
         epochs=FLAGS.train_steps // steps_per_epoch,
         steps_per_epoch=steps_per_epoch,
         callbacks=callbacks,
-    )
-
-    # Just for testing:
-    a = [v.name for v in model.trainable_variables]
-    print(
-        [(item, count) for item, count in collections.Counter(a).items() if count > 1]
     )
 
 

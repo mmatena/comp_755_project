@@ -219,6 +219,25 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         return self.prediction_network.get_representation_size()
 
 
+class NoHistoryWrapper(MemoryComponentWithHistory):
+    """Lets us use a transformer/LSTM with no history as control against retrieval network. """
+
+    def __init__(self, memory_component, **kwargs):
+        super().__init__(self, **kwargs)
+        self.memory_component = memory_component
+
+    def call_train(self, inputs, history, history_length, mask=None, training=None):
+        predictions = self.memory_component(inputs, mask=mask, training=training)
+        return predictions[..., -1, :]
+
+    def get_loss_fn(self):
+        """Train using a MSE loss."""
+        return tf.keras.losses.MeanSquaredError()
+
+    def get_representation_size(self):
+        return self.memory_component.get_representation_size()
+
+
 # from rl755.models.memory.retrieval import *
 # if True:
 #     from rl755.models.memory import instances

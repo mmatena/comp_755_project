@@ -77,7 +77,9 @@ class ArTransformer(MemoryComponent):
     def build(self, input_shape):
         hidden_size = self.transformer_params.hidden_size
 
-        self.initial_layer = tf.keras.layers.Dense(units=hidden_size, activation=None)
+        self.initial_layer = tf.keras.layers.Dense(
+            units=hidden_size, activation=None, name="initial_dense"
+        )
         self.initial_layer.build(input_shape)
 
         # Not really sure if this is needed here, but putting this here out of caution.
@@ -94,7 +96,7 @@ class ArTransformer(MemoryComponent):
             self.transformer.build(transformer_input_shape)
 
         self.final_layer = tf.keras.layers.Dense(
-            units=self.output_size, activation=None
+            units=self.output_size, activation=None, name="final_dense"
         )
         self.final_layer.build(list(input_shape[:-1]) + [hidden_size])
         super().build(input_shape)

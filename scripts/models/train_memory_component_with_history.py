@@ -124,6 +124,10 @@ def main(_):
             # model_checkpoint_cb,
             tensorboard_cb
         ]
+        # 'prediction/kernel:0', 'prediction/bias:0',
+        # 'key/kernel:0', 'key/bias:0',
+        # 'query/kernel:0', 'query/bias:0'
+        # 'Variable:0',
 
         model.compile(optimizer=optimizer, loss=model.get_loss_fn())
 

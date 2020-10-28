@@ -29,9 +29,8 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         self.history_stride = history_stride
         self.num_retrieved = num_retrieved
 
-        print("TODO: REMOVE THIS AS IT IS ONLY FOR TESTING.")
-        # self._original_prediction_pos_embeddings = prediction_network.pos_embeddings
-        # prediction_network.pos_embeddings = self._create_prediction_pos_embeddings()
+        self._original_prediction_pos_embeddings = prediction_network.pos_embeddings
+        prediction_network.pos_embeddings = self._create_prediction_pos_embeddings()
 
         self.query_proj = tf.keras.layers.Dense(
             units=key_size, activation=None, name="query_proj"
@@ -55,7 +54,7 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         # Actually also includes type embeddings.
         hidden_size = self.prediction_network.transformer_params.hidden_size
         self.value_type_embedding = self.add_weight(
-            shape=[hidden_size], initializer="zeros", trainable=True
+            shape=[hidden_size], initializer="random_normal", trainable=True
         )
         self.input_type_embedding = self.add_weight(
             shape=[hidden_size], initializer="zeros", trainable=True
@@ -167,10 +166,6 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         return retrieved_values, retrieved_scores
 
     def call_train(self, inputs, history, history_length, mask=None, training=None):
-        if True:
-            print("TODO: REMOVE THIS AS IT IS ONLY FOR TESTING.")
-            return self.prediction_network(inputs, training=training)[..., -1, :]
-
         assert mask is None, "Not handling masks when training the retrieval model."
         sequence_length = tf.shape(inputs)[-2]
         batch_size = tf.shape(inputs)[0]

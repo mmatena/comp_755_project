@@ -168,7 +168,7 @@ class EpisodicRetriever(MemoryComponentWithHistory):
     def call_train(self, inputs, history, history_length, mask=None, training=None):
         if True:
             print("TODO: REMOVE THIS AS IT IS ONLY FOR TESTING.")
-            return self.prediction_network(inputs, training=training)
+            return self.prediction_network(inputs, training=training)[..., -1, :]
 
         assert mask is None, "Not handling masks when training the retrieval model."
         sequence_length = tf.shape(inputs)[-2]

@@ -50,21 +50,21 @@ class EpisodicRetriever(MemoryComponentWithHistory):
             name="input_type_embedding",
         )
 
-    def build(self, input_shape):
-        print("TODO: Add a build_train and a build_no_train to the interface.")
-        # These represent retrieving no documents.
-        self.empty_key = self.add_weight(
-            shape=[self.key_size],
-            initializer="random_normal",
-            trainable=True,
-            name="empty_key",
-        )
-        self.empty_value = self.add_weight(
-            shape=input_shape["inputs"][1:],
-            initializer="random_normal",
-            trainable=True,
-            name="empty_value",
-        )
+    # def build(self, input_shape):
+    #     print("TODO: Add a build_train and a build_no_train to the interface.")
+    #     # These represent retrieving no documents.
+    #     self.empty_key = self.add_weight(
+    #         shape=[self.key_size],
+    #         initializer="random_normal",
+    #         trainable=True,
+    #         name="empty_key",
+    #     )
+    #     self.empty_value = self.add_weight(
+    #         shape=input_shape["inputs"][1:],
+    #         initializer="random_normal",
+    #         trainable=True,
+    #         name="empty_value",
+    #     )
 
     def _get_prediction_pos_embeddings(self):
         # Actually also includes type embeddings.

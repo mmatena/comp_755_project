@@ -31,6 +31,7 @@ flags.DEFINE_string(
 )
 flags.DEFINE_string("model", None, "")
 flags.DEFINE_string("rollouts_dataset", None, "")
+flags.DEFINE_string("trained_transformer", None, "")
 
 flags.DEFINE_integer(
     "batch_size", 256, "The number of sequences in each batch.", lower_bound=1
@@ -54,33 +55,44 @@ flags.mark_flag_as_required("train_steps")
 flags.mark_flag_as_required("rollouts_dataset")
 flags.mark_flag_as_required("environment")
 flags.mark_flag_as_required("model")
+# flags.mark_flag_as_required("trained_transformer")
+
+
+# def get_model():
+#     from rl755.models.memory.retrieval import EpisodicRetriever
+#     from rl755.models.memory.trained import caveflyer
+#     from rl755.models.memory import instances
+
+#     print("TODO: configure all this with flags and stuff")
+#     prediction_network = caveflyer.deterministic_transformer_64dm_32di(
+#         name="prediction"
+#     )
+#     query_network = caveflyer.deterministic_transformer_64dm_32di(name="query")
+#     key_network = caveflyer.deterministic_transformer_64dm_32di(name="key")
+
+#     sequence_length = 32
+#     key_size = 32
+#     history_stride = sequence_length // 2
+#     num_retrieved = 4
+
+#     model = EpisodicRetriever(
+#         prediction_network=prediction_network,
+#         key_network=key_network,
+#         query_network=query_network,
+#         key_size=key_size,
+#         history_stride=history_stride,
+#         num_retrieved=num_retrieved,
+#     )
+#     return model
 
 
 def get_model():
-    from rl755.models.memory.retrieval import EpisodicRetriever
+    from rl755.models.memory.retrieval import NoHistoryWrapper
     from rl755.models.memory.trained import caveflyer
-    from rl755.models.memory import instances
 
-    print("TODO: configure all this with flags and stuff")
-    prediction_network = caveflyer.deterministic_transformer_64dm_32di(
-        name="prediction"
-    )
-    query_network = caveflyer.deterministic_transformer_64dm_32di(name="query")
-    key_network = caveflyer.deterministic_transformer_64dm_32di(name="key")
+    net = caveflyer.deterministic_transformer_64dm_32di(name="prediction")
 
-    sequence_length = 32
-    key_size = 32
-    history_stride = sequence_length // 2
-    num_retrieved = 4
-
-    model = EpisodicRetriever(
-        prediction_network=prediction_network,
-        key_network=key_network,
-        query_network=query_network,
-        key_size=key_size,
-        history_stride=history_stride,
-        num_retrieved=num_retrieved,
-    )
+    model = NoHistoryWrapper(net)
     return model
 
 

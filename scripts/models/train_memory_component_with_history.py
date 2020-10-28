@@ -55,71 +55,41 @@ flags.mark_flag_as_required("environment")
 flags.mark_flag_as_required("model")
 
 
-# def get_model():
-#     from rl755.models.memory.retrieval import EpisodicRetriever
-#     from rl755.models.memory.trained import caveflyer
-
-#     print("TODO: configure all this with flags and stuff")
-#     prediction_network = caveflyer.deterministic_transformer_32dm_32di(
-#         name="prediction"
-#     )
-#     query_network = caveflyer.deterministic_transformer_32dm_32di(name="query")
-#     key_network = caveflyer.deterministic_transformer_32dm_32di(name="key")
-
-#     sequence_length = 32
-#     key_size = 32
-#     history_stride = sequence_length // 2
-#     num_retrieved = 4
-
-#     model = EpisodicRetriever(
-#         prediction_network=prediction_network,
-#         key_network=key_network,
-#         query_network=query_network,
-#         key_size=key_size,
-#         history_stride=history_stride,
-#         num_retrieved=num_retrieved,
-#     )
-#     return model
 def get_model():
+    from rl755.models.memory.retrieval import EpisodicRetriever
     from rl755.models.memory.trained import caveflyer
 
-    prediction_network = caveflyer.deterministic_transformer_32dm_32di()
+    print("TODO: configure all this with flags and stuff")
+    prediction_network = caveflyer.deterministic_transformer_32dm_32di(
+        name="prediction"
+    )
+    query_network = caveflyer.deterministic_transformer_32dm_32di(name="query")
+    key_network = caveflyer.deterministic_transformer_32dm_32di(name="key")
 
-    # class Model(tf.keras.Model):
-    #     def __init__(self, net):
-    #         super().__init__()
-    #         self.net = net
+    sequence_length = 32
+    key_size = 32
+    history_stride = sequence_length // 2
+    num_retrieved = 4
 
-    #     def call(self, inputs, mask=None, training=None):
-    #         return self.net(inputs["inputs"], mask=mask, training=training)[..., -1, :]
+    model = EpisodicRetriever(
+        prediction_network=prediction_network,
+        key_network=key_network,
+        query_network=query_network,
+        key_size=key_size,
+        history_stride=history_stride,
+        num_retrieved=num_retrieved,
+    )
+    return model
 
-    #     def get_loss_fn(self):
-    #         """Train using a MSE loss."""
-    #         return tf.keras.losses.MeanSquaredError()
 
-    # return Model(prediction_network)
-    return prediction_network
-
-
-# def get_train_dataset():
-#     dsb_cls = locate(f"rl755.data.envs.{FLAGS.environment}.{FLAGS.rollouts_dataset}")
-#     dsb = dsb_cls()
-
-#     ds = dsb.get_autoregressive_slices_with_full_history(
-#         sequence_length=FLAGS.sequence_length,
-#         max_history_length=FLAGS.max_history_length,
-#         split="train",
-#     )
-
-#     return processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
 def get_train_dataset():
     dsb_cls = locate(f"rl755.data.envs.{FLAGS.environment}.{FLAGS.rollouts_dataset}")
     dsb = dsb_cls()
 
-    ds = dsb.get_autoregressive_slices(
+    ds = dsb.get_autoregressive_slices_with_full_history(
         sequence_length=FLAGS.sequence_length,
+        max_history_length=FLAGS.max_history_length,
         split="train",
-        slices_per_rollout=2,
     )
 
     return processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)

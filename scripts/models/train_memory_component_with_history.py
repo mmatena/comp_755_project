@@ -29,7 +29,7 @@ flags.DEFINE_string(
     None,
     "Which environment we are using rollouts from.",
 )
-flags.DEFINE_string("model", None, "")
+flags.DEFINE_string("model_with_history", None, "")
 flags.DEFINE_string("rollouts_dataset", None, "")
 flags.DEFINE_string("trained_transformer", None, "")
 
@@ -54,8 +54,8 @@ flags.mark_flag_as_required("model_dir")
 flags.mark_flag_as_required("train_steps")
 flags.mark_flag_as_required("rollouts_dataset")
 flags.mark_flag_as_required("environment")
-flags.mark_flag_as_required("model")
-# flags.mark_flag_as_required("trained_transformer")
+flags.mark_flag_as_required("model_with_history")
+flags.mark_flag_as_required("trained_transformer")
 
 
 # def get_model():
@@ -87,13 +87,13 @@ flags.mark_flag_as_required("model")
 
 
 def get_model():
-    from rl755.models.memory.retrieval import NoHistoryWrapper
-    from rl755.models.memory.trained import caveflyer
-
-    net = caveflyer.deterministic_transformer_64dm_32di(name="prediction")
-
-    model = NoHistoryWrapper(net)
-    return model
+    get_transformer = locate(
+        f"rl755.models.memory.trained.{FLAGS.environment}.{FLAGS.trained_transformer}"
+    )
+    model_fn = locate(
+        f"rl755.models.memory.instances_with_history.{FLAGS.model_with_history}"
+    )
+    return model_fn(get_transformer)
 
 
 def get_train_dataset():

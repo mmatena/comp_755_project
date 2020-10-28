@@ -29,6 +29,7 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         self.history_stride = history_stride
         self.num_retrieved = num_retrieved
 
+        print("TODO: REMOVE THIS AS IT IS ONLY FOR TESTING.")
         # self._original_prediction_pos_embeddings = prediction_network.pos_embeddings
         # prediction_network.pos_embeddings = self._create_prediction_pos_embeddings()
 
@@ -211,50 +212,50 @@ class EpisodicRetriever(MemoryComponentWithHistory):
 
 
 # from rl755.models.memory.retrieval import *
-if True:
-    from rl755.models.memory import instances
+# if True:
+#     from rl755.models.memory import instances
 
-    sequence_length = 32
-    key_size = 16
-    history_stride = sequence_length // 2
-    num_retrieved = 4
+#     sequence_length = 32
+#     key_size = 16
+#     history_stride = sequence_length // 2
+#     num_retrieved = 4
 
-    prediction_network = instances.deterministic_transformer_32dm_32di(
-        name="prediction"
-    )
-    prediction_network(tf.keras.Input([None, 32 + 15]))
+#     prediction_network = instances.deterministic_transformer_32dm_32di(
+#         name="prediction"
+#     )
+#     prediction_network(tf.keras.Input([None, 32 + 15]))
 
-    query_network = instances.deterministic_transformer_32dm_32di(name="query")
-    query_network(tf.keras.Input([None, 32 + 15]))
+#     query_network = instances.deterministic_transformer_32dm_32di(name="query")
+#     query_network(tf.keras.Input([None, 32 + 15]))
 
-    key_network = instances.deterministic_transformer_32dm_32di(name="key")
-    key_network(tf.keras.Input([None, 32 + 15]))
+#     key_network = instances.deterministic_transformer_32dm_32di(name="key")
+#     key_network(tf.keras.Input([None, 32 + 15]))
 
-    model = EpisodicRetriever(
-        prediction_network=prediction_network,
-        key_network=key_network,
-        query_network=query_network,
-        key_size=key_size,
-        history_stride=history_stride,
-        num_retrieved=num_retrieved,
-    )
+#     model = EpisodicRetriever(
+#         prediction_network=prediction_network,
+#         key_network=key_network,
+#         query_network=query_network,
+#         key_size=key_size,
+#         history_stride=history_stride,
+#         num_retrieved=num_retrieved,
+#     )
 
-    @tf.function
-    def fn():
-        inputs = tf.random.normal([2, 32, 32 + 15])
-        history = tf.random.normal([2, 512, 32 + 15])
-        history_length = tf.constant([[311], [432]], dtype=tf.int32)
+#     @tf.function
+#     def fn():
+#         inputs = tf.random.normal([2, 32, 32 + 15])
+#         history = tf.random.normal([2, 512, 32 + 15])
+#         history_length = tf.constant([[311], [432]], dtype=tf.int32)
 
-        full_input = {
-            "inputs": inputs,
-            "history": history,
-            "history_length": history_length,
-        }
+#         full_input = {
+#             "inputs": inputs,
+#             "history": history,
+#             "history_length": history_length,
+#         }
 
-        outputs = model(full_input, training=True)
-        return outputs
+#         outputs = model(full_input, training=True)
+#         return outputs
 
-    out = fn()
+#     out = fn()
 # # if True:
 # #     from rl755.data.envs.caveflyer import EncodedRolloutsVae32d
 # #     from itertools import islice

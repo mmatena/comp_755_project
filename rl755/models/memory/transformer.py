@@ -56,7 +56,7 @@ _original_from_params = TransformerSelfAttentionLayer.from_params
 
 
 def _create_representation_catcher(*args, **kwargs):
-    layer = _original_from_params(*args, name="asdfsadf", **kwargs)
+    layer = _original_from_params(*args, **kwargs)
     return _RepresentationCatcher(layer)
 
 

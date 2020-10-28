@@ -116,12 +116,13 @@ class EpisodicRetriever(MemoryComponentWithHistory):
             values, training=training, position=position, rep_key="no_grads"
         )
 
-        print("TODO: These variables do not get gradients. Redo!")
-        empty_value = tf.broadcast_to(self.empty_value[None, ...], tf.shape(values))
-        values = tf.concat([empty_value, values], axis=1)
+        # TODO: Use an empty value/key. Need to move from here since these won't get
+        # gradients propagated here.
+        # empty_value = tf.broadcast_to(self.empty_value[None, ...], tf.shape(values))
+        # values = tf.concat([empty_value, values], axis=1)
 
-        empty_key = tf.broadcast_to(self.empty_key[None, ...], tf.shape(keys))
-        keys = tf.concat([empty_key, keys], axis=1)
+        # empty_key = tf.broadcast_to(self.empty_key[None, ...], tf.shape(keys))
+        # keys = tf.concat([empty_key, keys], axis=1)
 
         return keys, values
 

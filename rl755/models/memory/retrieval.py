@@ -55,7 +55,6 @@ class EpisodicRetriever(MemoryComponentWithHistory):
             trainable=True,
             name="empty_value",
         )
-        # super().build(input_shape)
 
     def _create_prediction_pos_embeddings(self):
         # Actually also includes type embeddings.

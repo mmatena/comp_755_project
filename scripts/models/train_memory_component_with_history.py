@@ -96,6 +96,7 @@ def get_train_dataset():
 
 
 def main(_):
+    global model
     model_dir = FLAGS.model_dir
 
     file_writer = tf.summary.create_file_writer(model_dir)
@@ -113,13 +114,16 @@ def main(_):
             learning_rate=FLAGS.learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9
         )
 
-        model_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
-            filepath=os.path.join(model_dir, "model-{epoch:03d}.hdf5"),
-            save_best_only=False,
-            save_weights_only=True,
-        )
+        # model_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
+        #     filepath=os.path.join(model_dir, "model-{epoch:03d}.hdf5"),
+        #     save_best_only=False,
+        #     save_weights_only=True,
+        # )
         tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=model_dir)
-        callbacks = [model_checkpoint_cb, tensorboard_cb]
+        callbacks = [
+            # model_checkpoint_cb,
+            tensorboard_cb
+        ]
 
         model.compile(optimizer=optimizer, loss=model.get_loss_fn())
 

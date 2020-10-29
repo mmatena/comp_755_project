@@ -12,7 +12,7 @@ deterministic_transformer_64dm_32di_short \
 deterministic_transformer_64dm_32di_skinny \
 deterministic_transformer_64dm_32di_wide \
 deterministic_transformer_64dm_32di_long_wide"
-for MODEL in MODELS; do
+for MODEL in $MODELS; do
   # The directory of the cloned github repo.
   PROJECT_DIR=~/projects/comp_755_project
 

@@ -64,8 +64,7 @@ for MODEL in $MODELS; do
       --gres=gpu:2 \
       --qos=gpu_access \
       --wrap="\"$(run_singularity)\"")
-    echo $CMD
-    # eval $CMD
+    eval $CMD
   }
 
 

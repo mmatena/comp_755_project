@@ -58,34 +58,6 @@ flags.mark_flag_as_required("model_with_history")
 flags.mark_flag_as_required("trained_transformer")
 
 
-# def get_model():
-#     from rl755.models.memory.retrieval import EpisodicRetriever
-#     from rl755.models.memory.trained import caveflyer
-#     from rl755.models.memory import instances
-
-#     print("TODO: configure all this with flags and stuff")
-#     prediction_network = caveflyer.deterministic_transformer_64dm_32di(
-#         name="prediction"
-#     )
-#     query_network = caveflyer.deterministic_transformer_64dm_32di(name="query")
-#     key_network = caveflyer.deterministic_transformer_64dm_32di(name="key")
-
-#     sequence_length = 32
-#     key_size = 32
-#     history_stride = sequence_length // 2
-#     num_retrieved = 4
-
-#     model = EpisodicRetriever(
-#         prediction_network=prediction_network,
-#         key_network=key_network,
-#         query_network=query_network,
-#         key_size=key_size,
-#         history_stride=history_stride,
-#         num_retrieved=num_retrieved,
-#     )
-#     return model
-
-
 def get_model():
     get_transformer = locate(
         f"rl755.models.memory.trained.{FLAGS.environment}.{FLAGS.trained_transformer}"

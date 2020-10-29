@@ -21,8 +21,7 @@ deterministic_transformer_64dm_32di_short_skinny \
 deterministic_transformer_64dm_32di_long_wide"
 
 for MODEL in $MODELS; do
-
-    MODEL_DIR=/pine/scr/m/m/mmatena/tmp/caveflyer_controller_256_det_test
+    MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/controller/caveflyer/$MODEL
 
     NUM_CORES=16
     MEMORY=16g

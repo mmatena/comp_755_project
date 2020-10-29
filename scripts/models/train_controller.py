@@ -136,6 +136,9 @@ def main(_):
     num_trials = FLAGS.cma_trials_per_member
     rollout_max_steps = FLAGS.rollout_max_steps
 
+    file_writer = tf.summary.create_file_writer(FLAGS.model_dir)
+    file_writer.set_as_default()
+
     vision_model = get_vision_model()
     memory_model = get_memory_model()
 
@@ -160,8 +163,11 @@ def main(_):
             memory_model=memory_model,
             max_steps=rollout_max_steps,
         )
+        tf.summary.histogram("per_trial_scores", scores, step=step)
         scores = misc.divide_chunks(scores, num_trials)
+
         fitlist = np.array([sum(s) / num_trials for s in scores])
+        tf.summary.histogram("aggregate_scores", fitlist, step=step)
 
         save_checkpoint(step=step, solutions=solutions, fitlist=fitlist)
 

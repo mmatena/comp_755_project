@@ -1,37 +1,55 @@
 """Created purely because I couldn't figure out how to get
 this work on longleaf's notebook."""
 import itertools
+from pydoc import locate
 
 from absl import app
 from absl import flags
 import tensorflow as tf
 
-from rl755.data.car_racing import raw_rollouts
-from rl755.models.car_racing import saved_models
-
 FLAGS = flags.FLAGS
+
+flags.DEFINE_string(
+    "environment",
+    None,
+    "Which environment we are using rollouts from.",
+)
+flags.DEFINE_string(
+    "model",
+    None,
+    "",
+)
 
 flags.DEFINE_integer(
     "num_samples", 1, "The number of times to sample from the VAE.", lower_bound=1
 )
+flags.DEFINE_bool("unconditional", False, "Whether to condition on real images or not.")
 
-flags.DEFINE_bool("unconditional", True, "Whether to condition on real images or not.")
+flags.mark_flag_as_required("environment")
+flags.mark_flag_as_required("model")
 
 
 def float_to_uint(x):
     return tf.cast(255.0 * x, tf.uint8)
 
 
+def get_model():
+    model = locate(f"rl755.models.vision.trained.{FLAGS.environment}.{FLAGS.model}")
+    return model()
+
+
+def get_dataset():
+    dsb_cls = locate(f"rl755.data.envs.{FLAGS.environment}.RawRollouts")
+    return dsb_cls().random_rollout_observations()
+
+
 def main(_):
-    vae = saved_models.raw_rollout_vae_32ld()
+    vae = get_model()
     if FLAGS.unconditional:
         images = vae.sample_unconditionally(FLAGS.num_samples)
     else:
         inputs = [
-            x["observation"]
-            for x in itertools.islice(
-                raw_rollouts.random_rollout_observations(), FLAGS.num_samples
-            )
+            x["observation"] for x in itertools.islice(get_dataset(), FLAGS.num_samples)
         ]
         inputs = tf.stack(inputs, axis=0)
         # TODO(mmatena): Compare .sample() vs .mean().

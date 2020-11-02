@@ -60,9 +60,10 @@ def get_final_ds_representation(x):
     return x["observation"], x["observation"]
 
 
-def get_train_dataset():
-    dsb_cls = locate(f"rl755.data.envs.{FLAGS.environment}.RawRollouts")
-    ds = dsb_cls().random_rollout_observations(
+def get_train_dataset(environment):
+    #dsb_cls = locate(f"rl755.data.envs.{FLAGS.environment}.RawRollouts")
+    from rl755.data.generic import RawRollouts
+    ds = RawRollouts(environment).random_rollout_observations(
         obs_sampled_per_rollout=FLAGS.obs_sampled_per_rollout
     )
     ds = processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
@@ -77,7 +78,7 @@ def main(_):
     file_writer = tf.summary.create_file_writer(model_dir)
     file_writer.set_as_default()
 
-    train_ds = get_train_dataset()
+    train_ds = get_train_dataset(FLAGS.environment)
 
     model_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
         filepath=os.path.join(model_dir, "model-{epoch:03d}.hdf5"),

@@ -180,7 +180,7 @@ class RolloutDatasetBuilder(object):
         files = tf.data.Dataset.from_tensor_slices(files)
         ds = files.interleave(
             tf.data.TFRecordDataset,
-            num_parallel_calls=tf.data.experimental.AUTOTUNE,
+            num_parallel_calls=1,
         )
         ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
         ds = ds.repeat()
@@ -188,7 +188,7 @@ class RolloutDatasetBuilder(object):
             functools.partial(
                 self.parse_tfrecord, process_observations=process_observations
             ),
-            num_parallel_calls=tf.data.experimental.AUTOTUNE,
+            num_parallel_calls=1,
         )
 
     def random_rollout_slices_ds(self, slice_size, split="train", slices_per_rollout=1):
@@ -220,7 +220,7 @@ class RolloutDatasetBuilder(object):
             ds = ds.interleave(
                 lambda x: tf.data.Dataset.from_tensors(x).repeat(slices_per_rollout)
             )
-        return ds.map(map_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        return ds.map(map_fn, num_parallel_calls=1)
 
     def random_rollout_observations(self, split="train", obs_sampled_per_rollout=100):
         """Returns a dataset containing single observations.
@@ -243,10 +243,13 @@ class RolloutDatasetBuilder(object):
 
         def random_obs(x):
             rollout_length = tf.shape(x["observations"])[0]
-            rollout_length = tf.minimum(rollout_length, x["done_step"] + 1)
+            #This check is not required because the env loops by default. omitting it CATASTROPHICALLY
+            #improves performance.
+            #rollout_length = tf.minimum(rollout_length, x["done_step"] + 1)
             index = tf.random.uniform(
                 [obs_sampled_per_rollout], 0, rollout_length, dtype=tf.int32
             )
+            print(rollout_length)
             observation = tf.gather(x["observations"], index, axis=0)
             observation = self._process_observations(observation)
             return {"observation": observation}
@@ -255,11 +258,11 @@ class RolloutDatasetBuilder(object):
             return {
                 "observation": tf.reshape(x["observation"], self._observation_shape())
             }
-
+        print("I exist")
         ds = self.rollouts_ds(split=split, process_observations=False)
-        ds = ds.map(random_obs, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        ds = ds.map(random_obs, num_parallel_calls=1)
         ds = ds.flat_map(tf.data.Dataset.from_tensor_slices)
-        ds = ds.map(set_shape, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        ds = ds.map(set_shape, num_parallel_calls=1)
         return ds
 
     def _get_autoregressive_slices(
@@ -315,7 +318,7 @@ class RolloutDatasetBuilder(object):
             split=split,
             slices_per_rollout=slices_per_rollout,
         )
-        return ds.map(map_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        return ds.map(map_fn, num_parallel_calls=1)
 
 
 class RawImageRolloutDatasetBuilder(RolloutDatasetBuilder):

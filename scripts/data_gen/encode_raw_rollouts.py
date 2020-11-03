@@ -59,11 +59,11 @@ def get_dataset():
 
     ds = files.interleave(
         tf.data.TFRecordDataset,
-        num_parallel_calls=tf.data.experimental.AUTOTUNE,
+        num_parallel_calls=1,
     )
     ds = ds.map(
         functools.partial(raw_rollouts.parse_tfrecord, process_observations=True),
-        num_parallel_calls=tf.data.experimental.AUTOTUNE,
+        num_parallel_calls=1,
     )
 
     return ds

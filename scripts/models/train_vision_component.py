@@ -68,7 +68,7 @@ def get_train_dataset(environment):
     )
     ds = processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
     return ds.map(
-        get_final_ds_representation, num_parallel_calls=tf.data.experimental.AUTOTUNE
+        get_final_ds_representation, num_parallel_calls=1
     )
 
 

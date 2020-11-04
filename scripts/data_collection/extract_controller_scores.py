@@ -20,6 +20,7 @@ flags.mark_flag_as_required("directories")
 def extract_from_directory(directory):
     row = [pathlib.PurePath(directory).parent.name] + FLAGS.max_steps * [""]
     for file in os.listdir(directory):
+        print(file)
         if not os.path.isfile(file):
             continue
         if not re.match(FLAGS.checkpoint_regex, file):

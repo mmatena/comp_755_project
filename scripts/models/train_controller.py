@@ -133,6 +133,12 @@ def save_checkpoint(step, solutions, fitlist):
 
 
 def main(_):
+    # Needed for some reason when running on my laptop. IDK if its needed for longleaf,
+    # but I'm putting it here just to be safe.
+    gpus = tf.config.experimental.list_physical_devices("GPU")
+    for gpu in gpus:
+        tf.config.experimental.set_memory_growth(gpu, True)
+
     num_trials = FLAGS.cma_trials_per_member
     rollout_max_steps = FLAGS.rollout_max_steps
 

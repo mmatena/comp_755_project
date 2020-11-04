@@ -2,6 +2,7 @@
 import tensorflow as tf
 
 from .. import instances
+from .. import instances_with_history
 
 ACTION_SIZE = 15
 
@@ -146,3 +147,18 @@ def deterministic_lstm_256dm_32di():
 
 def no_mem():
     return instances.no_mem()
+
+
+def deterministic_transformer_32dm_32di_untrained(**kwargs):
+    print("NOTE: THIS IS UNTRAINED!!!")
+    model = instances.deterministic_transformer_32dm_32di(**kwargs)
+    model(tf.keras.Input([None, 32 + ACTION_SIZE]))
+    return model
+
+
+def episodic_32dk_ret4_half_stride():
+    print("TODO: THIS IS NOT TRAINED!!!")
+    model = instances_with_history.episodic_32dk_ret4_half_stride(
+        deterministic_transformer_32dm_32di_untrained
+    )
+    return model

@@ -7,6 +7,8 @@ import gym3
 import numpy as np
 import tensorflow as tf
 
+from rl755.models.memory.interface import MemoryComponentWithHistory
+
 ACTION_SIZE = 15
 
 
@@ -53,11 +55,11 @@ class PolicyWrapper(Policy):
         self.memory_model = memory_model
         self.learned_policy = learned_policy
         self.max_seqlen = max_seqlen
+        self.memory_needs_history = isinstance(memory_model, MemoryComponentWithHistory)
 
         print("TODO: Make sure everything in this class lines up!!!")
 
     def initialize(self, env, max_steps):
-        # TODO: Probably make this into a np array, need to change parts that use it.
         self.encoded_obs = np.empty(
             [env.num, max_steps, self.vision_model.get_representation_size()],
             dtype=np.float32,
@@ -91,6 +93,19 @@ class PolicyWrapper(Policy):
         inputs, mask = self._ensure_sequence_length(inputs)
         return inputs, mask, nonpadding_seqlen
 
+    def _create_history_kwargs(self, rollout_state):
+        step = rollout_state.step
+        num_envs = rollout_state.num_envs
+        actions = tf.one_hot(
+            rollout_state.actions.T[:, :step], depth=ACTION_SIZE, axis=-1
+        )
+        history = tf.concat([self.encoded_obs[:, :step], actions], axis=-1)
+        # We don't really care about this when training controllers since we ignore
+        # all steps after the first episode terminates when computing the cumulative
+        # reward.
+        history_length = step * tf.ones([num_envs, 1], dtype=tf.int32)
+        return {"history": history, "history_length": history_length}
+
     def sample_action(self, rollout_state):
         step = rollout_state.step
         obs = rollout_state.get_current_observation()
@@ -105,11 +120,15 @@ class PolicyWrapper(Policy):
         inputs, mask, nonpadding_seqlen = self._create_memory_model_inputs(
             rollout_state
         )
+        additional_memory_kwargs = {}
+        if self.memory_needs_history:
+            additional_memory_kwargs = self._create_history_kwargs(rollout_state)
         hidden_state = self.memory_model.get_hidden_representation(
             inputs,
             mask=mask,
             training=tf.constant(False),
             position=tf.constant(nonpadding_seqlen - 1),
+            **additional_memory_kwargs
         )
         self.encoded_obs[:, step] = enc_obs
         policy_input = tf.concat([enc_obs, hidden_state], axis=-1)

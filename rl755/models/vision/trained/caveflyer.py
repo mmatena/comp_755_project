@@ -8,3 +8,10 @@ def vae_32d():
     model = instances.vae_32d()
     model.load_weights(weights_path)
     return model
+
+
+def vae_32d_untrained():
+    # TODO: Add docs, This is mostly for testing stuff locally, where we do not care
+    # about the actual performance but just want to make sure the code runs.
+    model = instances.vae_32d()
+    return model

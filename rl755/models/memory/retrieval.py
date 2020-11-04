@@ -51,7 +51,6 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         )
 
     # def build(self, input_shape):
-    #     print("TODO: Add a build_train and a build_no_train to the interface.")
     #     # These represent retrieving no documents.
     #     self.empty_key = self.add_weight(
     #         shape=[self.key_size],
@@ -89,6 +88,8 @@ class EpisodicRetriever(MemoryComponentWithHistory):
     def _extract_valid_values_func(self, history, history_length, sequence_length):
         # TODO: Incorporate the history_length in this step prevent unnecessary evaluation.
         max_history_length = history.shape[-2]
+        if max_history_length < sequence_length:
+            return tf.zeros([history.shape[0], 0, sequence_length, history.shape[-1]])
         values_per_history = (
             1 + (max_history_length - sequence_length) // self.history_stride
         )
@@ -133,7 +134,7 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         queries = self.query_proj(queries)
         return queries
 
-    def _retrieve_train(self, inputs, history, history_length, training):
+    def _retrieve_train(self, inputs, history, history_length, training, position=-1):
         sequence_length = tf.shape(inputs)[-2]
 
         keys, values = self._get_key_values(
@@ -141,8 +142,9 @@ class EpisodicRetriever(MemoryComponentWithHistory):
             history_length=history_length,
             sequence_length=sequence_length,
             training=training,
+            position=position,
         )
-        queries = self._get_queries(inputs, training)
+        queries = self._get_queries(inputs, training, position=position)
 
         scores = tf.einsum("bvi,bi->bv", keys, queries)
 
@@ -162,7 +164,7 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         retrieved_values = tf.stop_gradient(retrieved_values)
 
         retrieved_keys = self._compute_keys(
-            retrieved_values, training=training, rep_key="with_grads"
+            retrieved_values, training=training, position=position, rep_key="with_grads"
         )
 
         retrieved_scores = tf.einsum("bvi,bi->bv", retrieved_keys, queries)
@@ -175,8 +177,12 @@ class EpisodicRetriever(MemoryComponentWithHistory):
 
         return retrieved_values, retrieved_scores
 
-    def call_train(self, inputs, history, history_length, mask=None, training=None):
-        assert mask is None, "Not handling masks when training the retrieval model."
+    def get_hidden_representation(
+        self, inputs, history, history_length, mask=None, training=None, position=-1
+    ):
+        assert (
+            not training or mask is None
+        ), "Not handling masks when training the retrieval model."
         sequence_length = tf.shape(inputs)[-2]
         batch_size = tf.shape(inputs)[0]
 
@@ -193,21 +199,31 @@ class EpisodicRetriever(MemoryComponentWithHistory):
             prediction_inputs, [-1, 2 * sequence_length, tf.shape(inputs)[-1]]
         )
 
-        predictions = self.prediction_network.get_hidden_representation(
+        representations = self.prediction_network.get_hidden_representation(
             prediction_inputs,
             training=training,
-            position=-1,
+            position=position,
             pos_embeddings=self._get_prediction_pos_embeddings(),
         )
-        predictions = tf.reshape(
-            predictions, [batch_size, actual_num_retrieved, tf.shape(predictions)[-1]]
+        representations = tf.reshape(
+            representations,
+            [batch_size, actual_num_retrieved, tf.shape(representations)[-1]],
         )
 
         weights = tf.nn.softmax(scores, axis=-1)
 
-        weighted_predictions = tf.einsum("bvi,bv->bi", predictions, weights)
+        weighted_representation = tf.einsum("bvi,bv->bi", representations, weights)
+        return weighted_representation
+
+    def call(self, inputs, history, history_length, mask=None, training=None):
+        assert (
+            not training or mask is None
+        ), "Not handling masks when training the retrieval model."
+        weighted_representation = self.get_hidden_representation(
+            inputs, history, history_length, mask=mask, training=training, position=-1
+        )
         weighted_predictions = self.prediction_network.prediction_from_representation(
-            weighted_predictions, training=training
+            weighted_representation, training=training
         )
         return weighted_predictions
 
@@ -226,7 +242,7 @@ class NoHistoryWrapper(MemoryComponentWithHistory):
         super().__init__(self, **kwargs)
         self.memory_component = memory_component
 
-    def call_train(self, inputs, history, history_length, mask=None, training=None):
+    def call(self, inputs, history, history_length, mask=None, training=None):
         predictions = self.memory_component(inputs, mask=mask, training=training)
         return predictions[..., -1, :]
 

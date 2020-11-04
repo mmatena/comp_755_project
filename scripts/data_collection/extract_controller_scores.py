@@ -20,9 +20,6 @@ flags.mark_flag_as_required("directories")
 def extract_from_directory(directory):
     row = [pathlib.PurePath(directory).parent.name] + FLAGS.max_steps * [""]
     for file in os.listdir(directory):
-        print(file)
-        if not os.path.isfile(file):
-            continue
         if not re.match(FLAGS.checkpoint_regex, file):
             continue
         with open(os.path.join(directory, file), "rb") as f:
@@ -40,7 +37,8 @@ def main(_):
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(data)
+    for row in data:
+        writer.writerow(row)
     data_str = output.getvalue()
     print(data_str)
 

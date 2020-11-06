@@ -117,7 +117,7 @@ def deterministic_transformer_64dm_32di_long_wide(**kwargs):
 
 def deterministic_lstm_32dm_32di():
     # TODO: Add docs
-    weights_path = _WEIGHTS_PATTERN.format("deterministic_lstm_32dm_32di", "100")
+    weights_path = _WEIGHTS_PATTERN.format("deterministic_lstm_32dm_32di", "150")
     model = instances.deterministic_lstm_32dm_32di()
     # Build the model.
     model(tf.keras.Input([None, 32 + ACTION_SIZE]))

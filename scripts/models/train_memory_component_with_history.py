@@ -34,7 +34,7 @@ flags.DEFINE_string("rollouts_dataset", None, "")
 flags.DEFINE_string("trained_transformer", None, "")
 
 flags.DEFINE_integer(
-    "batch_size", 256, "The number of sequences in each batch.", lower_bound=1
+    "batch_size", 128, "The number of sequences in each batch.", lower_bound=1
 )
 flags.DEFINE_integer(
     "sequence_length", 32, "Size of windows to train on.", lower_bound=1

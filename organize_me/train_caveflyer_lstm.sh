@@ -8,9 +8,9 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-# MODEL=deterministic_lstm_32dm_32di
+MODEL=deterministic_lstm_32dm_32di
 # MODEL=deterministic_lstm_64dm_32di
-MODEL=deterministic_lstm_256dm_32di
+# MODEL=deterministic_lstm_256dm_32di
 MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/memory/caveflyer/$MODEL
 
 # Changing to 150k since it looked like the 32dm version didn't fully converge at 100k.
@@ -18,7 +18,7 @@ TRAIN_STEPS=150000
 
 NUM_CORES=6
 MEMORY=8g
-TIME="22:30:00"
+TIME="2-"
 #############################################################
 
 

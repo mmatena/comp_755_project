@@ -59,7 +59,7 @@ class EpisodicRetriever(MemoryComponentWithHistory):
     #         name="empty_key",
     #     )
     #     self.empty_value = self.add_weight(
-    #         shape=input_shape["inputs"][1:],
+    #         shape=input_shape["inputs"][-1:],
     #         initializer="random_normal",
     #         trainable=True,
     #         name="empty_value",
@@ -243,8 +243,17 @@ class NoHistoryWrapper(MemoryComponentWithHistory):
         self.memory_component = memory_component
 
     def call(self, inputs, history, history_length, mask=None, training=None):
+        del history, history_length
         predictions = self.memory_component(inputs, mask=mask, training=training)
         return predictions[..., -1, :]
+
+    def get_hidden_representation(
+        self, inputs, history, history_length, mask=None, training=None, position=-1
+    ):
+        del history, history_length
+        self.memory_component.get_hidden_representation(
+            inputs, mask=mask, training=training, position=position
+        )
 
     def get_loss_fn(self):
         """Train using a MSE loss."""

@@ -42,7 +42,7 @@ class ClrLoss(tf.keras.losses.Loss):
     def call(self, y_true, y_pred):
         LARGE_NUM = 1e9
         temperature = self.model.temperature
-        hidden = tf.math.l2_normalize(y_true, -1)
+        hidden = tf.math.l2_normalize(y_pred, -1)
         hidden1, hidden2 = tf.split(hidden, 2, 0)
         batch_size = tf.shape(hidden1)[0]
 

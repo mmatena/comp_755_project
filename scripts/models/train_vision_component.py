@@ -68,7 +68,7 @@ def get_aug_ds_representation(x):
     for _ in range(2):  # Two transformations
         xs.append(processing.augment_for_train(image, 64, 64))
         image = tf.concat(xs, -1)
-    return image, 0
+    return image, 0.0
 
 def get_train_dataset():
     dsb_cls = locate(f"rl755.data.envs.{FLAGS.environment}.RawRollouts")

@@ -22,7 +22,7 @@ class RawRollouts(RawImageRolloutDatasetBuilder):
         raise("Please pick a directory for bossfight on pine, then add it to this file")
 
 
-class TestEncodedRollouts(EncodedRolloutDatasetBuilder):
+class EncodedRollouts(EncodedRolloutDatasetBuilder):
     def __init__(self, environment):
         super(EncodedRolloutDatasetBuilder, self).__init__()
         self.environment = environment

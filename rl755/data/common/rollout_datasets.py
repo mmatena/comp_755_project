@@ -209,7 +209,8 @@ class RolloutDatasetBuilder(object):
         Returns:
             A tf.data.Dataset.
         """
-
+        def filter_fn(x):
+            return x['done_step'] > slice_size + 1 
         def map_fn(x):
             x = processing.slice_example(x, slice_size=slice_size)
             x["observations"] = self._process_observations(x["observations"])
@@ -220,6 +221,7 @@ class RolloutDatasetBuilder(object):
             ds = ds.interleave(
                 lambda x: tf.data.Dataset.from_tensors(x).repeat(slices_per_rollout)
             )
+        ds = ds.filter(filter_fn)
         return ds.map(map_fn, num_parallel_calls=1)
 
     def random_rollout_observations(self, split="train", obs_sampled_per_rollout=100):

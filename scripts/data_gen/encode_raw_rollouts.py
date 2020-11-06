@@ -2,6 +2,7 @@
 import functools
 from pydoc import locate
 import time
+from rl755.models.vision import vision_trained
 
 from absl import app
 from absl import flags
@@ -40,8 +41,8 @@ flags.mark_flag_as_required("out_dir")
 
 
 def get_raw_rollouts_builder():
-    dsb_cls = locate(f"rl755.data.envs.{FLAGS.environment}.RawRollouts")
-    return dsb_cls()
+    dsb_cls = locate(f"rl755.data.generic.RawRollouts")
+    return dsb_cls(FLAGS.environment)
 
 
 def get_dataset_files():
@@ -70,10 +71,8 @@ def get_dataset():
 
 
 def get_vision_model():
-    model = locate(
-        f"rl755.models.vision.trained.{FLAGS.environment}.{FLAGS.vision_model}"
-    )
-    return model()
+    model = getattr(vision_trained, FLAGS.vision_model)
+    return model(FLAGS.environment)
 
 
 @tf.function

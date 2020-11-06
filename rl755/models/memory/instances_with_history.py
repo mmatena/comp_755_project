@@ -45,3 +45,8 @@ def episodic_32dk_ret4_half_stride(get_transformer):
 def no_history_64dk_ret4_half_stride(get_transformer):
     prediction_network = get_transformer()
     return retrieval.NoHistoryWrapper(memory_component=prediction_network)
+
+
+def no_history_32dk_ret4_half_stride(get_transformer):
+    prediction_network = get_transformer()
+    return retrieval.NoHistoryWrapper(memory_component=prediction_network)

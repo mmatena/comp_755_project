@@ -32,7 +32,7 @@ for MODEL in $MODELS; do
   export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 
   run_python() {
-    python scripts/models/train_memory_component_with_history.py \
+    echo python scripts/models/train_memory_component_with_history.py \
       --environment=caveflyer \
       --model_dir=$MODEL_DIR \
       --train_steps=$TRAIN_STEPS \

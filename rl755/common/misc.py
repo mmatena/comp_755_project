@@ -1,5 +1,35 @@
 """Miscelaneous utilty functions."""
 
+import numpy as np
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+def numpy_to_mp4(numpy_array, filename):
+    Writer = animation.writers['ffmpeg']
+    writer = Writer(fps=30, metadata=dict(artist='Me'), bitrate=1800)
+    assert(len(numpy_array.shape) == 4)
+
+    anim = jupyter_video(numpy_array)
+    anim.save(filename, writer=writer)
+
+
+def jupyter_video(video):
+    fig = plt.figure()
+    im = plt.imshow(video[0,:,:,:])
+
+    plt.close() # this is required to not display the generated image
+
+    def init():
+        im.set_data(video[0,:,:,:])
+
+    def animate(i):
+        im.set_data(video[i,:,:,:])
+        return im
+
+    anim = animation.FuncAnimation(fig, animate, init_func=init, frames=video.shape[0],
+                                   interval=50)
+    return anim
 
 def divide_chunks(lis, n):
     """Yield successive n-sized from list `lis`."""

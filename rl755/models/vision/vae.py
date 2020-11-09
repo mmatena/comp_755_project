@@ -5,6 +5,20 @@ import tensorflow_probability as tfp
 from .interface import VisionComponent
 
 tfd = tfp.distributions
+class PerPixelShift(tf.keras.layers.Layer):
+    def __init__(self): 
+        super(PerPixelShift, self).__init__()
+    def build(self, input_shape):
+        self.shift = self.add_weight(
+            shape=(input_shape[1], input_shape[2], input_shape[3]),
+            initializer=tf.keras.initializers.Zeros(),
+            name="perPixelBias",
+            trainable=True
+        )
+    def call(self, inputs):
+        output = tf.add(self.shift, inputs)
+        return output
+    
 
 
 def _get_encoder(representation_size):

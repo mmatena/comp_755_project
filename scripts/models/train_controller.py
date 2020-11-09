@@ -18,6 +18,7 @@ import tensorflow as tf
 from rl755.common import misc
 from rl755.data_gen import gym_rollouts
 from rl755.models.policy import PolicyWrapper
+from rl755.utils.misc import numpy_to_mp4 
 
 ACTION_SIZE = 15
 
@@ -55,16 +56,16 @@ flags.mark_flag_as_required("memory_model")
 
 def get_vision_model():
     model = locate(
-        f"rl755.models.vision.trained.{FLAGS.environment}.{FLAGS.vision_model}"
+        f"rl755.models.vision.vision_trained.{FLAGS.vision_model}"
     )
-    return model()
+    return model(FLAGS.environment)
 
 
 def get_memory_model():
     model = locate(
-        f"rl755.models.memory.trained.{FLAGS.environment}.{FLAGS.memory_model}"
+        f"rl755.models.memory.memory_trained.{FLAGS.memory_model}"
     )
-    return model()
+    return model(FLAGS.environment)
 
 
 def get_controller_cls():
@@ -100,7 +101,7 @@ def get_scores(solutions, vision_model, memory_model, max_steps):
         policy=policy,
         max_steps=FLAGS.rollout_max_steps,
     )
-    return rollout_state.get_first_rollout_total_reward().tolist()
+    return rollout_state.get_first_rollout_total_reward().tolist(), rollout_state
 
 
 def save_checkpoint(step, solutions, fitlist):
@@ -136,12 +137,17 @@ def main(_):
         solutions = es.ask()
         args = functools.reduce(list.__add__, [num_trials * [s] for s in solutions])
 
-        scores = get_scores(
+        scores, rollouts = get_scores(
             args,
             vision_model=vision_model,
             memory_model=memory_model,
             max_steps=rollout_max_steps,
         )
+	if step % 10 == 0:
+	    obs_encoded = vision_model.encode(solutions.observations[:, 0] / 255.)
+	    obs_decoded = vision_model.decode(obs_encoded.mean())
+	    numpy_to_mp4(np.concatenate([obs_decoded, solutions.observations[:, 0] / 255.], -2),
+	        os.path.join(FLAGS.model_dir, f"sample-rollout-{step:03d}.mp4"))
         scores = misc.divide_chunks(scores, num_trials)
         fitlist = np.array([sum(s) / num_trials for s in scores])
 

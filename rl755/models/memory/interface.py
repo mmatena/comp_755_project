@@ -29,7 +29,16 @@ class MemoryComponent(tf.keras.Model):
 class MemoryComponentWithHistory(MemoryComponent):
     """Memory component models with access to full history should extend this."""
 
-    def call(self, inputs, history, history_length, mask=None, training=None):
+    def call(self, x, mask=None, training=None):
+        return self._call(
+            x["inputs"],
+            history=x["history"],
+            history_length=x["history_length"],
+            mask=mask,
+            training=training,
+        )
+
+    def _call(self, inputs, history, history_length, mask=None, training=None):
         raise NotImplementedError()
 
     def get_hidden_representation(

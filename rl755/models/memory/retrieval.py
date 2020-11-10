@@ -215,7 +215,7 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         weighted_representation = tf.einsum("bvi,bv->bi", representations, weights)
         return weighted_representation
 
-    def call(self, inputs, history, history_length, mask=None, training=None):
+    def _call(self, inputs, history, history_length, mask=None, training=None):
         assert (
             not training or mask is None
         ), "Not handling masks when training the retrieval model."
@@ -242,7 +242,7 @@ class NoHistoryWrapper(MemoryComponentWithHistory):
         super().__init__(self, **kwargs)
         self.memory_component = memory_component
 
-    def call(self, inputs, history, history_length, mask=None, training=None):
+    def _call(self, inputs, history, history_length, mask=None, training=None):
         del history, history_length
         predictions = self.memory_component(inputs, mask=mask, training=training)
         return predictions[..., -1, :]

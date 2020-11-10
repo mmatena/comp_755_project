@@ -216,9 +216,9 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         return weighted_representation
 
     def _call(self, inputs, history, history_length, mask=None, training=None):
-        assert (
-            not training or mask is None
-        ), "Not handling masks when training the retrieval model."
+        # assert (
+        #     not training or mask is None
+        # ), "Not handling masks when training the retrieval model."
         weighted_representation = self.get_hidden_representation(
             inputs, history, history_length, mask=mask, training=training, position=-1
         )

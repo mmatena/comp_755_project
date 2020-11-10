@@ -180,9 +180,9 @@ class EpisodicRetriever(MemoryComponentWithHistory):
     def get_hidden_representation(
         self, inputs, history, history_length, mask=None, training=None, position=-1
     ):
-        assert (
-            not training or mask is None
-        ), "Not handling masks when training the retrieval model."
+        # assert (
+        #     not training or mask is None
+        # ), "Not handling masks when training the retrieval model."
         sequence_length = tf.shape(inputs)[-2]
         batch_size = tf.shape(inputs)[0]
 

@@ -63,35 +63,7 @@ class ClrLoss(tf.keras.losses.Loss):
         denom = tf.reduce_logsumexp(denom, axis=-1)
         d1, d2 = tf.split(denom, num_or_size_splits=2, axis=0)
 
-        return numerator + d1 + d2
-
-    # def call(self, y_true, y_pred):
-    #     del y_true
-    #     temperature = self.model.temperature
-    #     hidden = tf.math.l2_normalize(y_pred, -1)
-    #     hidden1, hidden2 = tf.split(hidden, 2, 0)
-    #     batch_size = tf.shape(hidden1)[0]
-
-    #     hidden1_large = hidden1
-    #     hidden2_large = hidden2
-    #     labels = tf.one_hot(tf.range(batch_size), batch_size * 2)
-    #     masks = tf.one_hot(tf.range(batch_size), batch_size)
-
-    #     logits_aa = tf.matmul(hidden1, hidden1_large, transpose_b=True) / temperature
-    #     logits_aa = logits_aa - masks * _LARGE_NUM
-    #     logits_bb = tf.matmul(hidden2, hidden2_large, transpose_b=True) / temperature
-    #     logits_bb = logits_bb - masks * _LARGE_NUM
-    #     logits_ab = tf.matmul(hidden1, hidden2_large, transpose_b=True) / temperature
-    #     logits_ba = tf.matmul(hidden2, hidden1_large, transpose_b=True) / temperature
-
-    #     loss_a = tf.compat.v1.losses.softmax_cross_entropy(
-    #         labels, tf.concat([logits_ab, logits_aa], 1)
-    #     )
-    #     loss_b = tf.compat.v1.losses.softmax_cross_entropy(
-    #         labels, tf.concat([logits_ba, logits_bb], 1)
-    #     )
-    #     loss = loss_a + loss_b
-    #     return loss
+        return 0.5 * tf.reduce_mean(2 * numerator + d1 + d2)
 
 
 class Clr(VisionComponent):

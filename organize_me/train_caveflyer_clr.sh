@@ -14,7 +14,7 @@ TRAIN_STEPS=100000
 
 NUM_CORES=8
 MEMORY=8g
-TIME="8:30:00"
+TIME="2-"
 #############################################################
 
 
@@ -31,9 +31,11 @@ run_python() {
   echo python $PROJECT_DIR/scripts/models/train_vision_component.py \
     --model_dir=$MODEL_DIR \
     --train_steps=$TRAIN_STEPS \
-    --environment=bigfish \
+    --environment=caveflyer \
     --model=clr_32d \
-    --color_jitter_strength=0.5
+    --color_jitter_strength=0.5 \
+    --learning_rate=1e-4 \
+    --obs_sampled_per_rollout=25
 }
 
 

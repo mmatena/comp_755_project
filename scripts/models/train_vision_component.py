@@ -44,7 +44,7 @@ flags.DEFINE_integer(
     lower_bound=1,
 )
 flags.DEFINE_float("learning_rate", 1e-3, "")
-# flags.DEFINE_float("color_jitter_strength", 1.0, "The strength of color jittering.")
+flags.DEFINE_float("color_jitter_strength", 1.0, "The strength of color jittering.")
 
 flags.mark_flag_as_required("model_dir")
 flags.mark_flag_as_required("train_steps")

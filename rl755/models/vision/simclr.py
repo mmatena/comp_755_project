@@ -1,10 +1,9 @@
 """A variational autoencoder."""
 import tensorflow as tf
-import tensorflow_probability as tfp
 
 from .interface import VisionComponent
 
-tfd = tfp.distributions
+_LARGE_NUM = 1e9
 
 
 def _get_encoder(representation_size):
@@ -38,38 +37,61 @@ def _get_head(representation_size):
     )
 
 
+def _sim(z1, z2):
+    z1 = tf.math.l2_normalize(z1, axis=-1)
+    z2 = tf.math.l2_normalize(z2, axis=-1)
+    return tf.einsum("...i,...i->...", z1, z2)
+
+
 class ClrLoss(tf.keras.losses.Loss):
     def __init__(self, model, **kwargs):
         super().__init__(**kwargs)
         self.model = model
 
     def call(self, y_true, y_pred):
-        LARGE_NUM = 1e9
-        temperature = self.model.temperature
-        hidden = tf.math.l2_normalize(y_pred, -1)
-        hidden1, hidden2 = tf.split(hidden, 2, 0)
-        batch_size = tf.shape(hidden1)[0]
+        del y_true
+        tau = self.model.temperature
+        # Each is shaped [batched, d_z]
+        z1, z2 = tf.split(y_pred, num_or_size_splits=2, axis=-1)
 
-        hidden1_large = hidden1
-        hidden2_large = hidden2
-        labels = tf.one_hot(tf.range(batch_size), batch_size * 2)
-        masks = tf.one_hot(tf.range(batch_size), batch_size)
+        numerator = -_sim(z1, z2) / tau
 
-        logits_aa = tf.matmul(hidden1, hidden1_large, transpose_b=True) / temperature
-        logits_aa = logits_aa - masks * LARGE_NUM
-        logits_bb = tf.matmul(hidden2, hidden2_large, transpose_b=True) / temperature
-        logits_bb = logits_bb - masks * LARGE_NUM
-        logits_ab = tf.matmul(hidden1, hidden2_large, transpose_b=True) / temperature
-        logits_ba = tf.matmul(hidden2, hidden1_large, transpose_b=True) / temperature
+        z = tf.concat([z1, z2], axis=0)
+        # Shape = [2N, 2N]
+        denom = _sim(z[:, None, :], z[None, :, :]) / tau
+        denom += -_LARGE_NUM * tf.eye(tf.shape(z)[0])
+        denom = tf.reduce_logsumexp(denom, axis=-1)
+        d1, d2 = tf.split(denom, num_or_size_splits=2, axis=0)
 
-        loss_a = tf.compat.v1.losses.softmax_cross_entropy(
-            labels, tf.concat([logits_ab, logits_aa], 1)
-        )
-        loss_b = tf.compat.v1.losses.softmax_cross_entropy(
-            labels, tf.concat([logits_ba, logits_bb], 1)
-        )
-        loss = loss_a + loss_b
-        return loss
+        return numerator + d1 + d2
+
+    # def call(self, y_true, y_pred):
+    #     del y_true
+    #     temperature = self.model.temperature
+    #     hidden = tf.math.l2_normalize(y_pred, -1)
+    #     hidden1, hidden2 = tf.split(hidden, 2, 0)
+    #     batch_size = tf.shape(hidden1)[0]
+
+    #     hidden1_large = hidden1
+    #     hidden2_large = hidden2
+    #     labels = tf.one_hot(tf.range(batch_size), batch_size * 2)
+    #     masks = tf.one_hot(tf.range(batch_size), batch_size)
+
+    #     logits_aa = tf.matmul(hidden1, hidden1_large, transpose_b=True) / temperature
+    #     logits_aa = logits_aa - masks * _LARGE_NUM
+    #     logits_bb = tf.matmul(hidden2, hidden2_large, transpose_b=True) / temperature
+    #     logits_bb = logits_bb - masks * _LARGE_NUM
+    #     logits_ab = tf.matmul(hidden1, hidden2_large, transpose_b=True) / temperature
+    #     logits_ba = tf.matmul(hidden2, hidden1_large, transpose_b=True) / temperature
+
+    #     loss_a = tf.compat.v1.losses.softmax_cross_entropy(
+    #         labels, tf.concat([logits_ab, logits_aa], 1)
+    #     )
+    #     loss_b = tf.compat.v1.losses.softmax_cross_entropy(
+    #         labels, tf.concat([logits_ba, logits_bb], 1)
+    #     )
+    #     loss = loss_a + loss_b
+    #     return loss
 
 
 class Clr(VisionComponent):

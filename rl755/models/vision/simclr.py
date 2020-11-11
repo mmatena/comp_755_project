@@ -41,8 +41,7 @@ def _get_head(representation_size):
 
 
 def _sim(z1, z2):
-    z1 = tf.math.l2_normalize(z1, axis=-1)
-    z2 = tf.math.l2_normalize(z2, axis=-1)
+    # Assumes both z1 and z2 have been normalized.
     return tf.einsum("...i,...i->...", z1, z2)
 
 
@@ -56,6 +55,8 @@ class ClrLoss(tf.keras.losses.Loss):
         tau = self.model.temperature
         # Each is shaped [batched, d_z]
         z1, z2 = tf.split(y_pred, num_or_size_splits=2, axis=0)
+        z1 = tf.math.l2_normalize(z1, axis=-1)
+        z2 = tf.math.l2_normalize(z2, axis=-1)
 
         numerator = -_sim(z1, z2) / tau
 

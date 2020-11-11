@@ -65,7 +65,8 @@ def get_aug_ds_representation(x):
     image = x["observation"]
     xs = []
     for _ in range(2):  # Two transformations
-        xs.append(processing.augment_for_train(image, 64, 64))
+        # xs.append(processing.augment_for_train(image, 64, 64))
+        xs.append(image)
     image = tf.concat(xs, axis=-1)
     return image, 0.0
 

@@ -134,7 +134,7 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         queries = self.query_proj(queries)
         return queries
 
-    def _retrieve_train(self, inputs, history, history_length, training, position=-1):
+    def _retrieve(self, inputs, history, history_length, training, position=-1):
         sequence_length = tf.shape(inputs)[-2]
 
         keys, values = self._get_key_values(
@@ -177,6 +177,7 @@ class EpisodicRetriever(MemoryComponentWithHistory):
 
         return retrieved_values, retrieved_scores
 
+    # @tf.function
     def get_hidden_representation(
         self, inputs, history, history_length, mask=None, training=None, position=-1
     ):
@@ -186,7 +187,7 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         sequence_length = tf.shape(inputs)[-2]
         batch_size = tf.shape(inputs)[0]
 
-        values, scores = self._retrieve_train(
+        values, scores = self._retrieve(
             inputs, history, history_length, training=training
         )
         actual_num_retrieved = tf.shape(scores)[-1]

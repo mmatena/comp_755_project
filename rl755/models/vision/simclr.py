@@ -4,7 +4,6 @@ import functools
 import tensorflow as tf
 
 from .interface import VisionComponent
-from rl755.data.common import processing
 
 _LARGE_NUM = 1e9
 
@@ -55,7 +54,7 @@ class ClrLoss(tf.keras.losses.Loss):
         del y_true
         tau = self.model.temperature
         # Each is shaped [batched, d_z]
-        z1, z2 = tf.split(y_pred, num_or_size_splits=2, axis=-1)
+        z1, z2 = tf.split(y_pred, num_or_size_splits=2, axis=0)
 
         numerator = -_sim(z1, z2) / tau
 
@@ -79,22 +78,22 @@ class Clr(VisionComponent):
         self.encoder = _get_encoder(representation_size)
         self.head = _get_head(representation_size)
 
-    # def _augment(self, x):
-    #     map_fn = functools.partial(processing.augment_for_train, height=64, width=64)
-    #     image1 = tf.map_fn(map_fn, x)
-    #     image2 = tf.map_fn(map_fn, x)
-    #     return image1, image2
-
     def call(self, x, training=None):
-        # split the two images, go through encode and head separately
+        # # split the two images, go through encode and head separately
+        # image1, image2 = tf.split(x, num_or_size_splits=2, axis=-1)
+        # # image1, image2 = self._augment(x)
+        # rep1 = self.encoder(image1, training=training)
+        # hidden1 = self.head(rep1, training=training)
+        # rep2 = self.encoder(image2, training=training)
+        # hidden2 = self.head(rep2, training=training)
+        # # put the two images together
+        # hidden = tf.concat([hidden1, hidden2], -1)
+        # return hidden
+
         image1, image2 = tf.split(x, num_or_size_splits=2, axis=-1)
-        # image1, image2 = self._augment(x)
-        rep1 = self.encoder(image1, training=training)
-        hidden1 = self.head(rep1, training=training)
-        rep2 = self.encoder(image2, training=training)
-        hidden2 = self.head(rep2, training=training)
-        # put the two images together
-        hidden = tf.concat([hidden1, hidden2], -1)
+        image = tf.concat([image1, image2], axis=0)
+        rep = self.encoder(image, training=training)
+        hidden = self.head(rep, training=training)
         return hidden
 
     @tf.function

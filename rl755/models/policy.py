@@ -100,7 +100,6 @@ class PolicyWrapper(Policy):
             rollout_state.actions.T[:, :step], depth=ACTION_SIZE, axis=-1
         )
         history = tf.concat([self.encoded_obs[:, :step], actions], axis=-1)
-        history, _ = self._ensure_sequence_length(history, rollout_state.max_steps)
         # We don't really care about this when training controllers since we ignore
         # all steps after the first episode terminates when computing the cumulative
         # reward.

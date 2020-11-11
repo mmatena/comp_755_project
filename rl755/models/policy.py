@@ -69,9 +69,9 @@ class PolicyWrapper(Policy):
         start_index = max(0, step - self.max_seqlen)
         return self.encoded_obs[:, start_index:step]
 
-    def _ensure_sequence_length(self, x):
-        x = x[..., -self.max_seqlen :, :]
-        diff = self.max_seqlen - x.shape[-2]
+    def _ensure_sequence_length(self, x, sequence_length):
+        x = x[..., -sequence_length:, :]
+        diff = sequence_length - x.shape[-2]
         batch_dims = x.shape[:-2]
         if diff:
             mask = tf.concat(
@@ -90,7 +90,7 @@ class PolicyWrapper(Policy):
 
         actions = tf.one_hot(actions.T, depth=ACTION_SIZE, axis=-1)
         inputs = tf.concat([observations, actions], axis=-1)
-        inputs, mask = self._ensure_sequence_length(inputs)
+        inputs, mask = self._ensure_sequence_length(inputs, self.max_seqlen)
         return inputs, mask, nonpadding_seqlen
 
     def _create_history_kwargs(self, rollout_state):
@@ -100,6 +100,7 @@ class PolicyWrapper(Policy):
             rollout_state.actions.T[:, :step], depth=ACTION_SIZE, axis=-1
         )
         history = tf.concat([self.encoded_obs[:, :step], actions], axis=-1)
+        history, _ = self._ensure_sequence_length(history, rollout_state.max_steps)
         # We don't really care about this when training controllers since we ignore
         # all steps after the first episode terminates when computing the cumulative
         # reward.

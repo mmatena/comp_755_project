@@ -177,7 +177,8 @@ class EpisodicRetriever(MemoryComponentWithHistory):
 
         return retrieved_values, retrieved_scores
 
-    @tf.function(experimental_relax_shapes=True)
+    # @tf.function(experimental_relax_shapes=True)
+    @tf.function
     def get_hidden_representation(
         self, inputs, history, history_length, mask=None, training=None, position=-1
     ):

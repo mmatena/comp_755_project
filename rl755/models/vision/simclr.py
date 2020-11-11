@@ -35,6 +35,7 @@ def _get_encoder(representation_size):
 def _get_head(representation_size):
     return tf.keras.Sequential(
         [
+            tf.keras.layers.Dense(units=64, activation="relu"),
             tf.keras.layers.Dense(units=16),
         ]
     )

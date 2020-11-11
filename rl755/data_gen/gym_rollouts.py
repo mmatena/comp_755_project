@@ -100,4 +100,6 @@ def perform_rollouts(env_name, num_envs, policy, max_steps, **env_kwargs):
         action = policy.sample_action(rollout_state)
         rollout_state.perform_step(env, action)
 
+    env.close()
+
     return rollout_state

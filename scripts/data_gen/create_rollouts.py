@@ -4,6 +4,7 @@ import time
 
 from absl import app
 from absl import flags
+from absl import logging
 
 from rl755.common import tfrecords
 from rl755.data_gen import gym_rollouts
@@ -22,7 +23,7 @@ flags.DEFINE_string(
 
 flags.DEFINE_integer("max_steps", None, "The maximum number of steps in each rollout.")
 
-flags.DEFINE_integer("max_simul_envs", 256, "")
+flags.DEFINE_integer("max_simul_envs", 64, "")
 flags.DEFINE_integer("desired_shard_mb", 100, "")
 
 flags.DEFINE_string("out_dir", None, "The directory to write the tfrecords to.")
@@ -67,7 +68,7 @@ def main(_):
             serialized_records = rollout_state.to_serialized_tfrecords()
             record_writer.write(serialized_records)
 
-            print(f"Step {step} took {time.time() - step_start_time} s")
+            logging.info(f"Step {step} took {time.time() - step_start_time} s")
 
             rollouts_remaining -= max_simul_envs
             step += 1

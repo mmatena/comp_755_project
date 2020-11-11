@@ -251,7 +251,7 @@ class NoHistoryWrapper(MemoryComponentWithHistory):
         self, inputs, history, history_length, mask=None, training=None, position=-1
     ):
         del history, history_length
-        self.memory_component.get_hidden_representation(
+        return self.memory_component.get_hidden_representation(
             inputs, mask=mask, training=training, position=position
         )
 

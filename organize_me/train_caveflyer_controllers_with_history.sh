@@ -45,7 +45,7 @@ for MODEL in $MODELS; do
         --rollout_max_steps=1000 \
         --cma_population_size=64 \
         --cma_trials_per_member=16 \
-        --max_simul_envs=128 \
+        --max_simul_envs=32 \
         --cma_steps=1000
     }
 

@@ -21,9 +21,9 @@ no_history_32dk_ret4_half_stride"
 for MODEL in $MODELS; do
     MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/controller/caveflyer/$MODEL
 
-    NUM_CORES=16
-    MEMORY=16g
-    TIME="3-"
+    NUM_CORES=10
+    MEMORY=10g
+    TIME="2-"
     #############################################################
 
 

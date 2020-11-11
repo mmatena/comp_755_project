@@ -7,14 +7,20 @@ FLAGS = flags.FLAGS
 
 def random_apply(func, p, x):
     """Randomly apply function func to x with probability p."""
-    return tf.cond(
-        tf.less(
-            tf.random.uniform([], minval=0, maxval=1, dtype=tf.float32),
-            tf.cast(p, tf.float32),
-        ),
-        lambda: func(x),
-        lambda: x,
+    # return tf.cond(
+    #     tf.less(
+    #         tf.random.uniform([], minval=0, maxval=1, dtype=tf.float32),
+    #         tf.cast(p, tf.float32),
+    #     ),
+    #     lambda: func(x),
+    #     lambda: x,
+    # )
+    should_apply = tf.less(
+        tf.random.uniform([], minval=0, maxval=1, dtype=tf.float32),
+        tf.cast(p, tf.float32),
     )
+    should_apply = tf.cast(should_apply, tf.float32)
+    return should_apply * func(x) + (1 - should_apply) * x
 
 
 def random_brightness(image, max_delta, impl="simclrv2"):

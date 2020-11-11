@@ -81,12 +81,11 @@ class Clr(VisionComponent):
 
     def _augment(self, x):
         map_fn = functools.partial(processing.augment_for_train, height=64, width=64)
-        image1 = tf.map_fn(map_fn, x)
-        image2 = tf.map_fn(map_fn, x)
+        image1 = tf.vectorized_map(map_fn, x)
+        image2 = tf.vectorized_map(map_fn, x)
         return image1, image2
 
     def call(self, x, training=None):
-        # image1, image2 = tf.split(x, num_or_size_splits=2, axis=-1)
         image1, image2 = self._augment(x)
         image = tf.concat([image1, image2], axis=0)
         rep = self.encoder(image, training=training)

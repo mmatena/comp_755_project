@@ -23,7 +23,7 @@ for MODEL in $MODELS; do
 
     NUM_CORES=16
     MEMORY=16g
-    TIME="2-"
+    TIME="3-"
     #############################################################
 
 
@@ -45,7 +45,7 @@ for MODEL in $MODELS; do
         --rollout_max_steps=1000 \
         --cma_population_size=64 \
         --cma_trials_per_member=16 \
-        --max_simul_envs=32 \
+        --max_simul_envs=64 \
         --cma_steps=1000
     }
 

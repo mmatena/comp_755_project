@@ -76,20 +76,25 @@ def get_train_dataset():
         obs_sampled_per_rollout=FLAGS.obs_sampled_per_rollout
     )
 
-    # for contrastive learning
-    if "clr" in FLAGS.model:
-        ds = ds.map(
-            get_aug_ds_representation, num_parallel_calls=tf.data.experimental.AUTOTUNE
-        )
-        ds = processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
-        return ds
-    # for vae training
-    elif "vae" in FLAGS.model:
-        ds = processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
-        return ds.map(
-            get_final_ds_representation,
-            num_parallel_calls=tf.data.experimental.AUTOTUNE,
-        )
+    ds = processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
+    return ds.map(
+        get_final_ds_representation,
+        num_parallel_calls=tf.data.experimental.AUTOTUNE,
+    )
+    # # for contrastive learning
+    # if "clr" in FLAGS.model:
+    #     ds = ds.map(
+    #         get_aug_ds_representation, num_parallel_calls=tf.data.experimental.AUTOTUNE
+    #     )
+    #     ds = processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
+    #     return ds
+    # # for vae training
+    # elif "vae" in FLAGS.model:
+    #     ds = processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
+    #     return ds.map(
+    #         get_final_ds_representation,
+    #         num_parallel_calls=tf.data.experimental.AUTOTUNE,
+    #     )
 
 
 def main(_):

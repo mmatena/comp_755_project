@@ -8,10 +8,11 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-MODEL_DIR=/pine/scr/m/m/mmatena/tmp/bigfish_controller_test2
+# MODEL_DIR=/pine/scr/m/m/mmatena/tmp/bigfish_controller_test
+MODEL_DIR=/pine/scr/m/m/mmatena/tmp/bigfish_controller_det_test
 
-NUM_CORES=14
-MEMORY=32g
+NUM_CORES=16
+MEMORY=16g
 TIME="1-"
 #############################################################
 
@@ -34,6 +35,7 @@ run_python() {
     --rollout_max_steps=1000 \
     --cma_population_size=64 \
     --cma_trials_per_member=16 \
+    --max_simul_envs=128 \
     --cma_steps=1000
 }
 
@@ -51,7 +53,7 @@ launch() {
     --output="$MODEL_DIR/logs-%j.out" \
     --time=${TIME} \
     --mem=${MEMORY} \
-    --partition=volta-gpu \
+    --partition=gpu \
     --gres=gpu:1 \
     --qos=gpu_access \
     --wrap="\"$(run_singularity)\"")

@@ -8,13 +8,11 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/memory/bigfish/deterministic_transformer_32dm_32di
+MODEL_DIR=/pine/scr/m/m/mmatena/tmp/bigfish_controller_no_mem_test
 
-TRAIN_STEPS=100000
-
-NUM_CORES=6
-MEMORY=8g
-TIME="3:30:00"
+NUM_CORES=16
+MEMORY=16g
+TIME="1-"
 #############################################################
 
 
@@ -28,14 +26,16 @@ module add tensorflow_py3/2.1.0
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 
 run_python() {
-  echo python $PROJECT_DIR/scripts/models/train_memory_component.py \
-    --model_dir=$MODEL_DIR \
-    --train_steps=$TRAIN_STEPS \
+  echo python $PROJECT_DIR/scripts/models/train_controller.py \
     --environment=bigfish \
-    --batch_size=256 \
-    --model=deterministic_transformer_32dm_32di \
-    --rollouts_dataset=EncodedRolloutsVae32d \
-    --slices_per_rollout=2
+    --model_dir=$MODEL_DIR \
+    --memory_model=no_mem \
+    --vision_model=vae_32d \
+    --rollout_max_steps=1000 \
+    --cma_population_size=64 \
+    --cma_trials_per_member=16 \
+    --max_simul_envs=128 \
+    --cma_steps=1000
 }
 
 
@@ -53,7 +53,7 @@ launch() {
     --time=${TIME} \
     --mem=${MEMORY} \
     --partition=gpu \
-    --gres=gpu:8 \
+    --gres=gpu:1 \
     --qos=gpu_access \
     --wrap="\"$(run_singularity)\"")
   eval $CMD

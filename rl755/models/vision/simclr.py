@@ -6,6 +6,7 @@ from .interface import VisionComponent
 
 tfd = tfp.distributions
 
+
 def _get_encoder(representation_size):
     return tf.keras.Sequential(
         [
@@ -28,10 +29,13 @@ def _get_encoder(representation_size):
         ]
     )
 
+
 def _get_head(representation_size):
-    return tf.keras.Sequential([
-        tf.keras.layers.Dense(units=16),
-    ])
+    return tf.keras.Sequential(
+        [
+            tf.keras.layers.Dense(units=16),
+        ]
+    )
 
 
 class ClrLoss(tf.keras.losses.Loss):
@@ -59,11 +63,14 @@ class ClrLoss(tf.keras.losses.Loss):
         logits_ba = tf.matmul(hidden2, hidden1_large, transpose_b=True) / temperature
 
         loss_a = tf.compat.v1.losses.softmax_cross_entropy(
-            labels, tf.concat([logits_ab, logits_aa], 1))
+            labels, tf.concat([logits_ab, logits_aa], 1)
+        )
         loss_b = tf.compat.v1.losses.softmax_cross_entropy(
-            labels, tf.concat([logits_ba, logits_bb], 1))
+            labels, tf.concat([logits_ba, logits_bb], 1)
+        )
         loss = loss_a + loss_b
         return loss
+
 
 class Clr(VisionComponent):
     """A Contrastive learning representation."""
@@ -88,7 +95,7 @@ class Clr(VisionComponent):
 
     @tf.function
     def compute_full_representation(self, x, training=None):
-        rep = self.encode(x, training=training)
+        rep = self.encoder(x, training=training)
         return rep
 
     def get_loss_fn(self):

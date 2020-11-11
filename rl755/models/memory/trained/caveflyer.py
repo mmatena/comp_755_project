@@ -10,6 +10,8 @@ _WEIGHTS_PATTERN = (
     "/pine/scr/m/m/mmatena/comp_755_project/models/memory/caveflyer/{}/model-{}.hdf5"
 )
 
+_HISTORY_WEIGHTS_PATTERN = "/pine/scr/m/m/mmatena/comp_755_project/models/memory_with_history/caveflyer/{}/model-{}.hdf5"
+
 
 def deterministic_transformer_32dm_32di(**kwargs):
     # TODO: Add docs
@@ -149,16 +151,84 @@ def no_mem():
     return instances.no_mem()
 
 
-def deterministic_transformer_32dm_32di_untrained(**kwargs):
-    print("NOTE: THIS IS UNTRAINED!!!")
-    model = instances.deterministic_transformer_32dm_32di(**kwargs)
-    model(tf.keras.Input([None, 32 + ACTION_SIZE]))
+# def deterministic_transformer_32dm_32di_untrained(**kwargs):
+#     print("NOTE: THIS IS UNTRAINED!!!")
+#     model = instances.deterministic_transformer_32dm_32di(**kwargs)
+#     model(tf.keras.Input([None, 32 + ACTION_SIZE]))
+#     return model
+
+
+# def episodic_32dk_ret4_half_stride():
+#     print("TODO: THIS IS NOT TRAINED!!!")
+#     model = instances_with_history.episodic_32dk_ret4_half_stride(
+#         deterministic_transformer_32dm_32di_untrained
+#     )
+#     return model
+
+
+def episodic_64dk_ret4_half_stride():
+    model = instances_with_history.episodic_64dk_ret4_half_stride(
+        deterministic_transformer_64dm_32di
+    )
+    model(
+        {
+            "inputs": tf.keras.Input([None, 32 + ACTION_SIZE]),
+            "history": tf.keras.Input([None, 32 + ACTION_SIZE]),
+            "history_length": tf.keras.Input([None], dtype=tf.int32),
+        }
+    )
+    model.load_weights(
+        _HISTORY_WEIGHTS_PATTERN.format("episodic_64dk_ret4_half_stride", "50")
+    )
     return model
 
 
 def episodic_32dk_ret4_half_stride():
-    print("TODO: THIS IS NOT TRAINED!!!")
     model = instances_with_history.episodic_32dk_ret4_half_stride(
-        deterministic_transformer_32dm_32di_untrained
+        deterministic_transformer_32dm_32di
+    )
+    model(
+        {
+            "inputs": tf.keras.Input([None, 32 + ACTION_SIZE]),
+            "history": tf.keras.Input([None, 32 + ACTION_SIZE]),
+            "history_length": tf.keras.Input([None], dtype=tf.int32),
+        }
+    )
+    model.load_weights(
+        _HISTORY_WEIGHTS_PATTERN.format("episodic_32dk_ret4_half_stride", "50")
+    )
+    return model
+
+
+def no_history_64dk_ret4_half_stride():
+    model = instances_with_history.no_history_64dk_ret4_half_stride(
+        deterministic_transformer_64dm_32di
+    )
+    model(
+        {
+            "inputs": tf.keras.Input([None, 32 + ACTION_SIZE]),
+            "history": tf.keras.Input([None, 32 + ACTION_SIZE]),
+            "history_length": tf.keras.Input([None], dtype=tf.int32),
+        }
+    )
+    model.load_weights(
+        _HISTORY_WEIGHTS_PATTERN.format("no_history_64dk_ret4_half_stride", "50")
+    )
+    return model
+
+
+def no_history_32dk_ret4_half_stride():
+    model = instances_with_history.no_history_32dk_ret4_half_stride(
+        deterministic_transformer_32dm_32di
+    )
+    model(
+        {
+            "inputs": tf.keras.Input([None, 32 + ACTION_SIZE]),
+            "history": tf.keras.Input([None, 32 + ACTION_SIZE]),
+            "history_length": tf.keras.Input([None], dtype=tf.int32),
+        }
+    )
+    model.load_weights(
+        _HISTORY_WEIGHTS_PATTERN.format("no_history_32dk_ret4_half_stride", "50")
     )
     return model

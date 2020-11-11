@@ -35,7 +35,7 @@ run_python() {
     --model=clr_32d \
     --color_jitter_strength=0.5 \
     --learning_rate=1e-4 \
-    --obs_sampled_per_rollout=25
+    --obs_sampled_per_rollout=10
 }
 
 

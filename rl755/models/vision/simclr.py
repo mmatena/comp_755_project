@@ -1,7 +1,10 @@
 """A variational autoencoder."""
+import functools
+
 import tensorflow as tf
 
 from .interface import VisionComponent
+from rl755.data.common import processing
 
 _LARGE_NUM = 1e9
 
@@ -76,9 +79,16 @@ class Clr(VisionComponent):
         self.encoder = _get_encoder(representation_size)
         self.head = _get_head(representation_size)
 
+    def _augment(self, x):
+        map_fn = functools.partial(processing.augment_for_train, height=64, width=64)
+        image1 = tf.tf.vectorized_map(map_fn, x)
+        image2 = tf.tf.vectorized_map(map_fn, x)
+        return image1, image2
+
     def call(self, x, training=None):
         # split the two images, go through encode and head separately
-        image1, image2 = tf.split(x, num_or_size_splits=2, axis=-1)
+        # image1, image2 = tf.split(x, num_or_size_splits=2, axis=-1)
+        image1, image2 = self._augment(x)
         rep1 = self.encoder(image1, training=training)
         hidden1 = self.head(rep1, training=training)
         rep2 = self.encoder(image2, training=training)

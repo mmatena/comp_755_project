@@ -178,7 +178,7 @@ def episodic_64dk_ret4_half_stride():
         }
     )
     model.load_weights(
-        _HISTORY_WEIGHTS_PATTERN.format("episodic_64dk_ret4_half_stride", "50")
+        _HISTORY_WEIGHTS_PATTERN.format("episodic_64dk_ret4_half_stride", "050")
     )
     return model
 
@@ -195,7 +195,7 @@ def episodic_32dk_ret4_half_stride():
         }
     )
     model.load_weights(
-        _HISTORY_WEIGHTS_PATTERN.format("episodic_32dk_ret4_half_stride", "50")
+        _HISTORY_WEIGHTS_PATTERN.format("episodic_32dk_ret4_half_stride", "050")
     )
     return model
 
@@ -212,7 +212,7 @@ def no_history_64dk_ret4_half_stride():
         }
     )
     model.load_weights(
-        _HISTORY_WEIGHTS_PATTERN.format("no_history_64dk_ret4_half_stride", "50")
+        _HISTORY_WEIGHTS_PATTERN.format("no_history_64dk_ret4_half_stride", "050")
     )
     return model
 
@@ -229,6 +229,6 @@ def no_history_32dk_ret4_half_stride():
         }
     )
     model.load_weights(
-        _HISTORY_WEIGHTS_PATTERN.format("no_history_32dk_ret4_half_stride", "50")
+        _HISTORY_WEIGHTS_PATTERN.format("no_history_32dk_ret4_half_stride", "050")
     )
     return model

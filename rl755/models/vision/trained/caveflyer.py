@@ -9,6 +9,12 @@ def vae_32d():
     model.load_weights(weights_path)
     return model
 
+def clr_32d():
+    # TODO: Add docs
+    weights_path = "/pine/scr/m/t/mtguo/comp_755_project/vision/clr_32d/model-060.hdf5"
+    model = instances.clr_32d()
+    model.load_weights(weights_path)
+    return model
 
 def vae_32d_untrained():
     # TODO: Add docs, This is mostly for testing stuff locally, where we do not care

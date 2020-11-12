@@ -25,7 +25,7 @@ def extract_from_directory(directory):
     row = [pathlib.PurePath(directory).name] + FLAGS.max_epochs * [""]
     events_file = None
     for file in os.listdir(train_dir):
-        if re.match(FLAGS.checkpoint_regex, file):
+        if re.match(EVENTS_FILE_PATTERN, file):
             events_file = os.path.join(train_dir, file)
             break
     if not events_file:

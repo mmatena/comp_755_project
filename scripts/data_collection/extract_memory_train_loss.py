@@ -34,13 +34,9 @@ def extract_from_directory(directory):
     for item in summary_iterator(events_file):
         if not hasattr(item, "step") or not hasattr(item, "summary"):
             continue
-        print(item.summary.value)
-        if (
-            not hasattr(item.summary.value, "tag")
-            or item.summary.value.tag != "epoch_loss"
-        ):
+        if item.summary.value[0].tag != "epoch_loss":
             continue
-        row[item.step + 1] = item.summary.value.simple_value
+        row[item.step + 1] = item.summary.value[0].simple_value
     return row
 
 

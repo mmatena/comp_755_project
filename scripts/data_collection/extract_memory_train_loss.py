@@ -12,10 +12,13 @@ from tensorflow.python.summary.summary_iterator import summary_iterator
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_list("directories", None, "")
+flags.DEFINE_list("models", None, "")
+flags.DEFINE_string(
+    "base_dir", "/pine/scr/m/m/mmatena/comp_755_project/models/memory/caveflyer", ""
+)
 flags.DEFINE_integer("max_epochs", 151, "")
 
-flags.mark_flag_as_required("directories")
+flags.mark_flag_as_required("models")
 
 EVENTS_FILE_PATTERN = r"^events\.out\.tfevents\..+\.v2$"
 
@@ -42,7 +45,8 @@ def extract_from_directory(directory):
 
 def main(_):
     data = []
-    for directory in FLAGS.directories:
+    for model in FLAGS.models:
+        directory = os.path.join(FLAGS.base_dir, model)
         data.append(extract_from_directory(directory))
 
     output = io.StringIO()

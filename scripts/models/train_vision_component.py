@@ -44,9 +44,7 @@ flags.DEFINE_integer(
     lower_bound=1,
 )
 flags.DEFINE_float("learning_rate", 1e-3, "")
-flags.DEFINE_float(
-    'color_jitter_strength', 1.0,
-    'The strength of color jittering.')
+flags.DEFINE_float("color_jitter_strength", 1.0, "The strength of color jittering.")
 
 flags.mark_flag_as_required("model_dir")
 flags.mark_flag_as_required("train_steps")
@@ -62,32 +60,27 @@ def get_model():
 def get_final_ds_representation(x):
     return x["observation"], x["observation"]
 
+
 def get_aug_ds_representation(x):
     image = x["observation"]
     xs = []
     for _ in range(2):  # Two transformations
         xs.append(processing.augment_for_train(image, 64, 64))
-        image = tf.concat(xs, -1)
+    image = tf.concat(xs, axis=-1)
     return image, 0.0
+
 
 def get_train_dataset():
     dsb_cls = locate(f"rl755.data.envs.{FLAGS.environment}.RawRollouts")
     ds = dsb_cls().random_rollout_observations(
         obs_sampled_per_rollout=FLAGS.obs_sampled_per_rollout
     )
-    # for contrastive learning
-    if 'clr' in FLAGS.model:
-        ds = ds.map(
-            get_aug_ds_representation, num_parallel_calls=tf.data.experimental.AUTOTUNE
-        )
-        ds = processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
-        return ds
-    # for vae training
-    elif 'vae' in FLAGS.model:
-        ds = processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
-        return ds.map(
-            get_final_ds_representation, num_parallel_calls=tf.data.experimental.AUTOTUNE
-        )
+
+    ds = processing.standard_dataset_prep(ds, batch_size=FLAGS.batch_size)
+    return ds.map(
+        get_final_ds_representation,
+        num_parallel_calls=tf.data.experimental.AUTOTUNE,
+    )
 
 
 def main(_):

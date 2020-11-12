@@ -6,15 +6,13 @@
 # TODO(mmatena): Make these flags.
 
 # The directory of the cloned github repo.
-PROJECT_DIR=~/comp_755_project
+PROJECT_DIR=~/projects/comp_755_project
 
-MODEL_DIR=/pine/scr/m/t/mtguo/comp_755_project/vision/clr_32d
+MODEL_DIR=/pine/scr/m/m/mmatena/tmp/bigfish_controller_no_mem_test
 
-TRAIN_STEPS=100000
-
-NUM_CORES=8
-MEMORY=8g
-TIME="8:30:00"
+NUM_CORES=16
+MEMORY=16g
+TIME="1-"
 #############################################################
 
 
@@ -28,12 +26,16 @@ module add tensorflow_py3/2.1.0
 export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
 
 run_python() {
-  echo python $PROJECT_DIR/scripts/models/train_vision_component.py \
-    --model_dir=$MODEL_DIR \
-    --train_steps=$TRAIN_STEPS \
+  echo python $PROJECT_DIR/scripts/models/train_controller.py \
     --environment=bigfish \
-    --model=clr_32d \
-    --color_jitter_strength=0.5
+    --model_dir=$MODEL_DIR \
+    --memory_model=no_mem \
+    --vision_model=vae_32d \
+    --rollout_max_steps=1000 \
+    --cma_population_size=64 \
+    --cma_trials_per_member=16 \
+    --max_simul_envs=128 \
+    --cma_steps=1000
 }
 
 
@@ -50,7 +52,7 @@ launch() {
     --output="$MODEL_DIR/logs-%j.out" \
     --time=${TIME} \
     --mem=${MEMORY} \
-    --partition=volta-gpu \
+    --partition=gpu \
     --gres=gpu:1 \
     --qos=gpu_access \
     --wrap="\"$(run_singularity)\"")

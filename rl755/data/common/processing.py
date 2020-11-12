@@ -25,7 +25,7 @@ def slice_example(x, slice_size):
         A dict of of tf.Tensors.
     """
     # TODO(mmatena): Handle slice_sizes biggers than the rollout length.
-    rollout_length = tf.shape(next(iter(x.values())))[0]
+    rollout_length = tf.shape(x["actions"])[0]
     rollout_length = tf.minimum(rollout_length, x["done_step"] + 1)
     slice_start = tf.random.uniform([], 0, rollout_length - slice_size, dtype=tf.int32)
     x = {

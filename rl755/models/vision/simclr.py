@@ -1,10 +1,13 @@
 """A variational autoencoder."""
+import functools
+
 import tensorflow as tf
-import tensorflow_probability as tfp
 
 from .interface import VisionComponent
+from rl755.data.common import processing
 
-tfd = tfp.distributions
+_LARGE_NUM = 1e9
+
 
 def _get_encoder(representation_size):
     return tf.keras.Sequential(
@@ -28,10 +31,19 @@ def _get_encoder(representation_size):
         ]
     )
 
+
 def _get_head(representation_size):
-    return tf.keras.Sequential([
-        tf.keras.layers.Dense(units=16),
-    ])
+    return tf.keras.Sequential(
+        [
+            tf.keras.layers.Dense(units=32, activation="relu"),
+            tf.keras.layers.Dense(units=16),
+        ]
+    )
+
+
+def _sim(z1, z2):
+    # Assumes both z1 and z2 have been normalized.
+    return tf.einsum("...i,...i->...", z1, z2)
 
 
 class ClrLoss(tf.keras.losses.Loss):
@@ -40,30 +52,24 @@ class ClrLoss(tf.keras.losses.Loss):
         self.model = model
 
     def call(self, y_true, y_pred):
-        LARGE_NUM = 1e9
-        temperature = self.model.temperature
-        hidden = tf.math.l2_normalize(y_pred, -1)
-        hidden1, hidden2 = tf.split(hidden, 2, 0)
-        batch_size = tf.shape(hidden1)[0]
+        del y_true
+        tau = self.model.temperature
+        # Each is shaped [batched, d_z]
+        z1, z2 = tf.split(y_pred, num_or_size_splits=2, axis=0)
+        z1 = tf.math.l2_normalize(z1, axis=-1)
+        z2 = tf.math.l2_normalize(z2, axis=-1)
 
-        hidden1_large = hidden1
-        hidden2_large = hidden2
-        labels = tf.one_hot(tf.range(batch_size), batch_size * 2)
-        masks = tf.one_hot(tf.range(batch_size), batch_size)
+        numerator = -_sim(z1, z2) / tau
 
-        logits_aa = tf.matmul(hidden1, hidden1_large, transpose_b=True) / temperature
-        logits_aa = logits_aa - masks * LARGE_NUM
-        logits_bb = tf.matmul(hidden2, hidden2_large, transpose_b=True) / temperature
-        logits_bb = logits_bb - masks * LARGE_NUM
-        logits_ab = tf.matmul(hidden1, hidden2_large, transpose_b=True) / temperature
-        logits_ba = tf.matmul(hidden2, hidden1_large, transpose_b=True) / temperature
+        z = tf.concat([z1, z2], axis=0)
+        # Shape = [2N, 2N]
+        denom = _sim(z[:, None, :], z[None, :, :]) / tau
+        denom += -_LARGE_NUM * tf.eye(tf.shape(z)[0])
+        denom = tf.reduce_logsumexp(denom, axis=-1)
+        d1, d2 = tf.split(denom, num_or_size_splits=2, axis=0)
 
-        loss_a = tf.compat.v1.losses.softmax_cross_entropy(
-            labels, tf.concat([logits_ab, logits_aa], 1))
-        loss_b = tf.compat.v1.losses.softmax_cross_entropy(
-            labels, tf.concat([logits_ba, logits_bb], 1))
-        loss = loss_a + loss_b
-        return loss
+        return 0.5 * tf.reduce_mean(2 * numerator + d1 + d2)
+
 
 class Clr(VisionComponent):
     """A Contrastive learning representation."""
@@ -75,20 +81,22 @@ class Clr(VisionComponent):
         self.encoder = _get_encoder(representation_size)
         self.head = _get_head(representation_size)
 
+    def _augment(self, x):
+        map_fn = functools.partial(processing.augment_for_train, height=64, width=64)
+        image1 = tf.map_fn(map_fn, x)
+        image2 = tf.map_fn(map_fn, x)
+        return image1, image2
+
     def call(self, x, training=None):
-        # split the two images, go through encode and head separately
-        image1, image2 = tf.split(x, num_or_size_splits=2, axis=-1)
-        rep1 = self.encoder(image1, training=training)
-        hidden1 = self.head(rep1, training=training)
-        rep2 = self.encoder(image2, training=training)
-        hidden2 = self.head(rep2, training=training)
-        # put the two images together
-        hidden = tf.concat([hidden1, hidden2], -1)
+        image1, image2 = self._augment(x)
+        image = tf.concat([image1, image2], axis=0)
+        rep = self.encoder(image, training=training)
+        hidden = self.head(rep, training=training)
         return hidden
 
     @tf.function
     def compute_full_representation(self, x, training=None):
-        rep = self.encode(x, training=training)
+        rep = self.encoder(x, training=training)
         return rep
 
     def get_loss_fn(self):

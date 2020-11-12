@@ -8,13 +8,16 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/memory/bigfish/deterministic_transformer_32dm_32di
+# MODEL=deterministic_transformer_32dm_32di
+# MODEL=deterministic_transformer_64dm_32di
+MODEL=deterministic_transformer_256dm_32di
+MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/memory/caveflyer/$MODEL
 
 TRAIN_STEPS=100000
 
 NUM_CORES=6
 MEMORY=8g
-TIME="3:30:00"
+TIME="22:30:00"
 #############################################################
 
 
@@ -31,9 +34,9 @@ run_python() {
   echo python $PROJECT_DIR/scripts/models/train_memory_component.py \
     --model_dir=$MODEL_DIR \
     --train_steps=$TRAIN_STEPS \
-    --environment=bigfish \
+    --environment=caveflyer \
     --batch_size=256 \
-    --model=deterministic_transformer_32dm_32di \
+    --model=$MODEL \
     --rollouts_dataset=EncodedRolloutsVae32d \
     --slices_per_rollout=2
 }
@@ -53,7 +56,7 @@ launch() {
     --time=${TIME} \
     --mem=${MEMORY} \
     --partition=gpu \
-    --gres=gpu:8 \
+    --gres=gpu:4 \
     --qos=gpu_access \
     --wrap="\"$(run_singularity)\"")
   eval $CMD

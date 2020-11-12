@@ -13,7 +13,7 @@ from tensorflow.python.summary.summary_iterator import summary_iterator
 FLAGS = flags.FLAGS
 
 flags.DEFINE_list("directories", None, "")
-flags.DEFINE_integer("max_epochs", 150, "")
+flags.DEFINE_integer("max_epochs", 151, "")
 
 flags.mark_flag_as_required("directories")
 
@@ -22,7 +22,7 @@ EVENTS_FILE_PATTERN = r"^events\.out\.tfevents\..+\.v2$"
 
 def extract_from_directory(directory):
     train_dir = os.path.join(directory, "train")
-    row = [pathlib.PurePath(directory).name] + FLAGS.max_steps * [""]
+    row = [pathlib.PurePath(directory).name] + FLAGS.max_epochs * [""]
     events_file = None
     for file in os.listdir(train_dir):
         if re.match(FLAGS.checkpoint_regex, file):

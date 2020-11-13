@@ -1,4 +1,5 @@
 """Models that explicitly retrieve experiences."""
+import numpy as np
 import tensorflow as tf
 
 from .interface import MemoryComponentWithHistory
@@ -49,6 +50,12 @@ class EpisodicRetriever(MemoryComponentWithHistory):
             trainable=True,
             name="input_type_embedding",
         )
+
+    def get_value_stride(self):
+        return self.history_stride
+
+    def get_key_size(self):
+        return self.key_size
 
     # def build(self, input_shape):
     #     # These represent retrieving no documents.
@@ -177,13 +184,100 @@ class EpisodicRetriever(MemoryComponentWithHistory):
 
         return retrieved_values, retrieved_scores
 
-    @tf.function(experimental_relax_shapes=True)
+    def _extract_values_func(self, history, key_indices, sequence_length):
+        sequence_length = sequence_length.numpy()
+        starts = (key_indices * self.history_stride).numpy()
+        num_retrieved = starts.shape[-1]
+
+        history = history.numpy()
+
+        values = np.empty(
+            [history.shape[0], num_retrieved, sequence_length, history.shape[-1]]
+        )
+
+        for i in range(num_retrieved):
+            values[:, i, :, :] = history[:, starts : starts + sequence_length]
+
+        return tf.constant(values)
+
+    def _extract_values(self, history, key_indices, sequence_length):
+        # history.shape = [batch, max_samples, state]
+        # key_indices.shape = [batch, num_retrieved]
+        starts = key_indices * self.history_stride
+        # inds.shape = [batch, num_retrieved, sequence_length]
+        inds = starts[..., None] + tf.range(sequence_length)[None, None, :]
+        return tf.gather(history, inds, axis=-2, batch_dims=1)
+
+    @tf.function
     def get_hidden_representation(
+        self,
+        inputs,
+        history,
+        keys,
+        history_length,
+        num_keys,
+        mask=None,
+        training=None,
+        position=-1,
+    ):
+        sequence_length = tf.shape(inputs)[-2]
+        batch_size = tf.shape(inputs)[0]
+
+        if num_keys == 0:
+            # TODO: Do something better here.
+            prediction_inputs = tf.concat(2 * [inputs], axis=-2)
+            return self.prediction_network.get_hidden_representation(
+                prediction_inputs,
+                training=training,
+                position=position,
+                pos_embeddings=self._get_prediction_pos_embeddings(),
+            )
+
+        queries = self._get_queries(inputs, training=training, position=position)
+        keys = keys[:, :num_keys]
+
+        scores = tf.einsum("bvi,bi->bv", keys, queries)
+        scores, key_indices = tf.math.top_k(
+            scores, k=tf.minimum(self.num_retrieved, num_keys)
+        )
+
+        values = self._extract_values(history, key_indices, sequence_length)
+        actual_num_retrieved = tf.shape(scores)[-1]
+
+        inputs = tf.expand_dims(inputs, 1)
+        inputs = tf.broadcast_to(inputs, tf.shape(values))
+
+        prediction_inputs = tf.concat([values, inputs], axis=-2)
+        prediction_inputs = tf.reshape(
+            prediction_inputs, [-1, 2 * sequence_length, tf.shape(inputs)[-1]]
+        )
+
+        representations = self.prediction_network.get_hidden_representation(
+            prediction_inputs,
+            training=training,
+            position=position,
+            pos_embeddings=self._get_prediction_pos_embeddings(),
+        )
+        representations = tf.reshape(
+            representations,
+            [batch_size, actual_num_retrieved, tf.shape(representations)[-1]],
+        )
+
+        weights = tf.nn.softmax(scores, axis=-1)
+
+        weighted_representation = tf.einsum("bvi,bv->bi", representations, weights)
+        return weighted_representation
+
+    @tf.function
+    def key_from_value(self, value, training=None):
+        keys = self.key_network.get_hidden_representation(
+            value, training=training, position=-1, key="key_from_value"
+        )
+        return self.key_proj(keys)
+
+    def get_hidden_representation_train(
         self, inputs, history, history_length, mask=None, training=None, position=-1
     ):
-        # assert (
-        #     not training or mask is None
-        # ), "Not handling masks when training the retrieval model."
         sequence_length = tf.shape(inputs)[-2]
         batch_size = tf.shape(inputs)[0]
 
@@ -217,10 +311,7 @@ class EpisodicRetriever(MemoryComponentWithHistory):
         return weighted_representation
 
     def _call(self, inputs, history, history_length, mask=None, training=None):
-        # assert (
-        #     not training or mask is None
-        # ), "Not handling masks when training the retrieval model."
-        weighted_representation = self.get_hidden_representation(
+        weighted_representation = self.get_hidden_representation_train(
             inputs, history, history_length, mask=mask, training=training, position=-1
         )
         weighted_predictions = self.prediction_network.prediction_from_representation(
@@ -249,12 +340,29 @@ class NoHistoryWrapper(MemoryComponentWithHistory):
         return predictions[..., -1, :]
 
     def get_hidden_representation(
-        self, inputs, history, history_length, mask=None, training=None, position=-1
+        self,
+        inputs,
+        history,
+        keys,
+        history_length,
+        num_keys,
+        mask=None,
+        training=None,
+        position=-1,
     ):
-        del history, history_length
+        del history, keys, history_length, num_keys
         return self.memory_component.get_hidden_representation(
             inputs, mask=mask, training=training, position=position
         )
+
+    def get_history_stride(self):
+        return int(1e6)
+
+    def get_key_size(self):
+        return 1
+
+    def key_from_value(self, value, training=None):
+        raise tf.zeros([tf.shape(value)[0], self.get_key_size()])
 
     def get_loss_fn(self):
         """Train using a MSE loss."""

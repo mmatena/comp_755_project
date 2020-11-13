@@ -8,9 +8,10 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-MODELS="episodic_64dk_ret4_half_stride \
-episodic_32dk_ret4_half_stride"
-
+# MODELS="episodic_64dk_ret4_half_stride \
+# episodic_32dk_ret4_half_stride"
+MODELS="no_history_64dk_ret4_half_stride \
+no_history_32dk_ret4_half_stride"
 for MODEL in $MODELS; do
     MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/controller/caveflyer2/$MODEL
 

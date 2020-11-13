@@ -362,7 +362,7 @@ class NoHistoryWrapper(MemoryComponentWithHistory):
         return 1
 
     def key_from_value(self, value, training=None):
-        raise tf.zeros([tf.shape(value)[0], self.get_key_size()])
+        return tf.zeros([tf.shape(value)[0], self.get_key_size()])
 
     def get_loss_fn(self):
         """Train using a MSE loss."""

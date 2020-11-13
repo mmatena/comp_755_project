@@ -36,7 +36,7 @@ flags.DEFINE_integer("sequence_length", 32, "", lower_bound=1)
 
 flags.DEFINE_string("checkpoint_regex", r"^checkpoint-\d+\.pickle$", "")
 flags.DEFINE_integer("eval_trials", 1024, "")
-flags.DEFINE_integer("max_rollout_steps", 1000, "")
+flags.DEFINE_integer("rollout_max_steps", 1000, "")
 flags.DEFINE_integer("eval_every_n", 25, "")
 flags.DEFINE_integer("max_simul_envs", -1, "Negative integers mean no limits.")
 
@@ -148,7 +148,7 @@ def main(_):
 
     logging.info("Loading memory model.")
     memory_model = get_memory_model()
-    logging.info("Memory model has been read.")
+    logging.info("Vision model has been read.")
 
     outfile = os.path.join(FLAGS.directory, OUTFILE_NAME)
     with open(outfile, "a+") as f:

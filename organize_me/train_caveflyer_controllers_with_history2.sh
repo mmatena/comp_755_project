@@ -8,13 +8,14 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-MODELS="episodic_64dk_ret4_half_stride"
+MODELS="episodic_64dk_ret4_half_stride \
+episodic_32dk_ret4_half_stride"
 
 for MODEL in $MODELS; do
     MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/controller/caveflyer2/$MODEL
 
-    NUM_CORES=10
-    MEMORY=10g
+    NUM_CORES=12
+    MEMORY=16g
     TIME="2-"
     #############################################################
 

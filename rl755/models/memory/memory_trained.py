@@ -14,3 +14,14 @@ def deterministic_transformer_32dm_32di(environment):
     )
     model.load_weights(weights_path)
     return model
+
+def deterministic_transformer_64dm_64di(environment):
+    # TODO: Add docs
+    print("TODO: THIS MODEL ISN'T TRAINED. LOAD WEIGHTS!!!")
+    model = instances.deterministic_transformer_64dm_64di()
+    model(tf.keras.Input([32, 64 + ACTION_SIZE])) 
+    weights_path = (
+     f"../tmp/{environment}/memory/deterministic_transformer_64dm_64di/model-050.hdf5"
+    )
+    model.load_weights(weights_path)
+    return model

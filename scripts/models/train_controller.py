@@ -18,7 +18,7 @@ import tensorflow as tf
 from rl755.common import misc
 from rl755.data_gen import gym_rollouts
 from rl755.models.policy import PolicyWrapper
-from rl755.utils.misc import numpy_to_mp4 
+from rl755.common.misc import numpy_to_mp4 
 
 ACTION_SIZE = 15
 
@@ -143,13 +143,12 @@ def main(_):
             memory_model=memory_model,
             max_steps=rollout_max_steps,
         )
-	if step % 10 == 0:
-	    obs_encoded = vision_model.encode(solutions.observations[:, 0] / 255.)
-	    obs_decoded = vision_model.decode(obs_encoded.mean())
-	    numpy_to_mp4(np.concatenate([obs_decoded, solutions.observations[:, 0] / 255.], -2),
-	        os.path.join(FLAGS.model_dir, f"sample-rollout-{step:03d}.mp4"))
-        scores = misc.divide_chunks(scores, num_trials)
-        fitlist = np.array([sum(s) / num_trials for s in scores])
+        if step % 10 == 0:
+            obs_decoded = vision_model.call(rollouts.observations[:, 0] / 255., training=None)
+            numpy_to_mp4(np.concatenate([obs_decoded, rollouts.observations[:, 0] / 255.], -2),
+                os.path.join(FLAGS.model_dir, f"sample-rollout-{step:03d}.mp4"))
+            scores = misc.divide_chunks(scores, num_trials)
+            fitlist = np.array([sum(s) / num_trials for s in scores])
 
         save_checkpoint(step=step, solutions=solutions, fitlist=fitlist)
 

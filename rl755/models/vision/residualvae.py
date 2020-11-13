@@ -28,7 +28,7 @@ class ResidualVae(VisionComponent):
         self.residue_vae = instances.vae_32d(environment, name="residuevae")
         self.residue_vae.beta=.01
 
-    def compute_full_representation(self, x):
+    def compute_full_representation(self, x, training=None):
         ### x.shape is (N, 64, 64, 3)
         vae_representation = self.vae.encode(x).mean()
         image_compressed = self.vae.decode(vae_representation)

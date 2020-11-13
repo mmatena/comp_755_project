@@ -71,10 +71,6 @@ def get_memory_model():
     return model()
 
 
-def get_policy_class():
-    return locate(f"rl755.models.memory.policy.{FLAGS.policy}")
-
-
 def get_controller_class():
     return locate(f"rl755.models.controller.controllers.{FLAGS.controller}")
 

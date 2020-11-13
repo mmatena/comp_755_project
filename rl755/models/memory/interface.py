@@ -41,7 +41,7 @@ class MemoryComponentWithHistory(MemoryComponent):
     def _call(self, inputs, history, history_length, mask=None, training=None):
         raise NotImplementedError()
 
-    def get_history_stride(self):
+    def get_value_stride(self):
         raise NotImplementedError()
 
     def get_key_size(self):

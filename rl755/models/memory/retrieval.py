@@ -355,7 +355,7 @@ class NoHistoryWrapper(MemoryComponentWithHistory):
             inputs, mask=mask, training=training, position=position
         )
 
-    def get_history_stride(self):
+    def get_value_stride(self):
         return int(1e6)
 
     def get_key_size(self):

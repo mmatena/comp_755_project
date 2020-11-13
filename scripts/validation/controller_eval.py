@@ -140,7 +140,7 @@ def main(_):
     assert not (FLAGS.eval_trials % FLAGS.max_simul_envs)
     logging.info("Reading checkpoints from directory.")
     solution_per_step = get_checkpoints_to_eval(FLAGS.directory)
-    logging.info("Checkpoints have been read.")
+    logging.info(f"{len(solution_per_step.keys())} checkpoints to evaluate were read.")
 
     logging.info("Loading vision model.")
     vision_model = get_vision_model()

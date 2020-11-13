@@ -5,7 +5,10 @@ R"""
 python3 scripts/data_display/plot_controller_curves.py \
     --file=$HOME/Downloads/controllers.csv \
     --controllers=no_mem,deterministic_lstm_64dm_32di,deterministic_lstm_256dm_32di,deterministic_transformer_32dm_32di,deterministic_transformer_64dm_32di,deterministic_transformer_256dm_32di \
-    --labels='No memory','LSTM $d_m=64$','LSTM $d_m=256$','Transformer $d_m=32$','Transformer $d_m=64$','Transformer $d_m=256$'
+    --labels='No memory','LSTM $d_m=64$','LSTM $d_m=256$','Transformer $d_m=32$','Transformer $d_m=64$','Transformer $d_m=256$' \
+    --linestyles=solid,dashed,solid,dotted,dashed,solid \
+    --colors=darkblue,violet,purple,lightgreen,limegreen,darkgreen
+    # plum,violet,purple
 
 # Transformer with different sizes: (the @ get converted to commas)
 python3 scripts/data_display/plot_controller_curves.py \
@@ -43,6 +46,8 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string("file", None, "")
 flags.DEFINE_list("controllers", None, "")
 flags.DEFINE_list("labels", None, "")
+flags.DEFINE_list("colors", [], "")
+flags.DEFINE_list("linestyles", [], "")
 
 flags.DEFINE_boolean("smooth", True, "")
 
@@ -82,10 +87,17 @@ def get_controllers():
 
 
 def plot_controllers(controllers):
-    for name, label in zip(FLAGS.controllers, FLAGS.labels):
+    for i, (name, label) in enumerate(zip(FLAGS.controllers, FLAGS.labels)):
         series = controllers[name]
-        print(label)
-        plt.plot(np.arange(len(series)), series, label=label)
+        color = FLAGS.colors[i] if FLAGS.colors else None
+        linestyle = FLAGS.linestyles[i] if FLAGS.linestyles else None
+        plt.plot(
+            np.arange(len(series)),
+            series,
+            label=label,
+            color=color,
+            linestyle=linestyle,
+        )
     plt.legend(loc="lower right")
     plt.xlabel("Generation")
     plt.ylabel("Average cumulative reward")

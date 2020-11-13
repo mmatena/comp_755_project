@@ -13,13 +13,13 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-MODELS="deterministic_lstm_64dm_32di \
-deterministic_lstm_256dm_32di \
-deterministic_transformer_32dm_32di \
-deterministic_transformer_64dm_32di \
-deterministic_transformer_256dm_32di \
-no_mem"
-
+# MODELS="deterministic_lstm_64dm_32di \
+# deterministic_lstm_256dm_32di \
+# deterministic_transformer_32dm_32di \
+# deterministic_transformer_64dm_32di \
+# deterministic_transformer_256dm_32di \
+# no_mem"
+MODELS="deterministic_lstm_32dm_32di"
 for MODEL in $MODELS; do
     MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/controller/caveflyer/$MODEL
 

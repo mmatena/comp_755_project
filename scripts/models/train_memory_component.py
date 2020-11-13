@@ -83,7 +83,7 @@ def is_encoded_dsb(dataset_builder):
 
 
 def get_train_dataset():
-    dsb_cls = locate(f"rl755.data.generic.EncodedRollouts")
+    dsb_cls = locate(f"rl755.data.generic.ResidualEncodedRollouts")
     dsb = dsb_cls(FLAGS.environment)
 
     if is_encoded_dsb(dsb):

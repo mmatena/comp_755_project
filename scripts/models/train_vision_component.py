@@ -52,8 +52,11 @@ flags.mark_flag_as_required("model")
 
 
 def get_model():
+    print(f"rl755.models.vision.instances.{FLAGS.model}")
+
     model = locate(f"rl755.models.vision.instances.{FLAGS.model}")
-    return model()
+    print(model)
+    return model(FLAGS.environment)
 
 
 def get_final_ds_representation(x):

@@ -61,6 +61,21 @@ def deterministic_transformer_32dm_32di():
     )
     return transformer.ArTransformer(transformer_params, output_size=output_size)
 
+def deterministic_transformer_64dm_64di():
+    """Returns a deterministic transformer with a model size of 64 and input size of 32."""
+    output_size = 64
+    num_attention_heads = 2
+    hidden_size = 64
+    transformer_params = TransformerEncoderLayer.Params(
+        num_layers=6,
+        hidden_size=hidden_size,
+        hidden_dropout=0.1,
+        intermediate_size=4 * hidden_size,
+        intermediate_activation="gelu",
+        num_heads=num_attention_heads,
+        size_per_head=int(hidden_size / num_attention_heads),
+    )
+    return transformer.ArTransformer(transformer_params, output_size=output_size)
 
 ###############################################################################
 # LSTMs

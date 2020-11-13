@@ -38,3 +38,20 @@ class EncodedRollouts(EncodedRolloutDatasetBuilder):
 
     def representation_size(self):
         return 32
+
+class ResidualEncodedRollouts(EncodedRolloutDatasetBuilder):
+    def __init__(self, environment):
+        super(EncodedRolloutDatasetBuilder, self).__init__()
+        self.environment = environment
+    def _environment(self):
+        return self.environment
+
+    def _tfrecords_pattern(self):
+        print("TODO: THIS IS JUST A TEST VERSION OF ENCODED ROLLOUTS!!!")
+
+        if getpass.getuser() == "tgreer":
+            return "../tmp/" + self.environment + "/res_enc_rollouts/{split}/data.tfrecord*"
+        raise("Please pick a directory for bossfight on pine, then add it to this file")
+
+    def representation_size(self):
+        return 64

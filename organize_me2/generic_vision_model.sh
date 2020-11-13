@@ -1,9 +1,8 @@
 
 [ -d ../tmp/$env/vision_model ] || mkdir ../tmp/$env/vision_model
 
-model_name=vae_32d
 
-export PYTHONPATH=$PYTHONPATH:$PROJECT_DIR
+export PYTHONPATH=$PYTHONPATH:$(pwd)
 
 [ -d ../tmp/$env/vision_model/$model_name ] || mkdir ../tmp/$env/vision_model/$model_name
 

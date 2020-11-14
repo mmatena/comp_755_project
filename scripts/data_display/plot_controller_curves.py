@@ -19,8 +19,22 @@ python3 scripts/data_display/plot_controller_curves.py \
 # Explicit retrieval:
 python3 scripts/data_display/plot_controller_curves.py \
     --file=$HOME/Downloads/controllers.csv \
-    --controllers='episodic_64dk_ret4_half_stride (partial)','episodic_32dk_ret4_half_stride (partial)','no_history_64dk_ret4_half_stride (partial)','no_history_32dk_ret4_half_stride (partial)',deterministic_transformer_64dm_32di,deterministic_transformer_32dm_32di \
-    --labels='Episodic retrieval@ $d_m = 64$','Episodic retrieval@ $d_m = 32$','No retrieval with extra training@ $d_m = 64$','No retrieval with extra training@ $d_m = 32$','Baseline@ $d_m=64$','Baseline@ $d_m=32$'
+    --controllers=\
+'episodic_32dk_ret4_half_stride',\
+'no_history_32dk_ret4_half_stride',\
+deterministic_transformer_32dm_32di,\
+'episodic_64dk_ret4_half_stride',\
+'no_history_64dk_ret4_half_stride',\
+deterministic_transformer_64dm_32di \
+    --labels=\
+'Episodic retrieval@ $d_m = 32$',\
+'No retrieval with extra training@ $d_m = 32$',\
+'Baseline@ $d_m=32$',\
+'Episodic retrieval@ $d_m = 64$',\
+'No retrieval with extra training@ $d_m = 64$',\
+'Baseline@ $d_m=64$' \
+    --linestyles=solid,dashed,dotted,solid,dashed,dotted \
+    --colors=purple,violet,plum,darkgreen,limegreen,lightgreen
 
 
 """

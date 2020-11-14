@@ -12,7 +12,7 @@ FLAGS = flags.FLAGS
 
 flags.DEFINE_list("models", None, "")
 flags.DEFINE_string(
-    "base_dir", "/pine/scr/m/m/mmatena/comp_755_project/models/memory/caveflyer", ""
+    "base_dir", "/pine/scr/m/m/mmatena/comp_755_project/models/controller/caveflyer", ""
 )
 flags.DEFINE_string("checkpoint_regex", r"^checkpoint-\d+\.pickle$", "")
 flags.DEFINE_integer("max_steps", 1000, "")

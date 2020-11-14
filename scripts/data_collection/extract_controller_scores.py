@@ -17,7 +17,7 @@ flags.DEFINE_string(
 flags.DEFINE_string("checkpoint_regex", r"^checkpoint-\d+\.pickle$", "")
 flags.DEFINE_integer("max_steps", 1000, "")
 
-flags.mark_flag_as_required("directories")
+flags.mark_flag_as_required("models")
 
 
 def extract_from_directory(directory):

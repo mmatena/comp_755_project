@@ -23,7 +23,6 @@ from absl import flags
 import numpy as np
 from tensorflow.python.summary.summary_iterator import summary_iterator
 
-import seaborn as sns
 import matplotlib.pyplot as plt
 
 FLAGS = flags.FLAGS

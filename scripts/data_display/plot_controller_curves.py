@@ -39,7 +39,11 @@ deterministic_transformer_64dm_32di \
     --linestyles=solid,dashed,dotted,solid,dashed,dotted \
     --colors=purple,violet,plum,darkgreen,limegreen,lightgreen
 
-
+# Contrastive learning:
+python3 scripts/data_display/plot_controller_curves.py \
+    --file=$HOME/Downloads/controllers.csv \
+    --controllers=deterministic_transformer_64dm_32di,simclr_deterministic_transformer_64dm_32di \
+    --labels='VAE','SimCLR'
 """
 
 import csv

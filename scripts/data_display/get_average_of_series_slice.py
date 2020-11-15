@@ -2,8 +2,8 @@ R"""
 
 python3 scripts/data_display/get_average_of_series_slice.py \
     --file=$HOME/Downloads/controllers.csv \
-    --num=500 \
-    --num_is_start
+    --num=250 \
+    --num_is_start=False
 
 python3 scripts/data_display/get_average_of_series_slice.py \
     --file=$HOME/Downloads/memory.csv \
@@ -44,6 +44,9 @@ def print_average(series):
             section = values[FLAGS.num :]
         else:
             section = values[-FLAGS.num :]
+        #
+        # section = values[200:400]
+        #
         length = len(section)
         if length == 0:
             average = "N/A"

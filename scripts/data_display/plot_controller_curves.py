@@ -4,17 +4,20 @@ R"""
 # Transformer vs LSTM vs nothing:
 python3 scripts/data_display/plot_controller_curves.py \
     --file=$HOME/Downloads/controllers.csv \
-    --controllers=no_mem,deterministic_lstm_64dm_32di,deterministic_lstm_256dm_32di,deterministic_transformer_32dm_32di,deterministic_transformer_64dm_32di,deterministic_transformer_256dm_32di \
-    --labels='No memory','LSTM $d_m=64$','LSTM $d_m=256$','Transformer $d_m=32$','Transformer $d_m=64$','Transformer $d_m=256$' \
-    --linestyles=solid,dashed,solid,dotted,dashed,solid \
-    --colors=darkblue,violet,purple,lightgreen,limegreen,darkgreen
-    # plum,violet,purple
+    --controllers=no_mem,deterministic_lstm_32dm_32di,deterministic_lstm_64dm_32di,deterministic_lstm_256dm_32di,deterministic_transformer_32dm_32di,deterministic_transformer_64dm_32di,deterministic_transformer_256dm_32di \
+    --labels='No memory','LSTM $d_m=32$','LSTM $d_m=64$','LSTM $d_m=256$','Transformer $d_m=32$','Transformer $d_m=64$','Transformer $d_m=256$' \
+    --linestyles=solid,dotted,dashed,solid,dotted,dashed,solid \
+    --colors=darkblue,plum,violet,purple,lightgreen,limegreen,darkgreen \
+    --reverse
+
 
 # Transformer with different sizes: (the @ get converted to commas)
 python3 scripts/data_display/plot_controller_curves.py \
     --file=$HOME/Downloads/controllers.csv \
-    --controllers=deterministic_transformer_64dm_32di,deterministic_transformer_64dm_32di_long,deterministic_transformer_64dm_32di_short,deterministic_transformer_64dm_32di_skinny,deterministic_transformer_64dm_32di_wide \
-    --labels='$L=6@ d_{ff}=256$','$L=12@ d_{ff}=256$','$L=3@ d_{ff}=256$','$L=6@ d_{ff}=128$','$L=6@ d_{ff}=512$'
+    --controllers=deterministic_transformer_64dm_32di_long,deterministic_transformer_64dm_32di_short,deterministic_transformer_64dm_32di_wide,deterministic_transformer_64dm_32di_skinny,deterministic_transformer_64dm_32di \
+    --labels='$L=12@ d_{ff}=256$','$L=3@ d_{ff}=256$','$L=6@ d_{ff}=512$','$L=6@ d_{ff}=128$','$L=6@ d_{ff}=256$' \
+    --linestyles=solid,dotted,solid,dotted,dashed \
+    --colors=purple,violet,darkgreen,limegreen,darkblue
 
 # Explicit retrieval:
 python3 scripts/data_display/plot_controller_curves.py \
@@ -64,6 +67,7 @@ flags.DEFINE_list("colors", [], "")
 flags.DEFINE_list("linestyles", [], "")
 
 flags.DEFINE_boolean("smooth", True, "")
+flags.DEFINE_boolean("reverse", False, "Added as I am lazy")
 
 flags.mark_flag_as_required("file")
 flags.mark_flag_as_required("controllers")
@@ -101,10 +105,19 @@ def get_controllers():
 
 
 def plot_controllers(controllers):
-    for i, (name, label) in enumerate(zip(FLAGS.controllers, FLAGS.labels)):
+    fcontrollers = FLAGS.controllers
+    labels = FLAGS.labels
+    colors = FLAGS.colors
+    linestyles = FLAGS.linestyles
+    if FLAGS.reverse:
+        fcontrollers = fcontrollers[::-1]
+        labels = labels[::-1]
+        colors = colors[::-1]
+        linestyles = linestyles[::-1]
+    for i, (name, label) in enumerate(zip(fcontrollers, labels)):
         series = controllers[name]
-        color = FLAGS.colors[i] if FLAGS.colors else None
-        linestyle = FLAGS.linestyles[i] if FLAGS.linestyles else None
+        color = colors[i] if colors else None
+        linestyle = linestyles[i] if linestyles else None
         plt.plot(
             np.arange(len(series)),
             series,

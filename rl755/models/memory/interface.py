@@ -41,8 +41,25 @@ class MemoryComponentWithHistory(MemoryComponent):
     def _call(self, inputs, history, history_length, mask=None, training=None):
         raise NotImplementedError()
 
+    def get_value_stride(self):
+        raise NotImplementedError()
+
+    def get_key_size(self):
+        return NotImplementedError()
+
+    def key_from_value(self, value, training=None):
+        raise NotImplementedError()
+
     def get_hidden_representation(
-        self, x, history, history_length, mask=None, training=None, position=-1
+        self,
+        inputs,
+        history,
+        keys,
+        history_length,
+        num_keys,
+        mask=None,
+        training=None,
+        position=-1,
     ):
         # TODO: Add docs.
         raise NotImplementedError()

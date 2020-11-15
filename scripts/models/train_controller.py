@@ -18,7 +18,8 @@ import tensorflow as tf
 
 from rl755.common import misc
 from rl755.data_gen import gym_rollouts
-from rl755.models.policy import PolicyWrapper
+from rl755.models.memory.interface import MemoryComponentWithHistory
+from rl755.models.policy import PolicyWrapper, PolicyWrapperWithHistory
 
 ACTION_SIZE = 15
 
@@ -70,7 +71,7 @@ def get_memory_model():
     return model()
 
 
-def get_controller_cls():
+def get_controller_class():
     return locate(f"rl755.models.controller.controllers.{FLAGS.controller}")
 
 
@@ -83,7 +84,12 @@ def get_in_out_sizes(vision_model, memory_model):
 
 
 def get_scores(solutions, vision_model, memory_model, max_steps):
-    Controller = get_controller_cls()
+    if isinstance(memory_model, MemoryComponentWithHistory):
+        Policy = PolicyWrapperWithHistory
+    else:
+        Policy = PolicyWrapper
+
+    Controller = get_controller_class()
     in_size, out_size = get_in_out_sizes(vision_model, memory_model)
 
     learned_policy = Controller.from_flat_arrays(
@@ -102,7 +108,7 @@ def get_scores(solutions, vision_model, memory_model, max_steps):
             i * max_simul_envs, (i + 1) * max_simul_envs
         )
 
-        policy = PolicyWrapper(
+        policy = Policy(
             vision_model=vision_model,
             memory_model=memory_model,
             learned_policy=sliced_policy,
@@ -147,7 +153,7 @@ def main(_):
 
     in_size, out_size = get_in_out_sizes(vision_model, memory_model)
 
-    Controller = get_controller_cls()
+    Controller = get_controller_class()
     controller_params_count = Controller.get_parameter_count(
         in_size=in_size, out_size=out_size
     )

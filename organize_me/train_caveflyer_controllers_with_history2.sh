@@ -1,8 +1,3 @@
-
-# MODEL=deterministic_transformer_64dm_32di_short_skinny
-
-
-
 #!/bin/bash
 
 #############################################################
@@ -13,19 +8,16 @@
 # The directory of the cloned github repo.
 PROJECT_DIR=~/projects/comp_755_project
 
-# MODELS="deterministic_lstm_64dm_32di \
-# deterministic_lstm_256dm_32di \
-# deterministic_transformer_32dm_32di \
-# deterministic_transformer_64dm_32di \
-# deterministic_transformer_256dm_32di \
-# no_mem"
-MODELS="deterministic_lstm_32dm_32di"
+# MODELS="episodic_64dk_ret4_half_stride \
+# episodic_32dk_ret4_half_stride"
+MODELS="no_history_64dk_ret4_half_stride \
+no_history_32dk_ret4_half_stride"
 for MODEL in $MODELS; do
-    MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/controller/caveflyer/$MODEL
+    MODEL_DIR=/pine/scr/m/m/mmatena/comp_755_project/models/controller/caveflyer2/$MODEL
 
-    NUM_CORES=16
+    NUM_CORES=12
     MEMORY=16g
-    TIME="1-"
+    TIME="2-"
     #############################################################
 
 
@@ -47,7 +39,7 @@ for MODEL in $MODELS; do
         --rollout_max_steps=1000 \
         --cma_population_size=64 \
         --cma_trials_per_member=16 \
-        --max_simul_envs=128 \
+        --max_simul_envs=64 \
         --cma_steps=1000
     }
 

@@ -151,21 +151,6 @@ def no_mem():
     return instances.no_mem()
 
 
-# def deterministic_transformer_32dm_32di_untrained(**kwargs):
-#     print("NOTE: THIS IS UNTRAINED!!!")
-#     model = instances.deterministic_transformer_32dm_32di(**kwargs)
-#     model(tf.keras.Input([None, 32 + ACTION_SIZE]))
-#     return model
-
-
-# def episodic_32dk_ret4_half_stride():
-#     print("TODO: THIS IS NOT TRAINED!!!")
-#     model = instances_with_history.episodic_32dk_ret4_half_stride(
-#         deterministic_transformer_32dm_32di_untrained
-#     )
-#     return model
-
-
 def episodic_64dk_ret4_half_stride():
     model = instances_with_history.episodic_64dk_ret4_half_stride(
         deterministic_transformer_64dm_32di
@@ -230,5 +215,25 @@ def no_history_32dk_ret4_half_stride():
     )
     model.load_weights(
         _HISTORY_WEIGHTS_PATTERN.format("no_history_32dk_ret4_half_stride", "050")
+    )
+    return model
+
+
+###############################################
+# For local testing
+###############################################
+
+
+def deterministic_transformer_32dm_32di_untrained(**kwargs):
+    print("NOTE: THIS IS UNTRAINED!!!")
+    model = instances.deterministic_transformer_32dm_32di(**kwargs)
+    model(tf.keras.Input([None, 32 + ACTION_SIZE]))
+    return model
+
+
+def episodic_32dk_ret4_half_stride_untrained():
+    print("TODO: THIS IS NOT TRAINED!!!")
+    model = instances_with_history.episodic_32dk_ret4_half_stride(
+        deterministic_transformer_32dm_32di_untrained
     )
     return model

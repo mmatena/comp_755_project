@@ -51,13 +51,13 @@ class UniformRandomPolicy(Policy):
 class PolicyWrapper(Policy):
     # Note: TODO: Add docs
     def __init__(self, vision_model, memory_model, learned_policy, max_seqlen):
+        assert not isinstance(
+            memory_model, MemoryComponentWithHistory
+        ), "Use PolicyWrapperWithHistory instead."
         self.vision_model = vision_model
         self.memory_model = memory_model
         self.learned_policy = learned_policy
         self.max_seqlen = max_seqlen
-        self.memory_needs_history = isinstance(memory_model, MemoryComponentWithHistory)
-
-        print("TODO: Make sure everything in this class lines up!!!")
 
     def initialize(self, env, max_steps):
         self.encoded_obs = np.empty(
@@ -93,19 +93,6 @@ class PolicyWrapper(Policy):
         inputs, mask = self._ensure_sequence_length(inputs, self.max_seqlen)
         return inputs, mask, nonpadding_seqlen
 
-    def _create_history_kwargs(self, rollout_state):
-        step = rollout_state.step
-        num_envs = rollout_state.num_envs
-        actions = tf.one_hot(
-            rollout_state.actions.T[:, :step], depth=ACTION_SIZE, axis=-1
-        )
-        history = tf.concat([self.encoded_obs[:, :step], actions], axis=-1)
-        # We don't really care about this when training controllers since we ignore
-        # all steps after the first episode terminates when computing the cumulative
-        # reward.
-        history_length = step * tf.ones([num_envs, 1], dtype=tf.int32)
-        return {"history": history, "history_length": history_length}
-
     def sample_action(self, rollout_state):
         step = rollout_state.step
         obs = rollout_state.get_current_observation()
@@ -120,17 +107,123 @@ class PolicyWrapper(Policy):
         inputs, mask, nonpadding_seqlen = self._create_memory_model_inputs(
             rollout_state
         )
-        additional_memory_kwargs = {}
-        if self.memory_needs_history:
-            additional_memory_kwargs = self._create_history_kwargs(rollout_state)
         hidden_state = self.memory_model.get_hidden_representation(
             inputs,
             mask=mask,
             training=tf.constant(False),
             position=tf.constant(nonpadding_seqlen - 1),
-            **additional_memory_kwargs
         )
         self.encoded_obs[:, step] = enc_obs
         policy_input = tf.concat([enc_obs, hidden_state], axis=-1)
         action = self.learned_policy.sample_action(policy_input)
+        return action
+
+
+class PolicyWrapperWithHistory(Policy):
+    # Note: TODO: Add docs
+    def __init__(self, vision_model, memory_model, learned_policy, max_seqlen):
+        assert isinstance(
+            memory_model, MemoryComponentWithHistory
+        ), "Use PolicyWrapper instead."
+        self.vision_model = vision_model
+        self.memory_model = memory_model
+        self.learned_policy = learned_policy
+        self.max_seqlen = max_seqlen
+
+    def initialize(self, env, max_steps):
+        stride = self.memory_model.get_value_stride()
+        max_history_values = 1 + (max_steps - self.max_seqlen) // stride
+
+        self.history_values = np.zeros(
+            [
+                env.num,
+                max_steps,
+                self.vision_model.get_representation_size() + ACTION_SIZE,
+            ],
+            dtype=np.float32,
+        )
+        self.history_keys = np.zeros(
+            [env.num, max_history_values, self.memory_model.get_key_size()],
+            dtype=np.float32,
+        )
+        self.num_keys = 0
+
+    def _create_memory_model_inputs(self, rollout_state):
+        start_index = max(0, rollout_state.step - self.max_seqlen)
+        end_index = min(self.max_seqlen, rollout_state.step)
+
+        inputs = self.history_values[:, start_index : start_index + self.max_seqlen]
+        nonpadding_seqlen = min(self.max_seqlen, end_index)
+
+        return tf.constant(inputs), nonpadding_seqlen
+
+    def _create_history_inputs(self, rollout_state):
+        step = rollout_state.step
+        num_envs = rollout_state.num_envs
+        # We don't really care about this when training controllers since we ignore
+        # all steps after the first episode terminates when computing the cumulative
+        # reward.
+        history_length = step * tf.ones([num_envs, 1], dtype=tf.int32)
+        history = tf.constant(self.history_values)
+        keys = tf.constant(self.history_keys)
+        return history, keys, history_length, tf.constant(self.num_keys, dtype=tf.int32)
+
+    def _possibly_add_key(self, step):
+        stride = self.memory_model.get_value_stride()
+        next_value_end = self.num_keys * stride + self.max_seqlen
+        if step + 1 < next_value_end:
+            return
+
+        value = self.history_values[
+            :, next_value_end - self.max_seqlen : next_value_end
+        ]
+        value = tf.constant(value)
+        key = self.memory_model.key_from_value(value, training=tf.constant(False))
+
+        self.history_keys[:, self.num_keys, :] = key
+        self.num_keys += 1
+
+    def _add_to_history(self, enc_obs, action, step):
+        vision_size = self.vision_model.get_representation_size()
+        self.history_values[:, step, :vision_size] = enc_obs
+        self.history_values[:, step, vision_size + action] = 1.0
+        self._possibly_add_key(step)
+
+    def sample_action(self, rollout_state):
+        step = rollout_state.step
+
+        obs = rollout_state.get_current_observation()
+        obs = tf.cast(obs, tf.float32) / 255.0
+
+        enc_obs = self.vision_model.compute_tensor_representation(obs, training=False)
+        if step == 0:
+            # TODO(mmatena): Handle this case better.
+            action = self.learned_policy.sample_action(
+                np.zeros([enc_obs.shape[0], self.learned_policy.in_size()])
+            )
+            self._add_to_history(enc_obs, action, step)
+            return action
+
+        inputs, nonpadding_seqlen = self._create_memory_model_inputs(rollout_state)
+
+        history, keys, history_length, num_keys = self._create_history_inputs(
+            rollout_state
+        )
+        hidden_state = self.memory_model.get_hidden_representation(
+            inputs,
+            history=history,
+            keys=keys,
+            history_length=history_length,
+            num_keys=num_keys,
+            # Mask is not needed due to the autoregressive nature of the transformer.
+            mask=None,
+            training=tf.constant(False),
+            position=tf.constant(nonpadding_seqlen - 1),
+        )
+
+        policy_input = tf.concat([enc_obs, hidden_state], axis=-1)
+        action = self.learned_policy.sample_action(policy_input)
+
+        self._add_to_history(enc_obs, action, step)
+
         return action

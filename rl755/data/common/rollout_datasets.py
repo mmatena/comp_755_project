@@ -151,7 +151,7 @@ class RolloutDatasetBuilder(object):
         """Returns a string tf.Tensor with all tfrecord file names in the split."""
         return tf.io.matching_files(self.get_tfrecords_pattern(split=split))
 
-    def rollouts_ds(self, split="train", process_observations=True):
+    def rollouts_ds(self, split="train", process_observations=True, repeat=True):
         """Returns a tf.data.Dataset where each item is a full rollout.
 
         Each example is a dict containing tf.Tensor items with dtype, shape:
@@ -183,7 +183,8 @@ class RolloutDatasetBuilder(object):
             num_parallel_calls=tf.data.experimental.AUTOTUNE,
         )
         ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
-        ds = ds.repeat()
+        if repeat:
+            ds = ds.repeat()
         return ds.map(
             functools.partial(
                 self.parse_tfrecord, process_observations=process_observations

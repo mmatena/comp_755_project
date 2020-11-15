@@ -10,11 +10,14 @@ from absl import flags
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_list("directories", None, "")
+flags.DEFINE_list("models", None, "")
+flags.DEFINE_string(
+    "base_dir", "/pine/scr/m/m/mmatena/comp_755_project/models/controller/caveflyer", ""
+)
 flags.DEFINE_string("checkpoint_regex", r"^checkpoint-\d+\.pickle$", "")
 flags.DEFINE_integer("max_steps", 1000, "")
 
-flags.mark_flag_as_required("directories")
+flags.mark_flag_as_required("models")
 
 
 def extract_from_directory(directory):
@@ -32,7 +35,8 @@ def extract_from_directory(directory):
 
 def main(_):
     data = []
-    for directory in FLAGS.directories:
+    for model in FLAGS.models:
+        directory = os.path.join(FLAGS.base_dir, model)
         data.append(extract_from_directory(directory))
 
     output = io.StringIO()
